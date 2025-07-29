@@ -342,6 +342,16 @@ func (c *Cursor) StartOfText() {
 	}
 }
 
+// StartOfWord moves the cursor to the start of current word.
+func (c *Cursor) StartOfWord() {
+	for c.X > 0 {
+		if IsWhitespace(c.RuneUnder(c.X - 1)) {
+			break
+		}
+		c.Left()
+	}
+}
+
 // GetCharPosInLine gets the char position of a visual x y
 // coordinate (this is necessary because tabs are 1 char but
 // 4 visual spaces)

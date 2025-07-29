@@ -9,6 +9,10 @@ import (
 	"time"
 )
 
+type Overlay struct {
+	*cui.List
+}
+
 // The View struct stores information about a view into a buffer.
 // It stores information about the cursor, and the viewport
 // that the user sees the buffer from.
@@ -17,6 +21,8 @@ type View struct {
 
 	// A pointer to the buffer's cursor for ease of access
 	Cursor *Cursor
+
+	Overlay *Overlay
 
 	// The topmost line, used for vertical scrolling
 	Topline int
@@ -71,6 +77,27 @@ func NewView(buf *Buffer) *View {
 
 	v.Box = cui.NewBox()
 
+	v.Overlay = &Overlay{List: cui.NewList()}
+	v.Overlay.List.SetBackgroundTransparent(true)
+	v.Overlay.List.SetSelectedBackgroundColor(tcell.ColorLightBlue)
+	v.Overlay.List.SetSelectedAlwaysVisible(true)
+	v.Overlay.List.SetMainTextColor(tcell.ColorBlack)
+	v.Overlay.List.SetSelectedTextAttributes(tcell.AttrBold)
+	v.Overlay.List.ShowSecondaryText(false)
+	v.Overlay.List.SetHighlightFullLine(true)
+	item1 := cui.NewListItem("Option 1")
+	item2 := cui.NewListItem("Option 2")
+	item3 := cui.NewListItem("Option 3")
+	item4 := cui.NewListItem("Option 4")
+	item5 := cui.NewListItem("Option 5")
+	item6 := cui.NewListItem("Option 6")
+	v.Overlay.List.AddItem(item1)
+	v.Overlay.List.AddItem(item2)
+	v.Overlay.List.AddItem(item3)
+	v.Overlay.List.AddItem(item4)
+	v.Overlay.List.AddItem(item5)
+	v.Overlay.List.AddItem(item6)
+
 	v.x, v.y, v.width, v.height = 0, 0, 0, 0
 
 	v.cellview = new(CellView)
@@ -97,6 +124,21 @@ func (v *View) SetRect(x, y, width, height int) {
 // InputHandler returns a handler which received key events when this view has focus,
 func (v *View) InputHandler() func(event *tcell.EventKey, _ func(p cui.Primitive)) {
 	return v.WrapInputHandler(func(event *tcell.EventKey, _ func(p cui.Primitive)) {
+		// if down or up arrow is pressed, we need to relocate the view
+		// show overlay on ctrl+space
+		if event.Key() == tcell.KeyCtrlSpace {
+			v.Overlay.List.SetVisible(true)
+		}
+		if v.Overlay.List.GetVisible() {
+			if event.Key() == tcell.KeyEsc {
+				v.Overlay.List.SetVisible(false)
+				return
+			}
+			if event.Key() == tcell.KeyDown || event.Key() == tcell.KeyUp {
+				v.Overlay.List.InputHandler()(event, nil)
+				return
+			}
+		}
 		v.HandleEvent(event)
 	})
 }
@@ -617,6 +659,11 @@ func (v *View) Draw(screen tcell.Screen) {
 	if v.Cursor.Y-v.Topline < 0 || v.Cursor.Y-v.Topline > v.height-1 || v.Cursor.HasSelection() {
 		screen.HideCursor()
 	}
+
+	v.Overlay.SetRect(v.x+v.lineNumOffset+v.Cursor.GetVisualX(), v.y+v.Cursor.Y-v.Topline+1, 25, 4)
+	v.Overlay.SetBackgroundColor(tcell.ColorBlue)
+
+	v.Overlay.Draw(screen)
 
 	if v.Buf.Settings["scrollbar"].(bool) {
 		v.scrollbar.Display(screen)

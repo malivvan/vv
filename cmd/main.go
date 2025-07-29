@@ -6,7 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"github.com/malivvan/vv/pkg/cui"
-	"github.com/malivvan/vv/pkg/cui/editor"
+	"github.com/malivvan/vv/pkg/cui/mdview"
 	"io"
 	"os"
 	"path/filepath"
@@ -49,25 +49,34 @@ func main() {
 	}
 
 	if len(os.Args) == 2 && os.Args[1] == "edit" {
-		path := "cmd/demos/cui_with_routine.vv"
+		path := "docs/tutorial.md"
 		f, err := os.Open(path)
 		if err != nil {
 			_, _ = fmt.Fprintf(os.Stderr,
 				"Error opening file: %s\n", err.Error())
 			os.Exit(1)
 		}
-		info, err := f.Stat()
+		//info, err := f.Stat()
+		//if err != nil {
+		//	_, _ = fmt.Fprintf(os.Stderr,
+		//		"Error getting file info: %s\n", err.Error())
+		//	os.Exit(1)
+		//}
+
+		data, err := io.ReadAll(f)
 		if err != nil {
 			_, _ = fmt.Fprintf(os.Stderr,
-				"Error getting file info: %s\n", err.Error())
+				"Error reading file: %s\n", err.Error())
 			os.Exit(1)
 		}
-
-		buf := editor.NewBuffer(f, info.Size(), path)
-		view := editor.NewView(buf)
-		view.SetTheme("monokai")
 		app := cui.NewApplication()
-		app.SetRoot(view, true)
+
+		mdv := mdview.New(path, string(data), mdview.Pulumi, app)
+		//buf := editor.NewBuffer(f, info.Size(), path)
+		//view := editor.NewView(buf)
+		//view.SetTheme("monokai")
+		frame := cui.NewFrame(mdv)
+		app.SetRoot(frame, true)
 		if err := app.Run(); err != nil {
 			_, _ = fmt.Fprintf(os.Stderr,
 				"Error running application: %s\n", err.Error())
