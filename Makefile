@@ -7,6 +7,7 @@ ifeq ($(shell git status --porcelain),)
 endif
 
 define build
+	@mkdir -p build
    	$(eval COMPILED := $(shell date -u +'%Y-%m-%dT%H:%M:%S.%9N'))
 	$(eval OUTPUT := $(if $(filter windows,$(1)),vv-$(1)-$(2).exe,vv-$(1)-$(2)))
 	$(eval URL := $(shell if [ -z "$(VERSION)" ]; then echo -n "" ; else echo -n https://github.com/malivvan/vv/releases/download/$(VERSION)/$(OUTPUT); fi))
@@ -38,7 +39,6 @@ endef
 
 
 install:
-	@go install gotest.tools/gotestsum@latest
 	@go install golang.org/x/lint/golint@latest
 	@go install github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@latest
 
