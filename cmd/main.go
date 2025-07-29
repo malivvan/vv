@@ -5,8 +5,9 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
+	"github.com/malivvan/vv/pkg/cui"
+	"github.com/malivvan/vv/pkg/cui/editor"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -47,6 +48,34 @@ func main() {
 		return
 	}
 
+	if len(os.Args) == 2 && os.Args[1] == "edit" {
+		path := "cmd/demos/cui_with_routine.vv"
+		f, err := os.Open(path)
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr,
+				"Error opening file: %s\n", err.Error())
+			os.Exit(1)
+		}
+		info, err := f.Stat()
+		if err != nil {
+			_, _ = fmt.Fprintf(os.Stderr,
+				"Error getting file info: %s\n", err.Error())
+			os.Exit(1)
+		}
+
+		buf := editor.NewBuffer(f, info.Size(), path)
+		view := editor.NewView(buf)
+		view.SetTheme("monokai")
+		app := cui.NewApplication()
+		app.SetRoot(view, true)
+		if err := app.Run(); err != nil {
+			_, _ = fmt.Fprintf(os.Stderr,
+				"Error running application: %s\n", err.Error())
+			os.Exit(1)
+		}
+		return
+	}
+
 	modules := stdlib.GetModuleMap(stdlib.AllModuleNames()...)
 	inputFile := flag.Arg(0)
 	if inputFile == "" {
@@ -55,7 +84,7 @@ func main() {
 		return
 	}
 
-	inputData, err := ioutil.ReadFile(inputFile)
+	inputData, err := os.ReadFile(inputFile)
 	if err != nil {
 		_, _ = fmt.Fprintf(os.Stderr,
 			"Error reading input file: %s\n", err.Error())
