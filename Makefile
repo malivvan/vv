@@ -42,18 +42,19 @@ install:
 	@go install golang.org/x/lint/golint@latest
 	@go install github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@latest
 
-generate:
-	@go generate ./vvm/...
-
 lint:
 	@golint -set_exit_status ./vvm/...
 
 test: generate lint
+	@go test -cover ./pkg/...
 	@GODEBUG=randseednop=0 go test -race -cover ./vvm/...
 	@go run ./cmd -resolve ./vvm/testdata/cli/test.vv
 
 fmt:
 	@go fmt ./...
+
+generate:
+	@go generate ./vvm/...
 
 build: clean
 	$(call build,$(shell go env GOOS),$(shell go env GOARCH),,)
