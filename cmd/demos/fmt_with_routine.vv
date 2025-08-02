@@ -1,0 +1,13 @@
+
+fmt := import("fmt")
+times := import("times")
+writeRoutine := func() {
+    for i := 0; i < 5; i++ {
+        fmt.println("Hello from writeRoutine: " + i+"\n")
+        times.sleep(500*times.millisecond)
+    }
+}
+
+go(writeRoutine)
+go(writeRoutine)
+times.sleep(3 * times.second)

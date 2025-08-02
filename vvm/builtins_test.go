@@ -1,6 +1,7 @@
 package vvm_test
 
 import (
+	"context"
 	"errors"
 	"reflect"
 	"testing"
@@ -9,7 +10,7 @@ import (
 )
 
 func Test_builtinDelete(t *testing.T) {
-	var builtinDelete func(args ...vvm.Object) (vvm.Object, error)
+	var builtinDelete func(ctx context.Context, args ...vvm.Object) (vvm.Object, error)
 	for _, f := range vvm.GetAllBuiltinFunctions() {
 		if f.Name == "delete" {
 			builtinDelete = f.Value
@@ -98,7 +99,7 @@ func Test_builtinDelete(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := builtinDelete(tt.args.args...)
+			got, err := builtinDelete(context.Background(), tt.args.args...)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("builtinDelete() error = %v, wantErr %v",
 					err, tt.wantErr)
@@ -133,7 +134,7 @@ func Test_builtinDelete(t *testing.T) {
 }
 
 func Test_builtinSplice(t *testing.T) {
-	var builtinSplice func(args ...vvm.Object) (vvm.Object, error)
+	var builtinSplice func(ctx context.Context, args ...vvm.Object) (vvm.Object, error)
 	for _, f := range vvm.GetAllBuiltinFunctions() {
 		if f.Name == "splice" {
 			builtinSplice = f.Value
@@ -331,7 +332,7 @@ func Test_builtinSplice(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := builtinSplice(tt.args...)
+			got, err := builtinSplice(context.Background(), tt.args...)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("builtinSplice() error = %v, wantErr %v",
 					err, tt.wantErr)
@@ -353,7 +354,7 @@ func Test_builtinSplice(t *testing.T) {
 }
 
 func Test_builtinRange(t *testing.T) {
-	var builtinRange func(args ...vvm.Object) (vvm.Object, error)
+	var builtinRange func(ctx context.Context, args ...vvm.Object) (vvm.Object, error)
 	for _, f := range vvm.GetAllBuiltinFunctions() {
 		if f.Name == "range" {
 			builtinRange = f.Value
@@ -487,7 +488,7 @@ func Test_builtinRange(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := builtinRange(tt.args...)
+			got, err := builtinRange(context.Background(), tt.args...)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("builtinRange() error = %v, wantErr %v",
 					err, tt.wantErr)

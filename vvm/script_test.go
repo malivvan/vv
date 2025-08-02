@@ -21,7 +21,7 @@ func TestScript_Add(t *testing.T) {
 	require.NoError(t, s.Add("b", 5))     // b = 5
 	require.NoError(t, s.Add("b", "foo")) // b = "foo"  (re-define before compilation)
 	require.NoError(t, s.Add("test",
-		func(args ...vvm.Object) (ret vvm.Object, err error) {
+		func(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 			if len(args) > 0 {
 				switch arg := args[0].(type) {
 				case *vvm.Int:
@@ -172,7 +172,7 @@ e := mod1.double(s)
 `)
 	mod1 := map[string]vvm.Object{
 		"double": &vvm.BuiltinFunction{
-			Value: func(args ...vvm.Object) (
+			Value: func(ctx context.Context, args ...vvm.Object) (
 				ret vvm.Object,
 				err error,
 			) {
@@ -279,7 +279,7 @@ func (o *Counter) Copy() vvm.Object {
 	return &Counter{value: o.value}
 }
 
-func (o *Counter) Call(_ ...vvm.Object) (vvm.Object, error) {
+func (o *Counter) Call(_ context.Context, _ ...vvm.Object) (vvm.Object, error) {
 	return &vvm.Int{Value: o.value}, nil
 }
 
@@ -351,7 +351,7 @@ func TestScriptSourceModule(t *testing.T) {
 		map[string]vvm.Object{
 			"title": &vvm.BuiltinFunction{
 				Name: "title",
-				Value: func(args ...vvm.Object) (vvm.Object, error) {
+				Value: func(ctx context.Context, args ...vvm.Object) (vvm.Object, error) {
 					s, _ := vvm.ToString(args[0])
 					return &vvm.String{Value: strings.Title(s)}, nil
 				}},

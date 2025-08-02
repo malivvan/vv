@@ -1,6 +1,7 @@
 package stdlib
 
 import (
+	"context"
 	"os"
 
 	"github.com/malivvan/vv/vvm"
@@ -57,7 +58,7 @@ func makeOSFile(file *os.File) *vvm.ImmutableMap {
 			// chmod(mode int) => error
 			"chmod": &vvm.BuiltinFunction{
 				Name: "chmod",
-				Value: func(args ...vvm.Object) (vvm.Object, error) {
+				Value: func(ctx context.Context, args ...vvm.Object) (vvm.Object, error) {
 					if len(args) != 1 {
 						return nil, vvm.ErrWrongNumArguments
 					}
@@ -75,7 +76,7 @@ func makeOSFile(file *os.File) *vvm.ImmutableMap {
 			// seek(offset int, whence int) => int/error
 			"seek": &vvm.BuiltinFunction{
 				Name: "seek",
-				Value: func(args ...vvm.Object) (vvm.Object, error) {
+				Value: func(ctx context.Context, args ...vvm.Object) (vvm.Object, error) {
 					if len(args) != 2 {
 						return nil, vvm.ErrWrongNumArguments
 					}
@@ -105,11 +106,11 @@ func makeOSFile(file *os.File) *vvm.ImmutableMap {
 			// stat() => imap(fileinfo)/error
 			"stat": &vvm.BuiltinFunction{
 				Name: "stat",
-				Value: func(args ...vvm.Object) (vvm.Object, error) {
+				Value: func(ctx context.Context, args ...vvm.Object) (vvm.Object, error) {
 					if len(args) != 0 {
 						return nil, vvm.ErrWrongNumArguments
 					}
-					return osStat(&vvm.String{Value: file.Name()})
+					return osStat(ctx, &vvm.String{Value: file.Name()})
 				},
 			},
 		},

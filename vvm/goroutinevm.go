@@ -1,6 +1,7 @@
 package vvm
 
 import (
+	"context"
 	"fmt"
 	"runtime/debug"
 	"sync/atomic"
@@ -8,9 +9,9 @@ import (
 )
 
 func init() {
-	addBuiltinFunction("go", builtinGovm, true)
-	addBuiltinFunction("abort", builtinAbort, true)
-	addBuiltinFunction("makechan", builtinMakechan, false)
+	addBuiltinFunction("go", builtinGovm)
+	addBuiltinFunction("abort", builtinAbort)
+	addBuiltinFunction("makechan", builtinMakechan)
 }
 
 type ret struct {
@@ -42,9 +43,8 @@ type goroutineVM struct {
 //
 // The latter 2 cases will trigger aborting procedure of all the descendant goroutineVMs,
 // which will further result in #1 above.
-func builtinGovm(args ...Object) (Object, error) {
-	vm := args[0].(*VMObj).Value
-	args = args[1:] // the first arg is VMObj inserted by VM
+func builtinGovm(ctx context.Context, args ...Object) (Object, error) {
+	vm := ctx.Value(ContextKey("vm")).(*VM)
 	if len(args) == 0 {
 		return nil, ErrWrongNumArguments
 	}
@@ -94,15 +94,7 @@ func builtinGovm(args ...Object) (Object, error) {
 		if cfn != nil {
 			val, err = gvm.RunCompiled(cfn, args[1:]...)
 		} else {
-			var nargs []Object
-			if bltnfn, ok := fn.(*BuiltinFunction); ok {
-				if bltnfn.NeedVMObj {
-					// pass VM as the first para to builtin functions
-					nargs = append(nargs, vm.selfObject())
-				}
-			}
-			nargs = append(nargs, args[1:]...)
-			val, err = fn.Call(nargs...)
+			val, err = fn.Call(ctx, args[1:]...)
 		}
 	}()
 
@@ -115,9 +107,8 @@ func builtinGovm(args ...Object) (Object, error) {
 }
 
 // Triggers the termination process of the current VM and all its descendant VMs.
-func builtinAbort(args ...Object) (Object, error) {
-	vm := args[0].(*VMObj).Value
-	args = args[1:] // the first arg is VMObj inserted by VM
+func builtinAbort(ctx context.Context, args ...Object) (Object, error) {
+	vm := ctx.Value(ContextKey("vm")).(*VM)
 	if len(args) != 0 {
 		return nil, ErrWrongNumArguments
 	}
@@ -148,7 +139,7 @@ func (gvm *goroutineVM) wait(seconds int64) bool {
 // Waits for the goroutineVM to complete up to timeout seconds.
 // Returns true if the goroutineVM exited(successfully or not) within the timeout.
 // Waits forever if the optional timeout not specified, or timeout < 0.
-func (gvm *goroutineVM) waitTimeout(args ...Object) (Object, error) {
+func (gvm *goroutineVM) waitTimeout(ctx context.Context, args ...Object) (Object, error) {
 	if len(args) > 1 {
 		return nil, ErrWrongNumArguments
 	}
@@ -172,7 +163,7 @@ func (gvm *goroutineVM) waitTimeout(args ...Object) (Object, error) {
 }
 
 // Triggers the termination process of the goroutineVM and all its descendant VMs.
-func (gvm *goroutineVM) abort(args ...Object) (Object, error) {
+func (gvm *goroutineVM) abort(ctx context.Context, args ...Object) (Object, error) {
 	if len(args) != 0 {
 		return nil, ErrWrongNumArguments
 	}
@@ -184,7 +175,7 @@ func (gvm *goroutineVM) abort(args ...Object) (Object, error) {
 
 // Waits the goroutineVM to complete, return Error object if any runtime error occurred
 // during the execution, otherwise return the result value of fn(arg1, arg2, ...)
-func (gvm *goroutineVM) getRet(args ...Object) (Object, error) {
+func (gvm *goroutineVM) getRet(ctx context.Context, args ...Object) (Object, error) {
 	if len(args) != 0 {
 		return nil, ErrWrongNumArguments
 	}
@@ -201,7 +192,7 @@ type objchan chan Object
 
 // Makes a channel to send/receive object
 // Returns a chan object that has send, recv, close methods.
-func builtinMakechan(args ...Object) (Object, error) {
+func builtinMakechan(ctx context.Context, args ...Object) (Object, error) {
 	var size int
 	switch len(args) {
 	case 0:
@@ -221,8 +212,8 @@ func builtinMakechan(args ...Object) (Object, error) {
 
 	oc := make(objchan, size)
 	obj := map[string]Object{
-		"send":  &BuiltinFunction{Value: oc.send, NeedVMObj: true},
-		"recv":  &BuiltinFunction{Value: oc.recv, NeedVMObj: true},
+		"send":  &BuiltinFunction{Value: oc.send},
+		"recv":  &BuiltinFunction{Value: oc.recv},
 		"close": &BuiltinFunction{Value: oc.close},
 	}
 	return &Map{Value: obj}, nil
@@ -230,9 +221,8 @@ func builtinMakechan(args ...Object) (Object, error) {
 
 // Sends an obj to the channel, will block if channel is full and the VM has not been aborted.
 // Sends to a closed channel causes panic.
-func (oc objchan) send(args ...Object) (Object, error) {
-	vm := args[0].(*VMObj).Value
-	args = args[1:] // the first arg is VMObj inserted by VM
+func (oc objchan) send(ctx context.Context, args ...Object) (Object, error) {
+	vm := ctx.Value(ContextKey("vm")).(*VM)
 	if len(args) != 1 {
 		return nil, ErrWrongNumArguments
 	}
@@ -246,9 +236,8 @@ func (oc objchan) send(args ...Object) (Object, error) {
 
 // Receives an obj from the channel, will block if channel is empty and the VM has not been aborted.
 // Receives from a closed channel returns undefined value.
-func (oc objchan) recv(args ...Object) (Object, error) {
-	vm := args[0].(*VMObj).Value
-	args = args[1:] // the first arg is VMObj inserted by VM
+func (oc objchan) recv(ctx context.Context, args ...Object) (Object, error) {
+	vm := ctx.Value(ContextKey("vm")).(*VM)
 	if len(args) != 0 {
 		return nil, ErrWrongNumArguments
 	}
@@ -264,7 +253,7 @@ func (oc objchan) recv(args ...Object) (Object, error) {
 }
 
 // Closes the channel.
-func (oc objchan) close(args ...Object) (Object, error) {
+func (oc objchan) close(ctx context.Context, args ...Object) (Object, error) {
 	if len(args) != 0 {
 		return nil, ErrWrongNumArguments
 	}

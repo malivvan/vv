@@ -1,44 +1,46 @@
 package vvm
 
+import "context"
+
 var builtinFuncs []*BuiltinFunction
 
 // if needVMObj is true, VM will pass [VMObj, args...] to fn when calling it.
-func addBuiltinFunction(name string, fn CallableFunc, needVMObj bool) {
-	builtinFuncs = append(builtinFuncs, &BuiltinFunction{Name: name, Value: fn, NeedVMObj: needVMObj})
+func addBuiltinFunction(name string, fn CallableFunc) {
+	builtinFuncs = append(builtinFuncs, &BuiltinFunction{Name: name, Value: fn})
 }
 
 func init() {
-	addBuiltinFunction("len", builtinLen, false)
-	addBuiltinFunction("copy", builtinCopy, false)
-	addBuiltinFunction("append", builtinAppend, false)
-	addBuiltinFunction("delete", builtinDelete, false)
-	addBuiltinFunction("splice", builtinSplice, false)
-	addBuiltinFunction("string", builtinString, false)
-	addBuiltinFunction("int", builtinInt, false)
-	addBuiltinFunction("bool", builtinBool, false)
-	addBuiltinFunction("float", builtinFloat, false)
-	addBuiltinFunction("char", builtinChar, false)
-	addBuiltinFunction("bytes", builtinBytes, false)
-	addBuiltinFunction("time", builtinTime, false)
-	addBuiltinFunction("is_int", builtinIsInt, false)
-	addBuiltinFunction("is_float", builtinIsFloat, false)
-	addBuiltinFunction("is_string", builtinIsString, false)
-	addBuiltinFunction("is_bool", builtinIsBool, false)
-	addBuiltinFunction("is_char", builtinIsChar, false)
-	addBuiltinFunction("is_bytes", builtinIsBytes, false)
-	addBuiltinFunction("is_array", builtinIsArray, false)
-	addBuiltinFunction("is_immutable_array", builtinIsImmutableArray, false)
-	addBuiltinFunction("is_map", builtinIsMap, false)
-	addBuiltinFunction("is_immutable_map", builtinIsImmutableMap, false)
-	addBuiltinFunction("is_iterable", builtinIsIterable, false)
-	addBuiltinFunction("is_time", builtinIsTime, false)
-	addBuiltinFunction("is_error", builtinIsError, false)
-	addBuiltinFunction("is_undefined", builtinIsUndefined, false)
-	addBuiltinFunction("is_function", builtinIsFunction, false)
-	addBuiltinFunction("is_callable", builtinIsCallable, false)
-	addBuiltinFunction("type_name", builtinTypeName, false)
-	addBuiltinFunction("format", builtinFormat, false)
-	addBuiltinFunction("range", builtinRange, false)
+	addBuiltinFunction("len", builtinLen)
+	addBuiltinFunction("copy", builtinCopy)
+	addBuiltinFunction("append", builtinAppend)
+	addBuiltinFunction("delete", builtinDelete)
+	addBuiltinFunction("splice", builtinSplice)
+	addBuiltinFunction("string", builtinString)
+	addBuiltinFunction("int", builtinInt)
+	addBuiltinFunction("bool", builtinBool)
+	addBuiltinFunction("float", builtinFloat)
+	addBuiltinFunction("char", builtinChar)
+	addBuiltinFunction("bytes", builtinBytes)
+	addBuiltinFunction("time", builtinTime)
+	addBuiltinFunction("is_int", builtinIsInt)
+	addBuiltinFunction("is_float", builtinIsFloat)
+	addBuiltinFunction("is_string", builtinIsString)
+	addBuiltinFunction("is_bool", builtinIsBool)
+	addBuiltinFunction("is_char", builtinIsChar)
+	addBuiltinFunction("is_bytes", builtinIsBytes)
+	addBuiltinFunction("is_array", builtinIsArray)
+	addBuiltinFunction("is_immutable_array", builtinIsImmutableArray)
+	addBuiltinFunction("is_map", builtinIsMap)
+	addBuiltinFunction("is_immutable_map", builtinIsImmutableMap)
+	addBuiltinFunction("is_iterable", builtinIsIterable)
+	addBuiltinFunction("is_time", builtinIsTime)
+	addBuiltinFunction("is_error", builtinIsError)
+	addBuiltinFunction("is_undefined", builtinIsUndefined)
+	addBuiltinFunction("is_function", builtinIsFunction)
+	addBuiltinFunction("is_callable", builtinIsCallable)
+	addBuiltinFunction("type_name", builtinTypeName)
+	addBuiltinFunction("format", builtinFormat)
+	addBuiltinFunction("range", builtinRange)
 }
 
 // GetAllBuiltinFunctions returns all builtin function objects.
@@ -46,14 +48,14 @@ func GetAllBuiltinFunctions() []*BuiltinFunction {
 	return append([]*BuiltinFunction{}, builtinFuncs...)
 }
 
-func builtinTypeName(args ...Object) (Object, error) {
+func builtinTypeName(ctx context.Context, args ...Object) (Object, error) {
 	if len(args) != 1 {
 		return nil, ErrWrongNumArguments
 	}
 	return &String{Value: args[0].TypeName()}, nil
 }
 
-func builtinIsString(args ...Object) (Object, error) {
+func builtinIsString(ctx context.Context, args ...Object) (Object, error) {
 	if len(args) != 1 {
 		return nil, ErrWrongNumArguments
 	}
@@ -63,7 +65,7 @@ func builtinIsString(args ...Object) (Object, error) {
 	return FalseValue, nil
 }
 
-func builtinIsInt(args ...Object) (Object, error) {
+func builtinIsInt(ctx context.Context, args ...Object) (Object, error) {
 	if len(args) != 1 {
 		return nil, ErrWrongNumArguments
 	}
@@ -73,7 +75,7 @@ func builtinIsInt(args ...Object) (Object, error) {
 	return FalseValue, nil
 }
 
-func builtinIsFloat(args ...Object) (Object, error) {
+func builtinIsFloat(ctx context.Context, args ...Object) (Object, error) {
 	if len(args) != 1 {
 		return nil, ErrWrongNumArguments
 	}
@@ -83,7 +85,7 @@ func builtinIsFloat(args ...Object) (Object, error) {
 	return FalseValue, nil
 }
 
-func builtinIsBool(args ...Object) (Object, error) {
+func builtinIsBool(ctx context.Context, args ...Object) (Object, error) {
 	if len(args) != 1 {
 		return nil, ErrWrongNumArguments
 	}
@@ -93,7 +95,7 @@ func builtinIsBool(args ...Object) (Object, error) {
 	return FalseValue, nil
 }
 
-func builtinIsChar(args ...Object) (Object, error) {
+func builtinIsChar(ctx context.Context, args ...Object) (Object, error) {
 	if len(args) != 1 {
 		return nil, ErrWrongNumArguments
 	}
@@ -103,7 +105,7 @@ func builtinIsChar(args ...Object) (Object, error) {
 	return FalseValue, nil
 }
 
-func builtinIsBytes(args ...Object) (Object, error) {
+func builtinIsBytes(ctx context.Context, args ...Object) (Object, error) {
 	if len(args) != 1 {
 		return nil, ErrWrongNumArguments
 	}
@@ -113,7 +115,7 @@ func builtinIsBytes(args ...Object) (Object, error) {
 	return FalseValue, nil
 }
 
-func builtinIsArray(args ...Object) (Object, error) {
+func builtinIsArray(ctx context.Context, args ...Object) (Object, error) {
 	if len(args) != 1 {
 		return nil, ErrWrongNumArguments
 	}
@@ -123,7 +125,7 @@ func builtinIsArray(args ...Object) (Object, error) {
 	return FalseValue, nil
 }
 
-func builtinIsImmutableArray(args ...Object) (Object, error) {
+func builtinIsImmutableArray(ctx context.Context, args ...Object) (Object, error) {
 	if len(args) != 1 {
 		return nil, ErrWrongNumArguments
 	}
@@ -133,7 +135,7 @@ func builtinIsImmutableArray(args ...Object) (Object, error) {
 	return FalseValue, nil
 }
 
-func builtinIsMap(args ...Object) (Object, error) {
+func builtinIsMap(ctx context.Context, args ...Object) (Object, error) {
 	if len(args) != 1 {
 		return nil, ErrWrongNumArguments
 	}
@@ -143,7 +145,7 @@ func builtinIsMap(args ...Object) (Object, error) {
 	return FalseValue, nil
 }
 
-func builtinIsImmutableMap(args ...Object) (Object, error) {
+func builtinIsImmutableMap(ctx context.Context, args ...Object) (Object, error) {
 	if len(args) != 1 {
 		return nil, ErrWrongNumArguments
 	}
@@ -153,7 +155,7 @@ func builtinIsImmutableMap(args ...Object) (Object, error) {
 	return FalseValue, nil
 }
 
-func builtinIsTime(args ...Object) (Object, error) {
+func builtinIsTime(ctx context.Context, args ...Object) (Object, error) {
 	if len(args) != 1 {
 		return nil, ErrWrongNumArguments
 	}
@@ -163,7 +165,7 @@ func builtinIsTime(args ...Object) (Object, error) {
 	return FalseValue, nil
 }
 
-func builtinIsError(args ...Object) (Object, error) {
+func builtinIsError(ctx context.Context, args ...Object) (Object, error) {
 	if len(args) != 1 {
 		return nil, ErrWrongNumArguments
 	}
@@ -173,7 +175,7 @@ func builtinIsError(args ...Object) (Object, error) {
 	return FalseValue, nil
 }
 
-func builtinIsUndefined(args ...Object) (Object, error) {
+func builtinIsUndefined(ctx context.Context, args ...Object) (Object, error) {
 	if len(args) != 1 {
 		return nil, ErrWrongNumArguments
 	}
@@ -183,7 +185,7 @@ func builtinIsUndefined(args ...Object) (Object, error) {
 	return FalseValue, nil
 }
 
-func builtinIsFunction(args ...Object) (Object, error) {
+func builtinIsFunction(ctx context.Context, args ...Object) (Object, error) {
 	if len(args) != 1 {
 		return nil, ErrWrongNumArguments
 	}
@@ -194,7 +196,7 @@ func builtinIsFunction(args ...Object) (Object, error) {
 	return FalseValue, nil
 }
 
-func builtinIsCallable(args ...Object) (Object, error) {
+func builtinIsCallable(ctx context.Context, args ...Object) (Object, error) {
 	if len(args) != 1 {
 		return nil, ErrWrongNumArguments
 	}
@@ -204,7 +206,7 @@ func builtinIsCallable(args ...Object) (Object, error) {
 	return FalseValue, nil
 }
 
-func builtinIsIterable(args ...Object) (Object, error) {
+func builtinIsIterable(ctx context.Context, args ...Object) (Object, error) {
 	if len(args) != 1 {
 		return nil, ErrWrongNumArguments
 	}
@@ -215,7 +217,7 @@ func builtinIsIterable(args ...Object) (Object, error) {
 }
 
 // len(obj object) => int
-func builtinLen(args ...Object) (Object, error) {
+func builtinLen(ctx context.Context, args ...Object) (Object, error) {
 	if len(args) != 1 {
 		return nil, ErrWrongNumArguments
 	}
@@ -242,7 +244,7 @@ func builtinLen(args ...Object) (Object, error) {
 }
 
 // range(start, stop[, step])
-func builtinRange(args ...Object) (Object, error) {
+func builtinRange(ctx context.Context, args ...Object) (Object, error) {
 	numArgs := len(args)
 	if numArgs < 2 || numArgs > 3 {
 		return nil, ErrWrongNumArguments
@@ -306,7 +308,7 @@ func buildRange(start, stop, step int64) *Array {
 	return array
 }
 
-func builtinFormat(args ...Object) (Object, error) {
+func builtinFormat(ctx context.Context, args ...Object) (Object, error) {
 	numArgs := len(args)
 	if numArgs == 0 {
 		return nil, ErrWrongNumArguments
@@ -330,14 +332,14 @@ func builtinFormat(args ...Object) (Object, error) {
 	return &String{Value: s}, nil
 }
 
-func builtinCopy(args ...Object) (Object, error) {
+func builtinCopy(ctx context.Context, args ...Object) (Object, error) {
 	if len(args) != 1 {
 		return nil, ErrWrongNumArguments
 	}
 	return args[0].Copy(), nil
 }
 
-func builtinString(args ...Object) (Object, error) {
+func builtinString(ctx context.Context, args ...Object) (Object, error) {
 	argsLen := len(args)
 	if !(argsLen == 1 || argsLen == 2) {
 		return nil, ErrWrongNumArguments
@@ -358,7 +360,7 @@ func builtinString(args ...Object) (Object, error) {
 	return UndefinedValue, nil
 }
 
-func builtinInt(args ...Object) (Object, error) {
+func builtinInt(ctx context.Context, args ...Object) (Object, error) {
 	argsLen := len(args)
 	if !(argsLen == 1 || argsLen == 2) {
 		return nil, ErrWrongNumArguments
@@ -376,7 +378,7 @@ func builtinInt(args ...Object) (Object, error) {
 	return UndefinedValue, nil
 }
 
-func builtinFloat(args ...Object) (Object, error) {
+func builtinFloat(ctx context.Context, args ...Object) (Object, error) {
 	argsLen := len(args)
 	if !(argsLen == 1 || argsLen == 2) {
 		return nil, ErrWrongNumArguments
@@ -394,7 +396,7 @@ func builtinFloat(args ...Object) (Object, error) {
 	return UndefinedValue, nil
 }
 
-func builtinBool(args ...Object) (Object, error) {
+func builtinBool(ctx context.Context, args ...Object) (Object, error) {
 	if len(args) != 1 {
 		return nil, ErrWrongNumArguments
 	}
@@ -411,7 +413,7 @@ func builtinBool(args ...Object) (Object, error) {
 	return UndefinedValue, nil
 }
 
-func builtinChar(args ...Object) (Object, error) {
+func builtinChar(ctx context.Context, args ...Object) (Object, error) {
 	argsLen := len(args)
 	if !(argsLen == 1 || argsLen == 2) {
 		return nil, ErrWrongNumArguments
@@ -429,7 +431,7 @@ func builtinChar(args ...Object) (Object, error) {
 	return UndefinedValue, nil
 }
 
-func builtinBytes(args ...Object) (Object, error) {
+func builtinBytes(ctx context.Context, args ...Object) (Object, error) {
 	argsLen := len(args)
 	if !(argsLen == 1 || argsLen == 2) {
 		return nil, ErrWrongNumArguments
@@ -455,7 +457,7 @@ func builtinBytes(args ...Object) (Object, error) {
 	return UndefinedValue, nil
 }
 
-func builtinTime(args ...Object) (Object, error) {
+func builtinTime(ctx context.Context, args ...Object) (Object, error) {
 	argsLen := len(args)
 	if !(argsLen == 1 || argsLen == 2) {
 		return nil, ErrWrongNumArguments
@@ -474,7 +476,7 @@ func builtinTime(args ...Object) (Object, error) {
 }
 
 // append(arr, items...)
-func builtinAppend(args ...Object) (Object, error) {
+func builtinAppend(ctx context.Context, args ...Object) (Object, error) {
 	if len(args) < 2 {
 		return nil, ErrWrongNumArguments
 	}
@@ -495,7 +497,7 @@ func builtinAppend(args ...Object) (Object, error) {
 // builtinDelete deletes Map keys
 // usage: delete(map, "key")
 // key must be a string
-func builtinDelete(args ...Object) (Object, error) {
+func builtinDelete(ctx context.Context, args ...Object) (Object, error) {
 	argsLen := len(args)
 	if argsLen != 2 {
 		return nil, ErrWrongNumArguments
@@ -523,7 +525,7 @@ func builtinDelete(args ...Object) (Object, error) {
 // builtinSplice deletes and changes given Array, returns deleted items.
 // usage:
 // deleted_items := splice(array[,start[,delete_count[,item1[,item2[,...]]]])
-func builtinSplice(args ...Object) (Object, error) {
+func builtinSplice(ctx context.Context, args ...Object) (Object, error) {
 	argsLen := len(args)
 	if argsLen == 0 {
 		return nil, ErrWrongNumArguments

@@ -1,6 +1,7 @@
 package stdlib
 
 import (
+	"context"
 	"regexp"
 
 	"github.com/malivvan/vv/vvm"
@@ -11,10 +12,7 @@ func makeTextRegexp(re *regexp.Regexp) *vvm.ImmutableMap {
 		Value: map[string]vvm.Object{
 			// match(text) => bool
 			"match": &vvm.BuiltinFunction{
-				Value: func(args ...vvm.Object) (
-					ret vvm.Object,
-					err error,
-				) {
+				Value: func(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 					if len(args) != 1 {
 						err = vvm.ErrWrongNumArguments
 						return
@@ -43,10 +41,7 @@ func makeTextRegexp(re *regexp.Regexp) *vvm.ImmutableMap {
 			// find(text) 			=> array(array({text:,begin:,end:}))/undefined
 			// find(text, maxCount) => array(array({text:,begin:,end:}))/undefined
 			"find": &vvm.BuiltinFunction{
-				Value: func(args ...vvm.Object) (
-					ret vvm.Object,
-					err error,
-				) {
+				Value: func(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 					numArgs := len(args)
 					if numArgs != 1 && numArgs != 2 {
 						err = vvm.ErrWrongNumArguments
@@ -137,10 +132,7 @@ func makeTextRegexp(re *regexp.Regexp) *vvm.ImmutableMap {
 
 			// replace(src, repl) => string
 			"replace": &vvm.BuiltinFunction{
-				Value: func(args ...vvm.Object) (
-					ret vvm.Object,
-					err error,
-				) {
+				Value: func(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 					if len(args) != 2 {
 						err = vvm.ErrWrongNumArguments
 						return
@@ -180,10 +172,7 @@ func makeTextRegexp(re *regexp.Regexp) *vvm.ImmutableMap {
 			// split(text) 			 => array(string)
 			// split(text, maxCount) => array(string)
 			"split": &vvm.BuiltinFunction{
-				Value: func(args ...vvm.Object) (
-					ret vvm.Object,
-					err error,
-				) {
+				Value: func(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 					numArgs := len(args)
 					if numArgs != 1 && numArgs != 2 {
 						err = vvm.ErrWrongNumArguments

@@ -1,21 +1,21 @@
 package stdlib
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/malivvan/vv/vvm"
 )
 
 var fmtModule = map[string]vvm.Object{
-	"print":   &vvm.BuiltinFunction{Value: fmtPrint, NeedVMObj: true},
-	"printf":  &vvm.BuiltinFunction{Value: fmtPrintf, NeedVMObj: true},
-	"println": &vvm.BuiltinFunction{Value: fmtPrintln, NeedVMObj: true},
+	"print":   &vvm.BuiltinFunction{Value: fmtPrint},
+	"printf":  &vvm.BuiltinFunction{Value: fmtPrintf},
+	"println": &vvm.BuiltinFunction{Value: fmtPrintln},
 	"sprintf": &vvm.BuiltinFunction{Name: "sprintf", Value: fmtSprintf},
 }
 
-func fmtPrint(args ...vvm.Object) (ret vvm.Object, err error) {
-	vm := args[0].(*vvm.VMObj).Value
-	args = args[1:] // the first arg is VMObj inserted by VM
+func fmtPrint(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
+	vm := ctx.Value(vvm.ContextKey("vm")).(*vvm.VM)
 	printArgs, err := getPrintArgs(args...)
 	if err != nil {
 		return nil, err
@@ -24,9 +24,8 @@ func fmtPrint(args ...vvm.Object) (ret vvm.Object, err error) {
 	return nil, nil
 }
 
-func fmtPrintf(args ...vvm.Object) (ret vvm.Object, err error) {
-	vm := args[0].(*vvm.VMObj).Value
-	args = args[1:] // the first arg is VMObj inserted by VM
+func fmtPrintf(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
+	vm := ctx.Value(vvm.ContextKey("vm")).(*vvm.VM)
 	numArgs := len(args)
 	if numArgs == 0 {
 		return nil, vvm.ErrWrongNumArguments
@@ -53,9 +52,8 @@ func fmtPrintf(args ...vvm.Object) (ret vvm.Object, err error) {
 	return nil, nil
 }
 
-func fmtPrintln(args ...vvm.Object) (ret vvm.Object, err error) {
-	vm := args[0].(*vvm.VMObj).Value
-	args = args[1:] // the first arg is VMObj inserted by VM
+func fmtPrintln(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
+	vm := ctx.Value(vvm.ContextKey("vm")).(*vvm.VM)
 	printArgs, err := getPrintArgs(args...)
 	if err != nil {
 		return nil, err
@@ -65,7 +63,7 @@ func fmtPrintln(args ...vvm.Object) (ret vvm.Object, err error) {
 	return nil, nil
 }
 
-func fmtSprintf(args ...vvm.Object) (ret vvm.Object, err error) {
+func fmtSprintf(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	numArgs := len(args)
 	if numArgs == 0 {
 		return nil, vvm.ErrWrongNumArguments

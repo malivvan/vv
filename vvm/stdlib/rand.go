@@ -1,6 +1,7 @@
 package stdlib
 
 import (
+	"context"
 	"math/rand"
 
 	"github.com/malivvan/vv/vvm"
@@ -37,7 +38,7 @@ var randModule = map[string]vvm.Object{
 	},
 	"read": &vvm.BuiltinFunction{
 		Name: "read",
-		Value: func(args ...vvm.Object) (ret vvm.Object, err error) {
+		Value: func(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 			if len(args) != 1 {
 				return nil, vvm.ErrWrongNumArguments
 			}
@@ -59,7 +60,7 @@ var randModule = map[string]vvm.Object{
 	},
 	"rand": &vvm.BuiltinFunction{
 		Name: "rand",
-		Value: func(args ...vvm.Object) (vvm.Object, error) {
+		Value: func(ctx context.Context, args ...vvm.Object) (vvm.Object, error) {
 			if len(args) != 1 {
 				return nil, vvm.ErrWrongNumArguments
 			}
@@ -110,10 +111,7 @@ func randRand(r *rand.Rand) *vvm.ImmutableMap {
 			},
 			"read": &vvm.BuiltinFunction{
 				Name: "read",
-				Value: func(args ...vvm.Object) (
-					ret vvm.Object,
-					err error,
-				) {
+				Value: func(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 					if len(args) != 1 {
 						return nil, vvm.ErrWrongNumArguments
 					}

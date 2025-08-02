@@ -1,6 +1,7 @@
 package vvm
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -13,6 +14,13 @@ import (
 	"github.com/malivvan/vv/vvm/parser"
 	"github.com/malivvan/vv/vvm/token"
 )
+
+// ContextKey is a type for context keys used in the VM.
+type ContextKey string
+
+func (c ContextKey) String() string {
+	return string(c)
+}
 
 // frame represents a function call frame.
 type frame struct {
@@ -31,6 +39,7 @@ type vmChildCtl struct {
 
 // VM is a virtual machine that executes the bytecode compiled by Compiler.
 type VM struct {
+	ctx         context.Context
 	constants   []Object
 	stack       []Object
 	sp          int
@@ -81,6 +90,7 @@ func NewVM(
 		Out:         os.Stdout,
 		Args:        os.Args,
 	}
+	v.ctx = context.WithValue(context.Background(), ContextKey("vm"), v)
 	frame := &frame{
 		fn: bytecode.MainFunction,
 		ip: -1,
@@ -130,6 +140,7 @@ func (v *VM) ShallowClone() *VM {
 		Out:         v.Out,
 		Args:        v.Args,
 	}
+	vClone.ctx = context.WithValue(v.ctx, ContextKey("vm"), v)
 	frame := &frame{
 		fn: emptyEntry,
 		ip: -1,
@@ -307,16 +318,6 @@ func (v *VM) postRun() (err error) {
 		err = fmt.Errorf("%s", cerrs)
 	}
 	return
-}
-
-// VMObj exports VM
-type VMObj struct {
-	ObjectImpl
-	Value *VM
-}
-
-func (v *VM) selfObject() Object {
-	return &VMObj{Value: v}
 }
 
 func (v *VM) run() {
@@ -858,15 +859,7 @@ func (v *VM) run() {
 				v.framesIndex++
 				v.sp = v.sp - numArgs + callee.NumLocals
 			} else {
-				var args []Object
-				if bltnfn, ok := value.(*BuiltinFunction); ok {
-					if bltnfn.NeedVMObj {
-						// pass VM as the first para to builtin functions
-						args = append(args, v.selfObject())
-					}
-				}
-				args = append(args, v.stack[v.sp-numArgs:v.sp]...)
-				ret, e := value.Call(args...)
+				ret, e := value.Call(v.ctx, v.stack[v.sp-numArgs:v.sp]...)
 				v.sp -= numArgs + 1
 
 				// runtime error

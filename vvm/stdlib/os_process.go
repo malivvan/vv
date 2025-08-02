@@ -1,6 +1,7 @@
 package stdlib
 
 import (
+	"context"
 	"os"
 	"syscall"
 
@@ -43,7 +44,7 @@ func makeOSProcess(proc *os.Process) *vvm.ImmutableMap {
 			},
 			"signal": &vvm.BuiltinFunction{
 				Name: "signal",
-				Value: func(args ...vvm.Object) (vvm.Object, error) {
+				Value: func(ctx context.Context, args ...vvm.Object) (vvm.Object, error) {
 					if len(args) != 1 {
 						return nil, vvm.ErrWrongNumArguments
 					}
@@ -60,7 +61,7 @@ func makeOSProcess(proc *os.Process) *vvm.ImmutableMap {
 			},
 			"wait": &vvm.BuiltinFunction{
 				Name: "wait",
-				Value: func(args ...vvm.Object) (vvm.Object, error) {
+				Value: func(ctx context.Context, args ...vvm.Object) (vvm.Object, error) {
 					if len(args) != 0 {
 						return nil, vvm.ErrWrongNumArguments
 					}

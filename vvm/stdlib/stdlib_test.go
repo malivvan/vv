@@ -1,6 +1,7 @@
 package stdlib_test
 
 import (
+	"context"
 	"fmt"
 	"testing"
 	"time"
@@ -124,10 +125,10 @@ func (c callres) call(funcName string, args ...interface{}) callres {
 				"non-callable: %s", funcName)}
 		}
 
-		res, err := f.Value(oargs...)
+		res, err := f.Value(context.Background(), oargs...)
 		return callres{t: c.t, o: res, e: err}
 	case *vvm.BuiltinFunction:
-		res, err := o.Value(oargs...)
+		res, err := o.Value(context.Background(), oargs...)
 		return callres{t: c.t, o: res, e: err}
 	case *vvm.ImmutableMap:
 		m, ok := o.Value[funcName]
@@ -140,7 +141,7 @@ func (c callres) call(funcName string, args ...interface{}) callres {
 			return callres{t: c.t, e: fmt.Errorf("non-callable: %s", funcName)}
 		}
 
-		res, err := f.Value(oargs...)
+		res, err := f.Value(context.Background(), oargs...)
 		return callres{t: c.t, o: res, e: err}
 	default:
 		panic(fmt.Errorf("unexpected object: %v (%T)", o, o))

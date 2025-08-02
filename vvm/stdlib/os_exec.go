@@ -1,6 +1,7 @@
 package stdlib
 
 import (
+	"context"
 	"os/exec"
 
 	"github.com/malivvan/vv/vvm"
@@ -37,7 +38,7 @@ func makeOSExecCommand(cmd *exec.Cmd) *vvm.ImmutableMap {
 			// set_path(path string)
 			"set_path": &vvm.BuiltinFunction{
 				Name: "set_path",
-				Value: func(args ...vvm.Object) (vvm.Object, error) {
+				Value: func(ctx context.Context, args ...vvm.Object) (vvm.Object, error) {
 					if len(args) != 1 {
 						return nil, vvm.ErrWrongNumArguments
 					}
@@ -56,7 +57,7 @@ func makeOSExecCommand(cmd *exec.Cmd) *vvm.ImmutableMap {
 			// set_dir(dir string)
 			"set_dir": &vvm.BuiltinFunction{
 				Name: "set_dir",
-				Value: func(args ...vvm.Object) (vvm.Object, error) {
+				Value: func(ctx context.Context, args ...vvm.Object) (vvm.Object, error) {
 					if len(args) != 1 {
 						return nil, vvm.ErrWrongNumArguments
 					}
@@ -75,7 +76,7 @@ func makeOSExecCommand(cmd *exec.Cmd) *vvm.ImmutableMap {
 			// set_env(env array(string))
 			"set_env": &vvm.BuiltinFunction{
 				Name: "set_env",
-				Value: func(args ...vvm.Object) (vvm.Object, error) {
+				Value: func(ctx context.Context, args ...vvm.Object) (vvm.Object, error) {
 					if len(args) != 1 {
 						return nil, vvm.ErrWrongNumArguments
 					}
@@ -107,7 +108,7 @@ func makeOSExecCommand(cmd *exec.Cmd) *vvm.ImmutableMap {
 			// process() => imap(process)
 			"process": &vvm.BuiltinFunction{
 				Name: "process",
-				Value: func(args ...vvm.Object) (vvm.Object, error) {
+				Value: func(ctx context.Context, args ...vvm.Object) (vvm.Object, error) {
 					if len(args) != 0 {
 						return nil, vvm.ErrWrongNumArguments
 					}

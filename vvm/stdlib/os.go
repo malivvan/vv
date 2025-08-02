@@ -1,6 +1,7 @@
 package stdlib
 
 import (
+	"context"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -40,9 +41,8 @@ var osModule = map[string]vvm.Object{
 	"seek_cur":            &vvm.Int{Value: int64(io.SeekCurrent)},
 	"seek_end":            &vvm.Int{Value: int64(io.SeekEnd)},
 	"args": &vvm.BuiltinFunction{
-		Name:      "args",
-		Value:     osArgs,
-		NeedVMObj: true,
+		Name:  "args",
+		Value: osArgs,
 	}, // args() => array(string)
 	"chdir": &vvm.BuiltinFunction{
 		Name:  "chdir",
@@ -201,7 +201,7 @@ var osModule = map[string]vvm.Object{
 	}, // readfile(name) => array(byte)/error
 }
 
-func osReadFile(args ...vvm.Object) (ret vvm.Object, err error) {
+func osReadFile(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 1 {
 		return nil, vvm.ErrWrongNumArguments
 	}
@@ -223,7 +223,7 @@ func osReadFile(args ...vvm.Object) (ret vvm.Object, err error) {
 	return &vvm.Bytes{Value: bytes}, nil
 }
 
-func osStat(args ...vvm.Object) (ret vvm.Object, err error) {
+func osStat(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 1 {
 		return nil, vvm.ErrWrongNumArguments
 	}
@@ -255,7 +255,7 @@ func osStat(args ...vvm.Object) (ret vvm.Object, err error) {
 	return fstat, nil
 }
 
-func osCreate(args ...vvm.Object) (vvm.Object, error) {
+func osCreate(ctx context.Context, args ...vvm.Object) (vvm.Object, error) {
 	if len(args) != 1 {
 		return nil, vvm.ErrWrongNumArguments
 	}
@@ -274,7 +274,7 @@ func osCreate(args ...vvm.Object) (vvm.Object, error) {
 	return makeOSFile(res), nil
 }
 
-func osOpen(args ...vvm.Object) (vvm.Object, error) {
+func osOpen(ctx context.Context, args ...vvm.Object) (vvm.Object, error) {
 	if len(args) != 1 {
 		return nil, vvm.ErrWrongNumArguments
 	}
@@ -293,7 +293,7 @@ func osOpen(args ...vvm.Object) (vvm.Object, error) {
 	return makeOSFile(res), nil
 }
 
-func osOpenFile(args ...vvm.Object) (vvm.Object, error) {
+func osOpenFile(ctx context.Context, args ...vvm.Object) (vvm.Object, error) {
 	if len(args) != 3 {
 		return nil, vvm.ErrWrongNumArguments
 	}
@@ -328,9 +328,8 @@ func osOpenFile(args ...vvm.Object) (vvm.Object, error) {
 	return makeOSFile(res), nil
 }
 
-func osArgs(args ...vvm.Object) (vvm.Object, error) {
-	vm := args[0].(*vvm.VMObj).Value
-	args = args[1:] // the first arg is VMObj inserted by VM
+func osArgs(ctx context.Context, args ...vvm.Object) (vvm.Object, error) {
+	vm := ctx.Value(vvm.ContextKey("vm")).(*vvm.VM)
 	if len(args) != 0 {
 		return nil, vvm.ErrWrongNumArguments
 	}
@@ -350,7 +349,7 @@ func osFuncASFmRE(
 ) *vvm.BuiltinFunction {
 	return &vvm.BuiltinFunction{
 		Name: name,
-		Value: func(args ...vvm.Object) (vvm.Object, error) {
+		Value: func(ctx context.Context, args ...vvm.Object) (vvm.Object, error) {
 			if len(args) != 2 {
 				return nil, vvm.ErrWrongNumArguments
 			}
@@ -375,7 +374,7 @@ func osFuncASFmRE(
 	}
 }
 
-func osLookupEnv(args ...vvm.Object) (vvm.Object, error) {
+func osLookupEnv(ctx context.Context, args ...vvm.Object) (vvm.Object, error) {
 	if len(args) != 1 {
 		return nil, vvm.ErrWrongNumArguments
 	}
@@ -397,7 +396,7 @@ func osLookupEnv(args ...vvm.Object) (vvm.Object, error) {
 	return &vvm.String{Value: res}, nil
 }
 
-func osExpandEnv(args ...vvm.Object) (vvm.Object, error) {
+func osExpandEnv(ctx context.Context, args ...vvm.Object) (vvm.Object, error) {
 	if len(args) != 1 {
 		return nil, vvm.ErrWrongNumArguments
 	}
@@ -432,7 +431,7 @@ func osExpandEnv(args ...vvm.Object) (vvm.Object, error) {
 	return &vvm.String{Value: s}, nil
 }
 
-func osExec(args ...vvm.Object) (vvm.Object, error) {
+func osExec(ctx context.Context, args ...vvm.Object) (vvm.Object, error) {
 	if len(args) == 0 {
 		return nil, vvm.ErrWrongNumArguments
 	}
@@ -459,7 +458,7 @@ func osExec(args ...vvm.Object) (vvm.Object, error) {
 	return makeOSExecCommand(exec.Command(name, execArgs...)), nil
 }
 
-func osFindProcess(args ...vvm.Object) (vvm.Object, error) {
+func osFindProcess(ctx context.Context, args ...vvm.Object) (vvm.Object, error) {
 	if len(args) != 1 {
 		return nil, vvm.ErrWrongNumArguments
 	}
@@ -478,7 +477,7 @@ func osFindProcess(args ...vvm.Object) (vvm.Object, error) {
 	return makeOSProcess(proc), nil
 }
 
-func osStartProcess(args ...vvm.Object) (vvm.Object, error) {
+func osStartProcess(ctx context.Context, args ...vvm.Object) (vvm.Object, error) {
 	if len(args) != 4 {
 		return nil, vvm.ErrWrongNumArguments
 	}

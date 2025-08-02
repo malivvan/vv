@@ -1,6 +1,7 @@
 package vvm
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"strconv"
@@ -29,7 +30,7 @@ const (
 )
 
 // CallableFunc is a function signature for the callable functions.
-type CallableFunc = func(args ...Object) (ret Object, err error)
+type CallableFunc = func(ctx context.Context, args ...Object) (ret Object, err error)
 
 // CountObjects returns the number of objects that a given object o contains.
 // For scalar value types, it will always be 1. For compound value types,

@@ -3,6 +3,7 @@ package stdlib
 //go:generate go run gensrcmods.go
 
 import (
+	"context"
 	"fmt"
 	"github.com/malivvan/vv/vvm"
 )
@@ -109,9 +110,9 @@ func (prop *Property) CanCall() bool {
 }
 
 // Call invokes the property as a function if it is callable.
-func (prop *Property) Call(args ...vvm.Object) (vvm.Object, error) {
+func (prop *Property) Call(ctx context.Context, args ...vvm.Object) (vvm.Object, error) {
 	if f, ok := prop.get().(*vvm.BuiltinFunction); ok {
-		return f.Value(args...)
+		return f.Value(ctx, args...)
 	}
 	return nil, fmt.Errorf("property is not callable")
 }

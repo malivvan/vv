@@ -2,6 +2,7 @@ package stdlib
 
 import (
 	"bytes"
+	"context"
 	gojson "encoding/json"
 
 	"github.com/malivvan/vv/vvm"
@@ -27,7 +28,7 @@ var jsonModule = map[string]vvm.Object{
 	},
 }
 
-func jsonDecode(args ...vvm.Object) (ret vvm.Object, err error) {
+func jsonDecode(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 1 {
 		return nil, vvm.ErrWrongNumArguments
 	}
@@ -58,7 +59,7 @@ func jsonDecode(args ...vvm.Object) (ret vvm.Object, err error) {
 	}
 }
 
-func jsonEncode(args ...vvm.Object) (ret vvm.Object, err error) {
+func jsonEncode(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 1 {
 		return nil, vvm.ErrWrongNumArguments
 	}
@@ -71,7 +72,7 @@ func jsonEncode(args ...vvm.Object) (ret vvm.Object, err error) {
 	return &vvm.Bytes{Value: b}, nil
 }
 
-func jsonIndent(args ...vvm.Object) (ret vvm.Object, err error) {
+func jsonIndent(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 3 {
 		return nil, vvm.ErrWrongNumArguments
 	}
@@ -122,7 +123,7 @@ func jsonIndent(args ...vvm.Object) (ret vvm.Object, err error) {
 	}
 }
 
-func jsonHTMLEscape(args ...vvm.Object) (ret vvm.Object, err error) {
+func jsonHTMLEscape(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 1 {
 		return nil, vvm.ErrWrongNumArguments
 	}

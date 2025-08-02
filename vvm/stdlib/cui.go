@@ -1,13 +1,14 @@
 package stdlib
 
 import (
+	"context"
 	"github.com/malivvan/vv/pkg/cui"
 	"github.com/malivvan/vv/vvm"
 )
 
 var cuiModule = map[string]vvm.Object{
 	"new": &vvm.BuiltinFunction{
-		Value: func(args ...vvm.Object) (vvm.Object, error) {
+		Value: func(ctx context.Context, args ...vvm.Object) (vvm.Object, error) {
 			app := cui.NewApplication()
 			txt := cui.NewTextView()
 			app.SetRoot(txt, true)

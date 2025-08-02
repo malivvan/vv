@@ -1,6 +1,7 @@
 package stdlib
 
 import (
+	"context"
 	"time"
 
 	"github.com/malivvan/vv/vvm"
@@ -41,9 +42,8 @@ var timesModule = map[string]vvm.Object{
 	"november":            &vvm.Int{Value: int64(time.November)},
 	"december":            &vvm.Int{Value: int64(time.December)},
 	"sleep": &vvm.BuiltinFunction{
-		Name:      "sleep",
-		Value:     timesSleep,
-		NeedVMObj: true,
+		Name:  "sleep",
+		Value: timesSleep,
 	}, // sleep(int)
 	"parse_duration": &vvm.BuiltinFunction{
 		Name:  "parse_duration",
@@ -183,9 +183,8 @@ var timesModule = map[string]vvm.Object{
 	}, // to_utc(time) => time
 }
 
-func timesSleep(args ...vvm.Object) (ret vvm.Object, err error) {
-	vm := args[0].(*vvm.VMObj).Value
-	args = args[1:] // the first arg is VMObj inserted by VM
+func timesSleep(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
+	vm := ctx.Value(vvm.ContextKey("vm")).(*vvm.VM)
 	if len(args) != 1 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -223,10 +222,7 @@ func timesSleep(args ...vvm.Object) (ret vvm.Object, err error) {
 	return
 }
 
-func timesParseDuration(args ...vvm.Object) (
-	ret vvm.Object,
-	err error,
-) {
+func timesParseDuration(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 1 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -253,10 +249,7 @@ func timesParseDuration(args ...vvm.Object) (
 	return
 }
 
-func timesSince(args ...vvm.Object) (
-	ret vvm.Object,
-	err error,
-) {
+func timesSince(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 1 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -277,10 +270,7 @@ func timesSince(args ...vvm.Object) (
 	return
 }
 
-func timesUntil(args ...vvm.Object) (
-	ret vvm.Object,
-	err error,
-) {
+func timesUntil(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 1 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -301,10 +291,7 @@ func timesUntil(args ...vvm.Object) (
 	return
 }
 
-func timesDurationHours(args ...vvm.Object) (
-	ret vvm.Object,
-	err error,
-) {
+func timesDurationHours(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 1 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -325,10 +312,7 @@ func timesDurationHours(args ...vvm.Object) (
 	return
 }
 
-func timesDurationMinutes(args ...vvm.Object) (
-	ret vvm.Object,
-	err error,
-) {
+func timesDurationMinutes(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 1 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -349,10 +333,7 @@ func timesDurationMinutes(args ...vvm.Object) (
 	return
 }
 
-func timesDurationNanoseconds(args ...vvm.Object) (
-	ret vvm.Object,
-	err error,
-) {
+func timesDurationNanoseconds(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 1 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -373,10 +354,7 @@ func timesDurationNanoseconds(args ...vvm.Object) (
 	return
 }
 
-func timesDurationSeconds(args ...vvm.Object) (
-	ret vvm.Object,
-	err error,
-) {
+func timesDurationSeconds(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 1 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -397,10 +375,7 @@ func timesDurationSeconds(args ...vvm.Object) (
 	return
 }
 
-func timesDurationString(args ...vvm.Object) (
-	ret vvm.Object,
-	err error,
-) {
+func timesDurationString(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 1 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -421,10 +396,7 @@ func timesDurationString(args ...vvm.Object) (
 	return
 }
 
-func timesMonthString(args ...vvm.Object) (
-	ret vvm.Object,
-	err error,
-) {
+func timesMonthString(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 1 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -445,10 +417,7 @@ func timesMonthString(args ...vvm.Object) (
 	return
 }
 
-func timesDate(args ...vvm.Object) (
-	ret vvm.Object,
-	err error,
-) {
+func timesDate(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 7 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -526,7 +495,7 @@ func timesDate(args ...vvm.Object) (
 	return
 }
 
-func timesNow(args ...vvm.Object) (ret vvm.Object, err error) {
+func timesNow(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 0 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -537,7 +506,7 @@ func timesNow(args ...vvm.Object) (ret vvm.Object, err error) {
 	return
 }
 
-func timesParse(args ...vvm.Object) (ret vvm.Object, err error) {
+func timesParse(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 2 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -574,7 +543,7 @@ func timesParse(args ...vvm.Object) (ret vvm.Object, err error) {
 	return
 }
 
-func timesUnix(args ...vvm.Object) (ret vvm.Object, err error) {
+func timesUnix(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 2 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -605,7 +574,7 @@ func timesUnix(args ...vvm.Object) (ret vvm.Object, err error) {
 	return
 }
 
-func timesAdd(args ...vvm.Object) (ret vvm.Object, err error) {
+func timesAdd(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 2 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -636,7 +605,7 @@ func timesAdd(args ...vvm.Object) (ret vvm.Object, err error) {
 	return
 }
 
-func timesSub(args ...vvm.Object) (ret vvm.Object, err error) {
+func timesSub(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 2 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -667,7 +636,7 @@ func timesSub(args ...vvm.Object) (ret vvm.Object, err error) {
 	return
 }
 
-func timesAddDate(args ...vvm.Object) (ret vvm.Object, err error) {
+func timesAddDate(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 4 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -718,7 +687,7 @@ func timesAddDate(args ...vvm.Object) (ret vvm.Object, err error) {
 	return
 }
 
-func timesAfter(args ...vvm.Object) (ret vvm.Object, err error) {
+func timesAfter(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 2 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -753,7 +722,7 @@ func timesAfter(args ...vvm.Object) (ret vvm.Object, err error) {
 	return
 }
 
-func timesBefore(args ...vvm.Object) (ret vvm.Object, err error) {
+func timesBefore(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 2 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -788,7 +757,7 @@ func timesBefore(args ...vvm.Object) (ret vvm.Object, err error) {
 	return
 }
 
-func timesTimeYear(args ...vvm.Object) (ret vvm.Object, err error) {
+func timesTimeYear(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 1 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -809,7 +778,7 @@ func timesTimeYear(args ...vvm.Object) (ret vvm.Object, err error) {
 	return
 }
 
-func timesTimeMonth(args ...vvm.Object) (ret vvm.Object, err error) {
+func timesTimeMonth(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 1 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -830,7 +799,7 @@ func timesTimeMonth(args ...vvm.Object) (ret vvm.Object, err error) {
 	return
 }
 
-func timesTimeDay(args ...vvm.Object) (ret vvm.Object, err error) {
+func timesTimeDay(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 1 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -851,7 +820,7 @@ func timesTimeDay(args ...vvm.Object) (ret vvm.Object, err error) {
 	return
 }
 
-func timesTimeWeekday(args ...vvm.Object) (ret vvm.Object, err error) {
+func timesTimeWeekday(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 1 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -872,7 +841,7 @@ func timesTimeWeekday(args ...vvm.Object) (ret vvm.Object, err error) {
 	return
 }
 
-func timesTimeHour(args ...vvm.Object) (ret vvm.Object, err error) {
+func timesTimeHour(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 1 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -893,7 +862,7 @@ func timesTimeHour(args ...vvm.Object) (ret vvm.Object, err error) {
 	return
 }
 
-func timesTimeMinute(args ...vvm.Object) (ret vvm.Object, err error) {
+func timesTimeMinute(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 1 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -914,7 +883,7 @@ func timesTimeMinute(args ...vvm.Object) (ret vvm.Object, err error) {
 	return
 }
 
-func timesTimeSecond(args ...vvm.Object) (ret vvm.Object, err error) {
+func timesTimeSecond(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 1 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -935,10 +904,7 @@ func timesTimeSecond(args ...vvm.Object) (ret vvm.Object, err error) {
 	return
 }
 
-func timesTimeNanosecond(args ...vvm.Object) (
-	ret vvm.Object,
-	err error,
-) {
+func timesTimeNanosecond(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 1 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -959,7 +925,7 @@ func timesTimeNanosecond(args ...vvm.Object) (
 	return
 }
 
-func timesTimeUnix(args ...vvm.Object) (ret vvm.Object, err error) {
+func timesTimeUnix(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 1 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -980,10 +946,7 @@ func timesTimeUnix(args ...vvm.Object) (ret vvm.Object, err error) {
 	return
 }
 
-func timesTimeUnixNano(args ...vvm.Object) (
-	ret vvm.Object,
-	err error,
-) {
+func timesTimeUnixNano(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 1 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -1004,7 +967,7 @@ func timesTimeUnixNano(args ...vvm.Object) (
 	return
 }
 
-func timesTimeFormat(args ...vvm.Object) (ret vvm.Object, err error) {
+func timesTimeFormat(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 2 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -1041,7 +1004,7 @@ func timesTimeFormat(args ...vvm.Object) (ret vvm.Object, err error) {
 	return
 }
 
-func timesIsZero(args ...vvm.Object) (ret vvm.Object, err error) {
+func timesIsZero(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 1 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -1066,7 +1029,7 @@ func timesIsZero(args ...vvm.Object) (ret vvm.Object, err error) {
 	return
 }
 
-func timesToLocal(args ...vvm.Object) (ret vvm.Object, err error) {
+func timesToLocal(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 1 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -1087,7 +1050,7 @@ func timesToLocal(args ...vvm.Object) (ret vvm.Object, err error) {
 	return
 }
 
-func timesToUTC(args ...vvm.Object) (ret vvm.Object, err error) {
+func timesToUTC(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 1 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -1108,10 +1071,7 @@ func timesToUTC(args ...vvm.Object) (ret vvm.Object, err error) {
 	return
 }
 
-func timesTimeLocation(args ...vvm.Object) (
-	ret vvm.Object,
-	err error,
-) {
+func timesTimeLocation(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 1 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -1132,7 +1092,7 @@ func timesTimeLocation(args ...vvm.Object) (
 	return
 }
 
-func timesTimeString(args ...vvm.Object) (ret vvm.Object, err error) {
+func timesTimeString(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 1 {
 		err = vvm.ErrWrongNumArguments
 		return

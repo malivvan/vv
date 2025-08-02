@@ -1,6 +1,7 @@
 package stdlib
 
 import (
+	"context"
 	"fmt"
 	"regexp"
 	"strconv"
@@ -201,7 +202,7 @@ var textModule = map[string]vvm.Object{
 	}, // unquote(str) => string/error
 }
 
-func textREMatch(args ...vvm.Object) (ret vvm.Object, err error) {
+func textREMatch(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 2 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -242,7 +243,7 @@ func textREMatch(args ...vvm.Object) (ret vvm.Object, err error) {
 	return
 }
 
-func textREFind(args ...vvm.Object) (ret vvm.Object, err error) {
+func textREFind(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	numArgs := len(args)
 	if numArgs != 2 && numArgs != 3 {
 		err = vvm.ErrWrongNumArguments
@@ -332,7 +333,7 @@ func textREFind(args ...vvm.Object) (ret vvm.Object, err error) {
 	return
 }
 
-func textREReplace(args ...vvm.Object) (ret vvm.Object, err error) {
+func textREReplace(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 3 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -383,7 +384,7 @@ func textREReplace(args ...vvm.Object) (ret vvm.Object, err error) {
 	return
 }
 
-func textRESplit(args ...vvm.Object) (ret vvm.Object, err error) {
+func textRESplit(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	numArgs := len(args)
 	if numArgs != 2 && numArgs != 3 {
 		err = vvm.ErrWrongNumArguments
@@ -439,7 +440,7 @@ func textRESplit(args ...vvm.Object) (ret vvm.Object, err error) {
 	return
 }
 
-func textRECompile(args ...vvm.Object) (ret vvm.Object, err error) {
+func textRECompile(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 1 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -465,7 +466,7 @@ func textRECompile(args ...vvm.Object) (ret vvm.Object, err error) {
 	return
 }
 
-func textReplace(args ...vvm.Object) (ret vvm.Object, err error) {
+func textReplace(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 4 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -522,7 +523,7 @@ func textReplace(args ...vvm.Object) (ret vvm.Object, err error) {
 	return
 }
 
-func textSubstring(args ...vvm.Object) (ret vvm.Object, err error) {
+func textSubstring(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	argslen := len(args)
 	if argslen != 2 && argslen != 3 {
 		err = vvm.ErrWrongNumArguments
@@ -585,7 +586,7 @@ func textSubstring(args ...vvm.Object) (ret vvm.Object, err error) {
 	return
 }
 
-func textPadLeft(args ...vvm.Object) (ret vvm.Object, err error) {
+func textPadLeft(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	argslen := len(args)
 	if argslen != 2 && argslen != 3 {
 		err = vvm.ErrWrongNumArguments
@@ -648,7 +649,7 @@ func textPadLeft(args ...vvm.Object) (ret vvm.Object, err error) {
 	return
 }
 
-func textPadRight(args ...vvm.Object) (ret vvm.Object, err error) {
+func textPadRight(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	argslen := len(args)
 	if argslen != 2 && argslen != 3 {
 		err = vvm.ErrWrongNumArguments
@@ -711,7 +712,7 @@ func textPadRight(args ...vvm.Object) (ret vvm.Object, err error) {
 	return
 }
 
-func textRepeat(args ...vvm.Object) (ret vvm.Object, err error) {
+func textRepeat(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 2 {
 		return nil, vvm.ErrWrongNumArguments
 	}
@@ -741,7 +742,7 @@ func textRepeat(args ...vvm.Object) (ret vvm.Object, err error) {
 	return &vvm.String{Value: strings.Repeat(s1, i2)}, nil
 }
 
-func textJoin(args ...vvm.Object) (ret vvm.Object, err error) {
+func textJoin(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 2 {
 		return nil, vvm.ErrWrongNumArguments
 	}
@@ -800,7 +801,7 @@ func textJoin(args ...vvm.Object) (ret vvm.Object, err error) {
 	return &vvm.String{Value: strings.Join(ss1, s2)}, nil
 }
 
-func textFormatBool(args ...vvm.Object) (ret vvm.Object, err error) {
+func textFormatBool(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 1 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -825,7 +826,7 @@ func textFormatBool(args ...vvm.Object) (ret vvm.Object, err error) {
 	return
 }
 
-func textFormatFloat(args ...vvm.Object) (ret vvm.Object, err error) {
+func textFormatFloat(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 4 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -876,7 +877,7 @@ func textFormatFloat(args ...vvm.Object) (ret vvm.Object, err error) {
 	return
 }
 
-func textFormatInt(args ...vvm.Object) (ret vvm.Object, err error) {
+func textFormatInt(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 2 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -907,7 +908,7 @@ func textFormatInt(args ...vvm.Object) (ret vvm.Object, err error) {
 	return
 }
 
-func textParseBool(args ...vvm.Object) (ret vvm.Object, err error) {
+func textParseBool(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 1 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -938,7 +939,7 @@ func textParseBool(args ...vvm.Object) (ret vvm.Object, err error) {
 	return
 }
 
-func textParseFloat(args ...vvm.Object) (ret vvm.Object, err error) {
+func textParseFloat(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 2 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -975,7 +976,7 @@ func textParseFloat(args ...vvm.Object) (ret vvm.Object, err error) {
 	return
 }
 
-func textParseInt(args ...vvm.Object) (ret vvm.Object, err error) {
+func textParseInt(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
 	if len(args) != 3 {
 		err = vvm.ErrWrongNumArguments
 		return

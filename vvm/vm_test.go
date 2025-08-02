@@ -1,6 +1,7 @@
 package vvm_test
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"math"
@@ -1095,7 +1096,7 @@ export func() {
 func TestVMErrorUnwrap(t *testing.T) {
 	userErr := errors.New("user runtime error")
 	userFunc := func(err error) *vvm.BuiltinFunction {
-		return &vvm.BuiltinFunction{Name: "user_func", Value: func(args ...vvm.Object) (vvm.Object, error) {
+		return &vvm.BuiltinFunction{Name: "user_func", Value: func(ctx context.Context, args ...vvm.Object) (vvm.Object, error) {
 			return nil, err
 		}}
 	}
@@ -1104,7 +1105,7 @@ func TestVMErrorUnwrap(t *testing.T) {
 			Attrs: map[string]vvm.Object{
 				"afunction": &vvm.BuiltinFunction{
 					Name: "afunction",
-					Value: func(a ...vvm.Object) (vvm.Object, error) {
+					Value: func(ctx context.Context, a ...vvm.Object) (vvm.Object, error) {
 						return nil, err
 					},
 				},
@@ -2285,6 +2286,7 @@ func (o *StringArray) IndexSet(index, value vvm.Object) error {
 }
 
 func (o *StringArray) Call(
+	ctx context.Context,
 	args ...vvm.Object,
 ) (ret vvm.Object, err error) {
 	if len(args) != 1 {
@@ -2571,7 +2573,7 @@ func TestBuiltin(t *testing.T) {
 			Attrs: map[string]vvm.Object{
 				"abs": &vvm.BuiltinFunction{
 					Name: "abs",
-					Value: func(a ...vvm.Object) (vvm.Object, error) {
+					Value: func(ctx context.Context, a ...vvm.Object) (vvm.Object, error) {
 						v, _ := vvm.ToFloat64(a[0])
 						return &vvm.Float{Value: math.Abs(v)}, nil
 					},
@@ -2777,7 +2779,7 @@ func TestModuleBlockScopes(t *testing.T) {
 			Attrs: map[string]vvm.Object{
 				"intn": &vvm.BuiltinFunction{
 					Name: "abs",
-					Value: func(a ...vvm.Object) (vvm.Object, error) {
+					Value: func(ctx context.Context, a ...vvm.Object) (vvm.Object, error) {
 						v, _ := vvm.ToInt64(a[0])
 						return &vvm.Int{Value: rand.Int63n(v)}, nil
 					},
