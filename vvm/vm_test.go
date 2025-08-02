@@ -3784,12 +3784,7 @@ func (o *vmTracer) Write(p []byte) (n int, err error) {
 	return len(p), nil
 }
 
-func traceCompileRun(
-	file *parser.File,
-	symbols map[string]vvm.Object,
-	modules *vvm.ModuleMap,
-	maxAllocs int64,
-) (res map[string]vvm.Object, trace []string, err error) {
+func traceCompileRun(file *parser.File, symbols map[string]vvm.Object, modules *vvm.ModuleMap, maxAllocs int64) (res map[string]vvm.Object, trace []string, err error) {
 	var v *vvm.VM
 
 	defer func() {
@@ -3845,7 +3840,7 @@ func traceCompileRun(
 	trace = append(trace, fmt.Sprintf("\n[Compiled Instructions]\n\n%s\n",
 		strings.Join(bytecode.FormatInstructions(), "\n")))
 
-	v = vvm.NewVM(bytecode, globals, maxAllocs)
+	v = vvm.NewVM(context.Background(), bytecode, globals, maxAllocs)
 
 	err = v.Run()
 	{

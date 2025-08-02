@@ -1,13 +1,24 @@
 
 fmt := import("fmt")
 times := import("times")
-writeRoutine := func() {
-    for i := 0; i < 5; i++ {
-        fmt.println("Hello from writeRoutine: " + i+"\n")
-        times.sleep(500*times.millisecond)
+
+writeRoutine := func(num) {
+    return func() {
+        for i := 0; i < 100; i++ {
+            fmt.println("Hello from writeRoutine: "+ num + " i: " + i)
+            times.sleep(500*times.millisecond)
+        }
     }
 }
 
-go(writeRoutine)
-go(writeRoutine)
+r1 := go(writeRoutine(1))
+go(writeRoutine(2))
+go(writeRoutine(3))
 times.sleep(3 * times.second)
+fmt.println("Aborting routine 1")
+r1.abort()
+
+
+times.sleep(3 * times.second)
+fmt.println("Aborting all routines")
+abort()

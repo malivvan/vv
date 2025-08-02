@@ -214,13 +214,7 @@ func (f *formatter) fmtUnicode(u uint64) {
 }
 
 // fmtInteger formats signed and unsigned integers.
-func (f *formatter) fmtInteger(
-	u uint64,
-	base int,
-	isSigned bool,
-	verb rune,
-	digits string,
-) {
+func (f *formatter) fmtInteger(u uint64, base int, isSigned bool, verb rune, digits string) {
 	negative := isSigned && int64(u) < 0
 	if negative {
 		u = -u

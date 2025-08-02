@@ -59,13 +59,7 @@ type Compiler struct {
 }
 
 // NewCompiler creates a Compiler.
-func NewCompiler(
-	file *parser.SourceFile,
-	symbolTable *SymbolTable,
-	constants []Object,
-	modules *ModuleMap,
-	trace io.Writer,
-) *Compiler {
+func NewCompiler(file *parser.SourceFile, symbolTable *SymbolTable, constants []Object, modules *ModuleMap, trace io.Writer) *Compiler {
 	mainScope := compilationScope{
 		SymbolInit: make(map[string]bool),
 		SourceMap:  make(map[int]parser.Pos),
@@ -949,10 +943,7 @@ func (c *Compiler) compileForInStmt(stmt *parser.ForInStmt) error {
 	return nil
 }
 
-func (c *Compiler) checkCyclicImports(
-	node parser.Node,
-	modulePath string,
-) error {
+func (c *Compiler) checkCyclicImports(node parser.Node, modulePath string) error {
 	if c.modulePath == modulePath {
 		return c.errorf(node, "cyclic module import: %s", modulePath)
 	} else if c.parent != nil {
@@ -1006,9 +997,7 @@ func (c *Compiler) compileModule(
 	return compiledFunc, nil
 }
 
-func (c *Compiler) loadCompiledModule(
-	modulePath string,
-) (mod *CompiledFunction, ok bool) {
+func (c *Compiler) loadCompiledModule(modulePath string) (mod *CompiledFunction, ok bool) {
 	if c.parent != nil {
 		return c.parent.loadCompiledModule(modulePath)
 	}
@@ -1016,10 +1005,7 @@ func (c *Compiler) loadCompiledModule(
 	return
 }
 
-func (c *Compiler) storeCompiledModule(
-	modulePath string,
-	module *CompiledFunction,
-) {
+func (c *Compiler) storeCompiledModule(modulePath string, module *CompiledFunction) {
 	if c.parent != nil {
 		c.parent.storeCompiledModule(modulePath, module)
 	}
@@ -1072,10 +1058,7 @@ func (c *Compiler) enterScope() {
 	}
 }
 
-func (c *Compiler) leaveScope() (
-	instructions []byte,
-	sourceMap map[int]parser.Pos,
-) {
+func (c *Compiler) leaveScope() (instructions []byte, sourceMap map[int]parser.Pos) {
 	instructions = c.currentInstructions()
 	sourceMap = c.currentSourceMap()
 	c.scopes = c.scopes[:len(c.scopes)-1]
@@ -1087,12 +1070,7 @@ func (c *Compiler) leaveScope() (
 	return
 }
 
-func (c *Compiler) fork(
-	file *parser.SourceFile,
-	modulePath string,
-	symbolTable *SymbolTable,
-	isFile bool,
-) *Compiler {
+func (c *Compiler) fork(file *parser.SourceFile, modulePath string, symbolTable *SymbolTable, isFile bool) *Compiler {
 	child := NewCompiler(file, symbolTable, nil, c.modules, c.trace)
 	child.modulePath = modulePath // module file path
 	child.parent = c              // parent to set to current compiler
@@ -1112,11 +1090,7 @@ func (c *Compiler) error(node parser.Node, err error) error {
 	}
 }
 
-func (c *Compiler) errorf(
-	node parser.Node,
-	format string,
-	args ...interface{},
-) error {
+func (c *Compiler) errorf(node parser.Node, format string, args ...interface{}) error {
 	return &CompilerError{
 		FileSet: c.file.Set(),
 		Node:    node,
@@ -1251,11 +1225,7 @@ func (c *Compiler) optimizeFunc(node parser.Node) {
 	}
 }
 
-func (c *Compiler) emit(
-	node parser.Node,
-	opcode parser.Opcode,
-	operands ...int,
-) int {
+func (c *Compiler) emit(node parser.Node, opcode parser.Opcode, operands ...int) int {
 	filePos := parser.NoPos
 	if node != nil {
 		filePos = node.Pos()
@@ -1287,9 +1257,7 @@ func (c *Compiler) printTrace(a ...interface{}) {
 	_, _ = fmt.Fprintln(c.trace, a...)
 }
 
-func resolveAssignLHS(
-	expr parser.Expr,
-) (name string, selectors []parser.Expr) {
+func resolveAssignLHS(expr parser.Expr) (name string, selectors []parser.Expr) {
 	switch term := expr.(type) {
 	case *parser.SelectorExpr:
 		name, selectors = resolveAssignLHS(term.Expr)
@@ -1304,10 +1272,7 @@ func resolveAssignLHS(
 	return
 }
 
-func iterateInstructions(
-	b []byte,
-	fn func(pos int, opcode parser.Opcode, operands []int) bool,
-) {
+func iterateInstructions(b []byte, fn func(pos int, opcode parser.Opcode, operands []int) bool) {
 	for i := 0; i < len(b); i++ {
 		numOperands := parser.OpcodeOperands[b[i]]
 		operands, read := parser.ReadOperands(numOperands, b[i+1:])

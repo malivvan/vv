@@ -153,9 +153,7 @@ func (s *Script) Run() (compiled *Compiled, err error) {
 }
 
 // RunContext is like Run but includes a context.
-func (s *Script) RunContext(
-	ctx context.Context,
-) (compiled *Compiled, err error) {
+func (s *Script) RunContext(ctx context.Context) (compiled *Compiled, err error) {
 	compiled, err = s.Compile()
 	if err != nil {
 		return
@@ -207,7 +205,7 @@ func (c *Compiled) Run() error {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	v := NewVM(c.bytecode, c.globals, c.maxAllocs)
+	v := NewVM(context.Background(), c.bytecode, c.globals, c.maxAllocs)
 	return v.Run()
 }
 
@@ -216,7 +214,7 @@ func (c *Compiled) RunContext(ctx context.Context) (err error) {
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	v := NewVM(c.bytecode, c.globals, c.maxAllocs)
+	v := NewVM(ctx, c.bytecode, c.globals, c.maxAllocs)
 	ch := make(chan error, 1)
 	go func() {
 		ch <- v.Run()

@@ -222,12 +222,11 @@ func builtinMakechan(ctx context.Context, args ...Object) (Object, error) {
 // Sends an obj to the channel, will block if channel is full and the VM has not been aborted.
 // Sends to a closed channel causes panic.
 func (oc objchan) send(ctx context.Context, args ...Object) (Object, error) {
-	vm := ctx.Value(ContextKey("vm")).(*VM)
 	if len(args) != 1 {
 		return nil, ErrWrongNumArguments
 	}
 	select {
-	case <-vm.AbortChan:
+	case <-ctx.Done():
 		return nil, ErrVMAborted
 	case oc <- args[0]:
 	}
@@ -237,12 +236,11 @@ func (oc objchan) send(ctx context.Context, args ...Object) (Object, error) {
 // Receives an obj from the channel, will block if channel is empty and the VM has not been aborted.
 // Receives from a closed channel returns undefined value.
 func (oc objchan) recv(ctx context.Context, args ...Object) (Object, error) {
-	vm := ctx.Value(ContextKey("vm")).(*VM)
 	if len(args) != 0 {
 		return nil, ErrWrongNumArguments
 	}
 	select {
-	case <-vm.AbortChan:
+	case <-ctx.Done():
 		return nil, ErrVMAborted
 	case obj, ok := <-oc:
 		if ok {

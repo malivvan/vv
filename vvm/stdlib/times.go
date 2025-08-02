@@ -184,7 +184,6 @@ var timesModule = map[string]vvm.Object{
 }
 
 func timesSleep(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
-	vm := ctx.Value(vvm.ContextKey("vm")).(*vvm.VM)
 	if len(args) != 1 {
 		err = vvm.ErrWrongNumArguments
 		return
@@ -209,13 +208,13 @@ func timesSleep(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err er
 	go func() {
 		time.Sleep(time.Duration(i1))
 		select {
-		case <-vm.AbortChan:
+		case <-ctx.Done():
 		case done <- struct{}{}:
 		}
 	}()
 
 	select {
-	case <-vm.AbortChan:
+	case <-ctx.Done():
 		return nil, vvm.ErrVMAborted
 	case <-done:
 	}

@@ -40,6 +40,7 @@ type vmChildCtl struct {
 // VM is a virtual machine that executes the bytecode compiled by Compiler.
 type VM struct {
 	ctx         context.Context
+	cancel      context.CancelFunc
 	constants   []Object
 	stack       []Object
 	sp          int
@@ -54,7 +55,6 @@ type VM struct {
 	maxAllocs   int64
 	allocs      int64
 	err         error
-	AbortChan   chan struct{}
 	childCtl    vmChildCtl
 	In          io.Reader
 	Out         io.Writer
@@ -67,11 +67,7 @@ const (
 )
 
 // NewVM creates a VM.
-func NewVM(
-	bytecode *Bytecode,
-	globals []Object,
-	maxAllocs int64,
-) *VM {
+func NewVM(ctx context.Context, bytecode *Bytecode, globals []Object, maxAllocs int64) *VM {
 	if globals == nil {
 		globals = make([]Object, GlobalsSize)
 	}
@@ -84,13 +80,12 @@ func NewVM(
 		framesIndex: 1,
 		ip:          -1,
 		maxAllocs:   maxAllocs,
-		AbortChan:   make(chan struct{}),
 		childCtl:    vmChildCtl{vmMap: make(map[*VM]struct{})},
 		In:          os.Stdin,
 		Out:         os.Stdout,
 		Args:        os.Args,
 	}
-	v.ctx = context.WithValue(context.Background(), ContextKey("vm"), v)
+	v.ctx, v.cancel = context.WithCancel(context.WithValue(ctx, ContextKey("vm"), v))
 	frame := &frame{
 		fn: bytecode.MainFunction,
 		ip: -1,
@@ -134,13 +129,12 @@ func (v *VM) ShallowClone() *VM {
 		framesIndex: 1,
 		ip:          -1,
 		maxAllocs:   v.maxAllocs,
-		AbortChan:   make(chan struct{}),
 		childCtl:    vmChildCtl{vmMap: make(map[*VM]struct{})},
 		In:          v.In,
 		Out:         v.Out,
 		Args:        v.Args,
 	}
-	vClone.ctx = context.WithValue(v.ctx, ContextKey("vm"), v)
+	vClone.ctx, vClone.cancel = context.WithCancel(context.WithValue(v.ctx, ContextKey("vm"), v))
 	frame := &frame{
 		fn: emptyEntry,
 		ip: -1,
@@ -236,10 +230,7 @@ func (v *VM) Abort() {
 	}
 	v.childCtl.Lock()
 	atomic.StoreInt64(&v.aborting, 1)
-	close(v.AbortChan) // broadcast to all receivers
-	for cvm := range v.childCtl.vmMap {
-		cvm.Abort()
-	}
+	v.cancel()
 	v.childCtl.Unlock()
 }
 

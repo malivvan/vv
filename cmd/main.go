@@ -41,6 +41,8 @@ func init() {
 }
 
 func main() {
+	ctx := context.Background()
+
 	if showHelp {
 		doHelp()
 		os.Exit(2)
@@ -90,7 +92,7 @@ func main() {
 	inputFile := flag.Arg(0)
 	if inputFile == "" {
 		// REPL
-		RunREPL(modules, os.Stdin, os.Stdout)
+		RunREPL(ctx, modules, os.Stdin, os.Stdout)
 		return
 	}
 
@@ -119,13 +121,13 @@ func main() {
 			os.Exit(1)
 		}
 	} else if filepath.Ext(inputFile) == sourceFileExt {
-		err := CompileAndRun(modules, inputData, inputFile)
+		err := CompileAndRun(ctx, modules, inputData, inputFile)
 		if err != nil {
 			_, _ = fmt.Fprintln(os.Stderr, err.Error())
 			os.Exit(1)
 		}
 	} else {
-		if err := RunCompiled(modules, inputData); err != nil {
+		if err := RunCompiled(ctx, modules, inputData); err != nil {
 			_, _ = fmt.Fprintln(os.Stderr, err.Error())
 			os.Exit(1)
 		}
@@ -134,11 +136,7 @@ func main() {
 
 // CompileOnly compiles the source code and writes the compiled binary into
 // outputFile.
-func CompileOnly(
-	modules *vvm.ModuleMap,
-	data []byte,
-	inputFile, outputFile string,
-) (err error) {
+func CompileOnly(modules *vvm.ModuleMap, data []byte, inputFile, outputFile string) (err error) {
 	bytecode, err := compileSrc(modules, data, inputFile)
 	if err != nil {
 		return
@@ -169,36 +167,32 @@ func CompileOnly(
 }
 
 // CompileAndRun compiles the source code and executes it.
-func CompileAndRun(
-	modules *vvm.ModuleMap,
-	data []byte,
-	inputFile string,
-) (err error) {
+func CompileAndRun(ctx context.Context, modules *vvm.ModuleMap, data []byte, inputFile string) (err error) {
 	bytecode, err := compileSrc(modules, data, inputFile)
 	if err != nil {
 		return
 	}
 
-	machine := vvm.NewVM(bytecode, nil, -1)
+	machine := vvm.NewVM(ctx, bytecode, nil, -1)
 	err = machine.Run()
 	return
 }
 
 // RunCompiled reads the compiled binary from file and executes it.
-func RunCompiled(modules *vvm.ModuleMap, data []byte) (err error) {
+func RunCompiled(ctx context.Context, modules *vvm.ModuleMap, data []byte) (err error) {
 	bytecode := &vvm.Bytecode{}
 	err = bytecode.Decode(bytes.NewReader(data), modules)
 	if err != nil {
 		return
 	}
 
-	machine := vvm.NewVM(bytecode, nil, -1)
+	machine := vvm.NewVM(ctx, bytecode, nil, -1)
 	err = machine.Run()
 	return
 }
 
 // RunREPL starts REPL.
-func RunREPL(modules *vvm.ModuleMap, in io.Reader, out io.Writer) {
+func RunREPL(ctx context.Context, modules *vvm.ModuleMap, in io.Reader, out io.Writer) {
 	stdin := bufio.NewScanner(in)
 	fileSet := parser.NewFileSet()
 	globals := make([]vvm.Object, vvm.GlobalsSize)
@@ -252,7 +246,7 @@ func RunREPL(modules *vvm.ModuleMap, in io.Reader, out io.Writer) {
 		}
 
 		bytecode := c.Bytecode()
-		machine := vvm.NewVM(bytecode, globals, -1)
+		machine := vvm.NewVM(ctx, bytecode, globals, -1)
 		if err := machine.Run(); err != nil {
 			_, _ = fmt.Fprintln(out, err.Error())
 			continue
