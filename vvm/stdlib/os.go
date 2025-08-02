@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 
@@ -213,7 +212,7 @@ func osReadFile(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err er
 			Found:    args[0].TypeName(),
 		}
 	}
-	bytes, err := ioutil.ReadFile(fname)
+	bytes, err := os.ReadFile(fname)
 	if err != nil {
 		return wrapError(err), nil
 	}

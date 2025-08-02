@@ -80,10 +80,7 @@ func (t *SymbolTable) DefineBuiltin(index int, name string) *Symbol {
 }
 
 // Resolve resolves a symbol with a given name.
-func (t *SymbolTable) Resolve(
-	name string,
-	recur bool,
-) (*Symbol, int, bool) {
+func (t *SymbolTable) Resolve(name string, recur bool) (*Symbol, int, bool) {
 	symbol, ok := t.store[name]
 	if ok {
 		// symbol can be used if

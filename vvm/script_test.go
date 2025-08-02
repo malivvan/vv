@@ -1,6 +1,7 @@
 package vvm_test
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -31,13 +32,13 @@ func TestScript_Add(t *testing.T) {
 
 			return &vvm.Int{Value: 0}, nil
 		}))
-	c, err := s.Compile()
+	p, err := s.Compile()
 	require.NoError(t, err)
-	require.NoError(t, c.Run())
-	require.Equal(t, "foo", c.Get("a").Value())
-	require.Equal(t, "foo", c.Get("b").Value())
-	require.Equal(t, int64(0), c.Get("c").Value())
-	require.Equal(t, int64(6), c.Get("d").Value())
+	require.NoError(t, p.Run())
+	require.Equal(t, "foo", p.Get("a").Value())
+	require.Equal(t, "foo", p.Get("b").Value())
+	require.Equal(t, int64(0), p.Get("c").Value())
+	require.Equal(t, int64(6), p.Get("d").Value())
 }
 
 func TestScript_Remove(t *testing.T) {
@@ -53,24 +54,24 @@ func TestScript_Run(t *testing.T) {
 	s := vvm.NewScript([]byte(`a := b`))
 	err := s.Add("b", 5)
 	require.NoError(t, err)
-	c, err := s.Run()
+	p, err := s.Run()
 	require.NoError(t, err)
-	require.NotNil(t, c)
-	compiledGet(t, c, "a", int64(5))
+	require.NotNil(t, p)
+	programGet(t, p, "a", int64(5))
 }
 
 func TestScript_BuiltinModules(t *testing.T) {
 	s := vvm.NewScript([]byte(`math := import("math"); a := math.abs(-19.84)`))
 	s.SetImports(stdlib.GetModuleMap("math"))
-	c, err := s.Run()
+	p, err := s.Run()
 	require.NoError(t, err)
-	require.NotNil(t, c)
-	compiledGet(t, c, "a", 19.84)
+	require.NotNil(t, p)
+	programGet(t, p, "a", 19.84)
 
-	c, err = s.Run()
+	p, err = s.Run()
 	require.NoError(t, err)
-	require.NotNil(t, c)
-	compiledGet(t, c, "a", 19.84)
+	require.NotNil(t, p)
+	programGet(t, p, "a", 19.84)
 
 	s.SetImports(stdlib.GetModuleMap("os"))
 	_, err = s.Run()
@@ -92,7 +93,7 @@ a := enum.all([1,2,3], func(_, v) {
 	c, err := s.Run()
 	require.NoError(t, err)
 	require.NotNil(t, c)
-	compiledGet(t, c, "a", true)
+	programGet(t, c, "a", true)
 
 	s.SetImports(nil)
 	_, err = s.Run()
@@ -193,7 +194,7 @@ e := mod1.double(s)
 	compiled, err := scr.Compile()
 	require.NoError(t, err)
 
-	executeFn := func(compiled *vvm.Compiled, a, b, c int) (d, e int) {
+	executeFn := func(compiled *vvm.Program, a, b, c int) (d, e int) {
 		_ = compiled.Set("a", a)
 		_ = compiled.Set("b", b)
 		_ = compiled.Set("c", c)
@@ -208,7 +209,7 @@ e := mod1.double(s)
 	var wg sync.WaitGroup
 	wg.Add(concurrency)
 	for i := 0; i < concurrency; i++ {
-		go func(compiled *vvm.Compiled) {
+		go func(compiled *vvm.Program) {
 			time.Sleep(time.Duration(rand.Int63n(50)) * time.Millisecond)
 			defer wg.Done()
 
@@ -288,15 +289,15 @@ func (o *Counter) CanCall() bool {
 }
 
 func TestScript_CustomObjects(t *testing.T) {
-	c := compile(t, `a := c1(); s := string(c1); c2 := c1; c2++`, M{
+	p := compile(t, `a := c1(); s := string(c1); c2 := c1; c2++`, M{
 		"c1": &Counter{value: 5},
 	})
-	compiledRun(t, c)
-	compiledGet(t, c, "a", int64(5))
-	compiledGet(t, c, "s", "Counter(5)")
-	compiledGetCounter(t, c, "c2", &Counter{value: 6})
+	programRun(t, p)
+	programGet(t, p, "a", int64(5))
+	programGet(t, p, "s", "Counter(5)")
+	compiledGetCounter(t, p, "c2", &Counter{value: 6})
 
-	c = compile(t, `
+	p = compile(t, `
 arr := [1, 2, 3, 4]
 for x in arr {
 	c1 += x
@@ -305,17 +306,12 @@ out := c1()
 `, M{
 		"c1": &Counter{value: 5},
 	})
-	compiledRun(t, c)
-	compiledGet(t, c, "out", int64(15))
+	programRun(t, p)
+	programGet(t, p, "out", int64(15))
 }
 
-func compiledGetCounter(
-	t *testing.T,
-	c *vvm.Compiled,
-	name string,
-	expected *Counter,
-) {
-	v := c.Get(name)
+func compiledGetCounter(t *testing.T, p *vvm.Program, name string, expected *Counter) {
+	v := p.Get(name)
 	require.NotNil(t, v)
 
 	actual := v.Value().(*Counter)
@@ -329,9 +325,9 @@ func TestScriptSourceModule(t *testing.T) {
 	mods := vvm.NewModuleMap()
 	mods.AddSourceModule("mod", []byte(`export 5`))
 	scr.SetImports(mods)
-	c, err := scr.Run()
+	p, err := scr.Run()
 	require.NoError(t, err)
-	require.Equal(t, int64(5), c.Get("out").Value())
+	require.Equal(t, int64(5), p.Get("out").Value())
 
 	// executing module function
 	scr = vvm.NewScript([]byte(`fn := import("mod"); out := fn()`))
@@ -339,9 +335,9 @@ func TestScriptSourceModule(t *testing.T) {
 	mods.AddSourceModule("mod",
 		[]byte(`a := 3; export func() { return a + 5 }`))
 	scr.SetImports(mods)
-	c, err = scr.Run()
+	p, err = scr.Run()
 	require.NoError(t, err)
-	require.Equal(t, int64(8), c.Get("out").Value())
+	require.Equal(t, int64(8), p.Get("out").Value())
 
 	scr = vvm.NewScript([]byte(`out := import("mod")`))
 	mods = vvm.NewModuleMap()
@@ -357,9 +353,9 @@ func TestScriptSourceModule(t *testing.T) {
 				}},
 		})
 	scr.SetImports(mods)
-	c, err = scr.Run()
+	p, err = scr.Run()
 	require.NoError(t, err)
-	require.Equal(t, "Foo", c.Get("out").Value())
+	require.Equal(t, "Foo", p.Get("out").Value())
 	scr.SetImports(nil)
 	_, err = scr.Run()
 	require.Error(t, err)
@@ -397,89 +393,117 @@ func bench(n int, input string) {
 
 type M map[string]interface{}
 
-func TestCompiled_Get(t *testing.T) {
+func TestProgram_Get(t *testing.T) {
 	// simple script
 	c := compile(t, `a := 5`, nil)
-	compiledRun(t, c)
-	compiledGet(t, c, "a", int64(5))
+	programRun(t, c)
+	programGet(t, c, "a", int64(5))
 
 	// user-defined variables
 	compileError(t, `a := b`, nil)          // compile error because "b" is not defined
 	c = compile(t, `a := b`, M{"b": "foo"}) // now compile with b = "foo" defined
-	compiledGet(t, c, "a", nil)             // a = undefined; because it's before Compiled.Run()
-	compiledRun(t, c)                       // Compiled.Run()
-	compiledGet(t, c, "a", "foo")           // a = "foo"
+	programGet(t, c, "a", nil)              // a = undefined; because it's before Compiled.Run()
+	programRun(t, c)                        // Compiled.Run()
+	programGet(t, c, "a", "foo")            // a = "foo"
 }
 
-func TestCompiled_GetAll(t *testing.T) {
+func TestProgram_GetAll(t *testing.T) {
 	c := compile(t, `a := 5`, nil)
-	compiledRun(t, c)
-	compiledGetAll(t, c, M{"a": int64(5)})
+	programRun(t, c)
+	programGetAll(t, c, M{"a": int64(5)})
 
 	c = compile(t, `a := b`, M{"b": "foo"})
-	compiledRun(t, c)
-	compiledGetAll(t, c, M{"a": "foo", "b": "foo"})
+	programRun(t, c)
+	programGetAll(t, c, M{"a": "foo", "b": "foo"})
 
 	c = compile(t, `a := b; b = 5`, M{"b": "foo"})
-	compiledRun(t, c)
-	compiledGetAll(t, c, M{"a": "foo", "b": int64(5)})
+	programRun(t, c)
+	programGetAll(t, c, M{"a": "foo", "b": int64(5)})
 }
 
-func TestCompiled_IsDefined(t *testing.T) {
+func TestProgram_IsDefined(t *testing.T) {
 	c := compile(t, `a := 5`, nil)
-	compiledIsDefined(t, c, "a", false) // a is not defined before Run()
-	compiledRun(t, c)
-	compiledIsDefined(t, c, "a", true)
-	compiledIsDefined(t, c, "b", false)
+	programIsDefined(t, c, "a", false) // a is not defined before Run()
+	programRun(t, c)
+	programIsDefined(t, c, "a", true)
+	programIsDefined(t, c, "b", false)
 }
 
-func TestCompiled_Set(t *testing.T) {
-	c := compile(t, `a := b`, M{"b": "foo"})
-	compiledRun(t, c)
-	compiledGet(t, c, "a", "foo")
+func TestProgram_Set(t *testing.T) {
+	p := compile(t, `a := b`, M{"b": "foo"})
+	programRun(t, p)
+	programGet(t, p, "a", "foo")
 
 	// replace value of 'b'
-	err := c.Set("b", "bar")
+	err := p.Set("b", "bar")
 	require.NoError(t, err)
-	compiledRun(t, c)
-	compiledGet(t, c, "a", "bar")
+	programRun(t, p)
+	programGet(t, p, "a", "bar")
 
 	// try to replace undefined variable
-	err = c.Set("c", 1984)
+	err = p.Set("c", 1984)
 	require.Error(t, err) // 'c' is not defined
 
 	// case #2
-	c = compile(t, `
+	p = compile(t, `
 a := func() { 
 	return func() {
 		return b + 5
 	}() 
 }()`, M{"b": 5})
-	compiledRun(t, c)
-	compiledGet(t, c, "a", int64(10))
-	err = c.Set("b", 10)
+	programRun(t, p)
+	programGet(t, p, "a", int64(10))
+	err = p.Set("b", 10)
 	require.NoError(t, err)
-	compiledRun(t, c)
-	compiledGet(t, c, "a", int64(15))
+	programRun(t, p)
+	programGet(t, p, "a", int64(15))
 }
 
-func TestCompiled_RunContext(t *testing.T) {
+func TestProgram_RunContext(t *testing.T) {
 	// machine completes normally
-	c := compile(t, `a := 5`, nil)
-	err := c.RunContext(context.Background())
+	p := compile(t, `a := 5`, nil)
+	err := p.RunContext(context.Background())
 	require.NoError(t, err)
-	compiledGet(t, c, "a", int64(5))
+	programGet(t, p, "a", int64(5))
 
 	// timeout
-	c = compile(t, `for true {}`, nil)
+	p = compile(t, `for true {}`, nil)
 	ctx, cancel := context.WithTimeout(context.Background(),
 		1*time.Millisecond)
 	defer cancel()
-	err = c.RunContext(ctx)
+	err = p.RunContext(ctx)
 	require.Equal(t, context.DeadlineExceeded, err)
 }
 
-func compile(t *testing.T, input string, vars M) *vvm.Compiled {
+func TestProgram_EncodeDecode(t *testing.T) {
+	// machine completes normally
+	p := compile(t, `a := 5`, nil)
+	err := p.RunContext(context.Background())
+	require.NoError(t, err)
+	programGet(t, p, "a", int64(5))
+
+	// timeout
+	p = compile(t, `for true {}`, nil)
+
+	var buf bytes.Buffer
+	err = p.Encode(&buf)
+	require.NoError(t, err)
+	cx := new(vvm.Program)
+	b := buf.Bytes()
+
+	err = cx.Decode(&buf, nil)
+	require.NoError(t, err)
+	require.Equal(t, p, cx)
+
+	var bufx bytes.Buffer
+	err = cx.Encode(&bufx)
+	require.NoError(t, err)
+	bx := bufx.Bytes()
+
+	require.Equal(t, b, bx, "encoded bytes should be equal")
+}
+
+func compile(t *testing.T, input string, vars M) *vvm.Program {
 	s := vvm.NewScript([]byte(input))
 	for vn, vv := range vars {
 		err := s.Add(vn, vv)
@@ -502,28 +526,19 @@ func compileError(t *testing.T, input string, vars M) {
 	require.Error(t, err)
 }
 
-func compiledRun(t *testing.T, c *vvm.Compiled) {
-	err := c.Run()
+func programRun(t *testing.T, p *vvm.Program) {
+	err := p.Run()
 	require.NoError(t, err)
 }
 
-func compiledGet(
-	t *testing.T,
-	c *vvm.Compiled,
-	name string,
-	expected interface{},
-) {
-	v := c.Get(name)
+func programGet(t *testing.T, p *vvm.Program, name string, expected interface{}) {
+	v := p.Get(name)
 	require.NotNil(t, v)
 	require.Equal(t, expected, v.Value())
 }
 
-func compiledGetAll(
-	t *testing.T,
-	c *vvm.Compiled,
-	expected M,
-) {
-	vars := c.GetAll()
+func programGetAll(t *testing.T, p *vvm.Program, expected M) {
+	vars := p.GetAll()
 	require.Equal(t, len(expected), len(vars))
 
 	for k, v := range expected {
@@ -538,11 +553,6 @@ func compiledGetAll(
 	}
 }
 
-func compiledIsDefined(
-	t *testing.T,
-	c *vvm.Compiled,
-	name string,
-	expected bool,
-) {
-	require.Equal(t, expected, c.IsDefined(name))
+func programIsDefined(t *testing.T, p *vvm.Program, name string, expected bool) {
+	require.Equal(t, expected, p.IsDefined(name))
 }

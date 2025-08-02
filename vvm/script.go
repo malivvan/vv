@@ -2,7 +2,9 @@ package vvm
 
 import (
 	"context"
+	"encoding/gob"
 	"fmt"
+	"io"
 	"path/filepath"
 	"sync"
 
@@ -87,9 +89,8 @@ func (s *Script) EnableFileImport(enable bool) {
 	s.enableFileImport = enable
 }
 
-// Compile compiles the script with all the defined variables, and, returns
-// Compiled object.
-func (s *Script) Compile() (*Compiled, error) {
+// Compile compiles the script with all the defined variables and returns Program object.
+func (s *Script) Compile() (*Program, error) {
 	symbolTable, globals, err := s.prepCompile()
 	if err != nil {
 		return nil, err
@@ -114,11 +115,11 @@ func (s *Script) Compile() (*Compiled, error) {
 	globals = globals[:symbolTable.MaxSymbols()+1]
 
 	// global symbol names to indexes
-	globalIndexes := make(map[string]int, len(globals))
+	indices := make(map[string]int, len(globals))
 	for _, name := range symbolTable.Names() {
 		symbol, _, _ := symbolTable.Resolve(name, false)
 		if symbol.Scope == ScopeGlobal {
-			globalIndexes[name] = symbol.Index
+			indices[name] = symbol.Index
 		}
 	}
 
@@ -133,8 +134,8 @@ func (s *Script) Compile() (*Compiled, error) {
 			return nil, fmt.Errorf("exceeding constant objects limit: %d", cnt)
 		}
 	}
-	return &Compiled{
-		globalIndexes: globalIndexes,
+	return &Program{
+		globalIndices: indices,
 		bytecode:      bytecode,
 		globals:       globals,
 		maxAllocs:     s.maxAllocs,
@@ -143,30 +144,26 @@ func (s *Script) Compile() (*Compiled, error) {
 
 // Run compiles and runs the scripts. Use returned compiled object to access
 // global variables.
-func (s *Script) Run() (compiled *Compiled, err error) {
-	compiled, err = s.Compile()
+func (s *Script) Run() (program *Program, err error) {
+	program, err = s.Compile()
 	if err != nil {
 		return
 	}
-	err = compiled.Run()
+	err = program.Run()
 	return
 }
 
 // RunContext is like Run but includes a context.
-func (s *Script) RunContext(ctx context.Context) (compiled *Compiled, err error) {
-	compiled, err = s.Compile()
+func (s *Script) RunContext(ctx context.Context) (program *Program, err error) {
+	program, err = s.Compile()
 	if err != nil {
 		return
 	}
-	err = compiled.RunContext(ctx)
+	err = program.RunContext(ctx)
 	return
 }
 
-func (s *Script) prepCompile() (
-	symbolTable *SymbolTable,
-	globals []Object,
-	err error,
-) {
+func (s *Script) prepCompile() (symbolTable *SymbolTable, globals []Object, err error) {
 	var names []string
 	for name := range s.variables {
 		names = append(names, name)
@@ -190,31 +187,83 @@ func (s *Script) prepCompile() (
 	return
 }
 
-// Compiled is a compiled instance of the user script. Use Script.Compile() to
+// Program is a compiled instance of the user script. Use Script.Compile() to
 // create Compiled object.
-type Compiled struct {
-	globalIndexes map[string]int // global symbol name to index
+type Program struct {
+	globalIndices map[string]int
 	bytecode      *Bytecode
 	globals       []Object
 	maxAllocs     int64
 	lock          sync.RWMutex
 }
 
-// Run executes the compiled script in the virtual machine.
-func (c *Compiled) Run() error {
-	c.lock.Lock()
-	defer c.lock.Unlock()
+// Decode deserializes the Program from a byte slice.
+func (p *Program) Decode(r io.Reader, modules *ModuleMap) error {
+	p.lock.Lock()
+	defer p.lock.Unlock()
 
-	v := NewVM(context.Background(), c.bytecode, c.globals, c.maxAllocs)
+	p.globalIndices = make(map[string]int)
+	dec := gob.NewDecoder(r)
+	err := dec.Decode(&p.globalIndices)
+	if err != nil {
+		return err
+	}
+	err = dec.Decode(&p.globals)
+	if err != nil {
+		return err
+	}
+	err = dec.Decode(&p.maxAllocs)
+	if err != nil {
+		return err
+	}
+	p.bytecode = &Bytecode{}
+	err = p.bytecode.Decode(r, modules)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// Encode serializes the Program into a byte slice.
+func (p *Program) Encode(w io.Writer) error {
+	p.lock.RLock()
+	defer p.lock.RUnlock()
+	enc := gob.NewEncoder(w)
+
+	err := enc.Encode(p.globalIndices)
+	if err != nil {
+		return err
+	}
+	err = enc.Encode(p.globals)
+	if err != nil {
+		return err
+	}
+	err = enc.Encode(p.maxAllocs)
+	if err != nil {
+		return err
+	}
+	err = p.bytecode.Encode(w)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// Run executes the compiled script in the virtual machine.
+func (p *Program) Run() error {
+	p.lock.Lock()
+	defer p.lock.Unlock()
+
+	v := NewVM(context.Background(), p.bytecode, p.globals, p.maxAllocs)
 	return v.Run()
 }
 
 // RunContext is like Run but includes a context.
-func (c *Compiled) RunContext(ctx context.Context) (err error) {
-	c.lock.Lock()
-	defer c.lock.Unlock()
+func (p *Program) RunContext(ctx context.Context) (err error) {
+	p.lock.Lock()
+	defer p.lock.Unlock()
 
-	v := NewVM(ctx, c.bytecode, c.globals, c.maxAllocs)
+	v := NewVM(ctx, p.bytecode, p.globals, p.maxAllocs)
 	ch := make(chan error, 1)
 	go func() {
 		ch <- v.Run()
@@ -232,18 +281,18 @@ func (c *Compiled) RunContext(ctx context.Context) (err error) {
 
 // Clone creates a new copy of Compiled. Cloned copies are safe for concurrent
 // use by multiple goroutines.
-func (c *Compiled) Clone() *Compiled {
-	c.lock.Lock()
-	defer c.lock.Unlock()
+func (p *Program) Clone() *Program {
+	p.lock.Lock()
+	defer p.lock.Unlock()
 
-	clone := &Compiled{
-		globalIndexes: c.globalIndexes,
-		bytecode:      c.bytecode,
-		globals:       make([]Object, len(c.globals)),
-		maxAllocs:     c.maxAllocs,
+	clone := &Program{
+		globalIndices: p.globalIndices,
+		bytecode:      p.bytecode,
+		globals:       make([]Object, len(p.globals)),
+		maxAllocs:     p.maxAllocs,
 	}
 	// copy global objects
-	for idx, g := range c.globals {
+	for idx, g := range p.globals {
 		if g != nil {
 			clone.globals[idx] = g
 		}
@@ -253,15 +302,15 @@ func (c *Compiled) Clone() *Compiled {
 
 // IsDefined returns true if the variable name is defined (has value) before or
 // after the execution.
-func (c *Compiled) IsDefined(name string) bool {
-	c.lock.RLock()
-	defer c.lock.RUnlock()
+func (p *Program) IsDefined(name string) bool {
+	p.lock.RLock()
+	defer p.lock.RUnlock()
 
-	idx, ok := c.globalIndexes[name]
+	idx, ok := p.globalIndices[name]
 	if !ok {
 		return false
 	}
-	v := c.globals[idx]
+	v := p.globals[idx]
 	if v == nil {
 		return false
 	}
@@ -269,13 +318,13 @@ func (c *Compiled) IsDefined(name string) bool {
 }
 
 // Get returns a variable identified by the name.
-func (c *Compiled) Get(name string) *Variable {
-	c.lock.RLock()
-	defer c.lock.RUnlock()
+func (p *Program) Get(name string) *Variable {
+	p.lock.RLock()
+	defer p.lock.RUnlock()
 
 	value := UndefinedValue
-	if idx, ok := c.globalIndexes[name]; ok {
-		value = c.globals[idx]
+	if idx, ok := p.globalIndices[name]; ok {
+		value = p.globals[idx]
 		if value == nil {
 			value = UndefinedValue
 		}
@@ -287,13 +336,13 @@ func (c *Compiled) Get(name string) *Variable {
 }
 
 // GetAll returns all the variables that are defined by the compiled script.
-func (c *Compiled) GetAll() []*Variable {
-	c.lock.RLock()
-	defer c.lock.RUnlock()
+func (p *Program) GetAll() []*Variable {
+	p.lock.RLock()
+	defer p.lock.RUnlock()
 
 	var vars []*Variable
-	for name, idx := range c.globalIndexes {
-		value := c.globals[idx]
+	for name, idx := range p.globalIndices {
+		value := p.globals[idx]
 		if value == nil {
 			value = UndefinedValue
 		}
@@ -307,18 +356,48 @@ func (c *Compiled) GetAll() []*Variable {
 
 // Set replaces the value of a global variable identified by the name. An error
 // will be returned if the name was not defined during compilation.
-func (c *Compiled) Set(name string, value interface{}) error {
-	c.lock.Lock()
-	defer c.lock.Unlock()
+func (p *Program) Set(name string, value interface{}) error {
+	p.lock.Lock()
+	defer p.lock.Unlock()
 
 	obj, err := FromInterface(value)
 	if err != nil {
 		return err
 	}
-	idx, ok := c.globalIndexes[name]
+	idx, ok := p.globalIndices[name]
 	if !ok {
 		return fmt.Errorf("'%s' is not defined", name)
 	}
-	c.globals[idx] = obj
+	p.globals[idx] = obj
 	return nil
+}
+
+// Equals compares two Program objects for equality.
+func (p *Program) Equals(other *Program) bool {
+	p.lock.RLock()
+	defer p.lock.RUnlock()
+
+	if len(p.globalIndices) != len(other.globalIndices) {
+		return false
+	}
+	for k, v := range p.globalIndices {
+		if ov, ok := other.globalIndices[k]; !ok || v != ov {
+			return false
+		}
+	}
+	if len(p.globals) != len(other.globals) {
+		return false
+	}
+	for i, v := range p.globals {
+		if ov := other.globals[i]; v != ov {
+			return false
+		}
+	}
+	if p.maxAllocs != other.maxAllocs {
+		return false
+	}
+	if !p.bytecode.Equals(other.bytecode) {
+		return false
+	}
+	return true
 }

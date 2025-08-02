@@ -26,7 +26,6 @@ func (p SourceFilePos) IsValid() bool {
 //	line                valid position without file name and no column (column == 0)
 //	file                invalid position with file name
 //	-                   invalid position without file name
-//
 func (p SourceFilePos) String() string {
 	s := p.Filename
 	if p.IsValid() {
@@ -46,9 +45,8 @@ func (p SourceFilePos) String() string {
 
 // SourceFileSet represents a set of source files.
 type SourceFileSet struct {
-	Base     int           // base offset for the next file
-	Files    []*SourceFile // list of files in the order added to the set
-	LastFile *SourceFile   // cache of last file looked up
+	Base  int           // base offset for the next file
+	Files []*SourceFile // list of files in the order added to the set
 }
 
 // NewFileSet creates a new file set.
@@ -56,6 +54,22 @@ func NewFileSet() *SourceFileSet {
 	return &SourceFileSet{
 		Base: 1, // 0 == NoPos
 	}
+}
+
+// Equals returns true if the file set is equal to another file set.
+func (s *SourceFileSet) Equals(other *SourceFileSet) bool {
+	if s == other {
+		return true
+	}
+	if s.Base != other.Base || len(s.Files) != len(other.Files) {
+		return false
+	}
+	for i, f := range s.Files {
+		if !f.Equals(other.Files[i]) {
+			return false
+		}
+	}
+	return true
 }
 
 // AddFile adds a new file in the file set.
@@ -81,7 +95,6 @@ func (s *SourceFileSet) AddFile(filename string, base, size int) *SourceFile {
 	// add the file to the file set
 	s.Base = base
 	s.Files = append(s.Files, f)
-	s.LastFile = f
 	return f
 }
 
@@ -106,7 +119,7 @@ func (s *SourceFileSet) Position(p Pos) (pos SourceFilePos) {
 
 func (s *SourceFileSet) file(p Pos) *SourceFile {
 	// common case: p is in last file
-	f := s.LastFile
+	f := s.Files[len(s.Files)-1]
 	if f != nil && f.Base <= int(p) && int(p) <= f.Base+f.Size {
 		return f
 	}
@@ -117,7 +130,6 @@ func (s *SourceFileSet) file(p Pos) *SourceFile {
 
 		// f.base <= int(p) by definition of searchFiles
 		if int(p) <= f.Base+f.Size {
-			s.LastFile = f // race is ok - s.last is only a cache
 			return f
 		}
 	}
@@ -141,6 +153,23 @@ type SourceFile struct {
 	// Lines contains the offset of the first character for each line
 	// (the first entry is always 0)
 	Lines []int
+}
+
+// Equals returns true if the source file is equal to another source file.
+func (f *SourceFile) Equals(other *SourceFile) bool {
+	if f == other {
+		return true
+	}
+	if f.Name != other.Name || f.Base != other.Base || f.Size != other.Size ||
+		len(f.Lines) != len(other.Lines) {
+		return false
+	}
+	for i, line := range f.Lines {
+		if line != other.Lines[i] {
+			return false
+		}
+	}
+	return true
 }
 
 // Set returns SourceFileSet.

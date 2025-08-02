@@ -70,11 +70,7 @@ func IsType(
 }
 
 // Equal asserts expected and actual are equal.
-func Equal(
-	t *testing.T,
-	expected, actual interface{},
-	msg ...interface{},
-) {
+func Equal(t *testing.T, expected, actual interface{}, msg ...interface{}) {
 	if isNil(expected) {
 		Nil(t, actual, "expected nil, but got not nil")
 		return
@@ -177,15 +173,19 @@ func Equal(
 			failExpectedActual(t, expected, actual, msg...)
 		}
 	case *parser.SourceFileSet:
-		equalFileSet(t, expected, actual.(*parser.SourceFileSet), msg...)
+		if !expected.Equals(actual.(*parser.SourceFileSet)) {
+			failExpectedActual(t, expected, actual, msg...)
+		}
 	case *parser.SourceFile:
-		Equal(t, expected.Name, actual.(*parser.SourceFile).Name, msg...)
-		Equal(t, expected.Base, actual.(*parser.SourceFile).Base, msg...)
-		Equal(t, expected.Size, actual.(*parser.SourceFile).Size, msg...)
-		True(t, equalIntSlice(expected.Lines,
-			actual.(*parser.SourceFile).Lines), msg...)
+		if !expected.Equals(actual.(*parser.SourceFile)) {
+			failExpectedActual(t, expected, actual, msg...)
+		}
 	case error:
 		if expected != actual.(error) {
+			failExpectedActual(t, expected, actual, msg...)
+		}
+	case *vvm.Program:
+		if !expected.Equals(actual.(*vvm.Program)) {
 			failExpectedActual(t, expected, actual, msg...)
 		}
 	default:
@@ -268,19 +268,6 @@ func equalObjectSlice(
 	for i := 0; i < len(expected); i++ {
 		Equal(t, expected[i], actual[i], msg...)
 	}
-}
-
-func equalFileSet(
-	t *testing.T,
-	expected, actual *parser.SourceFileSet,
-	msg ...interface{},
-) {
-	Equal(t, len(expected.Files), len(actual.Files), msg...)
-	for i, f := range expected.Files {
-		Equal(t, f, actual.Files[i], msg...)
-	}
-	Equal(t, expected.Base, actual.Base)
-	Equal(t, expected.LastFile, actual.LastFile)
 }
 
 func equalObjectMap(

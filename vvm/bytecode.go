@@ -16,6 +16,35 @@ type Bytecode struct {
 	Constants    []Object
 }
 
+// Equals compares two Bytecode instances for equality.
+func (b *Bytecode) Equals(other *Bytecode) bool {
+	if b == nil || other == nil {
+		return b == other
+	}
+	if !b.FileSet.Equals(other.FileSet) {
+		return false
+	}
+	f1 := FormatInstructions(b.MainFunction.Instructions, 0)
+	f2 := FormatInstructions(other.MainFunction.Instructions, 0)
+	if len(f1) != len(f2) {
+		return false
+	}
+	for i, l1 := range f1 {
+		if l1 != f2[i] {
+			return false
+		}
+	}
+	if len(b.Constants) != len(other.Constants) {
+		return false
+	}
+	for i, c := range b.Constants {
+		if !c.Equals(other.Constants[i]) {
+			return false
+		}
+	}
+	return true
+}
+
 // Encode writes Bytecode data to the writer.
 func (b *Bytecode) Encode(w io.Writer) error {
 	enc := gob.NewEncoder(w)
