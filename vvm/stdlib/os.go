@@ -44,158 +44,158 @@ var osModule = map[string]vvm.Object{
 		Value:     osArgs,
 		NeedVMObj: true,
 	}, // args() => array(string)
-	"chdir": &vvm.UserFunction{
+	"chdir": &vvm.BuiltinFunction{
 		Name:  "chdir",
 		Value: FuncASRE(os.Chdir),
 	}, // chdir(dir string) => error
 	"chmod": osFuncASFmRE("chmod", os.Chmod), // chmod(name string, mode int) => error
-	"chown": &vvm.UserFunction{
+	"chown": &vvm.BuiltinFunction{
 		Name:  "chown",
 		Value: FuncASIIRE(os.Chown),
 	}, // chown(name string, uid int, gid int) => error
-	"clearenv": &vvm.UserFunction{
+	"clearenv": &vvm.BuiltinFunction{
 		Name:  "clearenv",
 		Value: FuncAR(os.Clearenv),
 	}, // clearenv()
-	"environ": &vvm.UserFunction{
+	"environ": &vvm.BuiltinFunction{
 		Name:  "environ",
 		Value: FuncARSs(os.Environ),
 	}, // environ() => array(string)
-	"exit": &vvm.UserFunction{
+	"exit": &vvm.BuiltinFunction{
 		Name:  "exit",
 		Value: FuncAIR(os.Exit),
 	}, // exit(code int)
-	"expand_env": &vvm.UserFunction{
+	"expand_env": &vvm.BuiltinFunction{
 		Name:  "expand_env",
 		Value: osExpandEnv,
 	}, // expand_env(s string) => string
-	"getegid": &vvm.UserFunction{
+	"getegid": &vvm.BuiltinFunction{
 		Name:  "getegid",
 		Value: FuncARI(os.Getegid),
 	}, // getegid() => int
-	"getenv": &vvm.UserFunction{
+	"getenv": &vvm.BuiltinFunction{
 		Name:  "getenv",
 		Value: FuncASRS(os.Getenv),
 	}, // getenv(s string) => string
-	"geteuid": &vvm.UserFunction{
+	"geteuid": &vvm.BuiltinFunction{
 		Name:  "geteuid",
 		Value: FuncARI(os.Geteuid),
 	}, // geteuid() => int
-	"getgid": &vvm.UserFunction{
+	"getgid": &vvm.BuiltinFunction{
 		Name:  "getgid",
 		Value: FuncARI(os.Getgid),
 	}, // getgid() => int
-	"getgroups": &vvm.UserFunction{
+	"getgroups": &vvm.BuiltinFunction{
 		Name:  "getgroups",
 		Value: FuncARIsE(os.Getgroups),
 	}, // getgroups() => array(string)/error
-	"getpagesize": &vvm.UserFunction{
+	"getpagesize": &vvm.BuiltinFunction{
 		Name:  "getpagesize",
 		Value: FuncARI(os.Getpagesize),
 	}, // getpagesize() => int
-	"getpid": &vvm.UserFunction{
+	"getpid": &vvm.BuiltinFunction{
 		Name:  "getpid",
 		Value: FuncARI(os.Getpid),
 	}, // getpid() => int
-	"getppid": &vvm.UserFunction{
+	"getppid": &vvm.BuiltinFunction{
 		Name:  "getppid",
 		Value: FuncARI(os.Getppid),
 	}, // getppid() => int
-	"getuid": &vvm.UserFunction{
+	"getuid": &vvm.BuiltinFunction{
 		Name:  "getuid",
 		Value: FuncARI(os.Getuid),
 	}, // getuid() => int
-	"getwd": &vvm.UserFunction{
+	"getwd": &vvm.BuiltinFunction{
 		Name:  "getwd",
 		Value: FuncARSE(os.Getwd),
 	}, // getwd() => string/error
-	"hostname": &vvm.UserFunction{
+	"hostname": &vvm.BuiltinFunction{
 		Name:  "hostname",
 		Value: FuncARSE(os.Hostname),
 	}, // hostname() => string/error
-	"lchown": &vvm.UserFunction{
+	"lchown": &vvm.BuiltinFunction{
 		Name:  "lchown",
 		Value: FuncASIIRE(os.Lchown),
 	}, // lchown(name string, uid int, gid int) => error
-	"link": &vvm.UserFunction{
+	"link": &vvm.BuiltinFunction{
 		Name:  "link",
 		Value: FuncASSRE(os.Link),
 	}, // link(oldname string, newname string) => error
-	"lookup_env": &vvm.UserFunction{
+	"lookup_env": &vvm.BuiltinFunction{
 		Name:  "lookup_env",
 		Value: osLookupEnv,
 	}, // lookup_env(key string) => string/false
 	"mkdir":     osFuncASFmRE("mkdir", os.Mkdir),        // mkdir(name string, perm int) => error
 	"mkdir_all": osFuncASFmRE("mkdir_all", os.MkdirAll), // mkdir_all(name string, perm int) => error
-	"readlink": &vvm.UserFunction{
+	"readlink": &vvm.BuiltinFunction{
 		Name:  "readlink",
 		Value: FuncASRSE(os.Readlink),
 	}, // readlink(name string) => string/error
-	"remove": &vvm.UserFunction{
+	"remove": &vvm.BuiltinFunction{
 		Name:  "remove",
 		Value: FuncASRE(os.Remove),
 	}, // remove(name string) => error
-	"remove_all": &vvm.UserFunction{
+	"remove_all": &vvm.BuiltinFunction{
 		Name:  "remove_all",
 		Value: FuncASRE(os.RemoveAll),
 	}, // remove_all(name string) => error
-	"rename": &vvm.UserFunction{
+	"rename": &vvm.BuiltinFunction{
 		Name:  "rename",
 		Value: FuncASSRE(os.Rename),
 	}, // rename(oldpath string, newpath string) => error
-	"setenv": &vvm.UserFunction{
+	"setenv": &vvm.BuiltinFunction{
 		Name:  "setenv",
 		Value: FuncASSRE(os.Setenv),
 	}, // setenv(key string, value string) => error
-	"symlink": &vvm.UserFunction{
+	"symlink": &vvm.BuiltinFunction{
 		Name:  "symlink",
 		Value: FuncASSRE(os.Symlink),
 	}, // symlink(oldname string newname string) => error
-	"temp_dir": &vvm.UserFunction{
+	"temp_dir": &vvm.BuiltinFunction{
 		Name:  "temp_dir",
 		Value: FuncARS(os.TempDir),
 	}, // temp_dir() => string
-	"truncate": &vvm.UserFunction{
+	"truncate": &vvm.BuiltinFunction{
 		Name:  "truncate",
 		Value: FuncASI64RE(os.Truncate),
 	}, // truncate(name string, size int) => error
-	"unsetenv": &vvm.UserFunction{
+	"unsetenv": &vvm.BuiltinFunction{
 		Name:  "unsetenv",
 		Value: FuncASRE(os.Unsetenv),
 	}, // unsetenv(key string) => error
-	"create": &vvm.UserFunction{
+	"create": &vvm.BuiltinFunction{
 		Name:  "create",
 		Value: osCreate,
 	}, // create(name string) => imap(file)/error
-	"open": &vvm.UserFunction{
+	"open": &vvm.BuiltinFunction{
 		Name:  "open",
 		Value: osOpen,
 	}, // open(name string) => imap(file)/error
-	"open_file": &vvm.UserFunction{
+	"open_file": &vvm.BuiltinFunction{
 		Name:  "open_file",
 		Value: osOpenFile,
 	}, // open_file(name string, flag int, perm int) => imap(file)/error
-	"find_process": &vvm.UserFunction{
+	"find_process": &vvm.BuiltinFunction{
 		Name:  "find_process",
 		Value: osFindProcess,
 	}, // find_process(pid int) => imap(process)/error
-	"start_process": &vvm.UserFunction{
+	"start_process": &vvm.BuiltinFunction{
 		Name:  "start_process",
 		Value: osStartProcess,
 	}, // start_process(name string, argv array(string), dir string, env array(string)) => imap(process)/error
-	"exec_look_path": &vvm.UserFunction{
+	"exec_look_path": &vvm.BuiltinFunction{
 		Name:  "exec_look_path",
 		Value: FuncASRSE(exec.LookPath),
 	}, // exec_look_path(file) => string/error
-	"exec": &vvm.UserFunction{
+	"exec": &vvm.BuiltinFunction{
 		Name:  "exec",
 		Value: osExec,
 	}, // exec(name, args...) => command
-	"stat": &vvm.UserFunction{
+	"stat": &vvm.BuiltinFunction{
 		Name:  "stat",
 		Value: osStat,
 	}, // stat(name) => imap(fileinfo)/error
-	"read_file": &vvm.UserFunction{
+	"read_file": &vvm.BuiltinFunction{
 		Name:  "read_file",
 		Value: osReadFile,
 	}, // readfile(name) => array(byte)/error
@@ -347,8 +347,8 @@ func osArgs(args ...vvm.Object) (vvm.Object, error) {
 func osFuncASFmRE(
 	name string,
 	fn func(string, os.FileMode) error,
-) *vvm.UserFunction {
-	return &vvm.UserFunction{
+) *vvm.BuiltinFunction {
+	return &vvm.BuiltinFunction{
 		Name: name,
 		Value: func(args ...vvm.Object) (vvm.Object, error) {
 			if len(args) != 2 {

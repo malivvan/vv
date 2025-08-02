@@ -10,52 +10,52 @@ func makeOSFile(file *os.File) *vvm.ImmutableMap {
 	return &vvm.ImmutableMap{
 		Value: map[string]vvm.Object{
 			// chdir() => true/error
-			"chdir": &vvm.UserFunction{
+			"chdir": &vvm.BuiltinFunction{
 				Name:  "chdir",
 				Value: FuncARE(file.Chdir),
 			}, //
 			// chown(uid int, gid int) => true/error
-			"chown": &vvm.UserFunction{
+			"chown": &vvm.BuiltinFunction{
 				Name:  "chown",
 				Value: FuncAIIRE(file.Chown),
 			}, //
 			// close() => error
-			"close": &vvm.UserFunction{
+			"close": &vvm.BuiltinFunction{
 				Name:  "close",
 				Value: FuncARE(file.Close),
 			}, //
 			// name() => string
-			"name": &vvm.UserFunction{
+			"name": &vvm.BuiltinFunction{
 				Name:  "name",
 				Value: FuncARS(file.Name),
 			}, //
 			// readdirnames(n int) => array(string)/error
-			"readdirnames": &vvm.UserFunction{
+			"readdirnames": &vvm.BuiltinFunction{
 				Name:  "readdirnames",
 				Value: FuncAIRSsE(file.Readdirnames),
 			}, //
 			// sync() => error
-			"sync": &vvm.UserFunction{
+			"sync": &vvm.BuiltinFunction{
 				Name:  "sync",
 				Value: FuncARE(file.Sync),
 			}, //
 			// write(bytes) => int/error
-			"write": &vvm.UserFunction{
+			"write": &vvm.BuiltinFunction{
 				Name:  "write",
 				Value: FuncAYRIE(file.Write),
 			}, //
 			// write(string) => int/error
-			"write_string": &vvm.UserFunction{
+			"write_string": &vvm.BuiltinFunction{
 				Name:  "write_string",
 				Value: FuncASRIE(file.WriteString),
 			}, //
 			// read(bytes) => int/error
-			"read": &vvm.UserFunction{
+			"read": &vvm.BuiltinFunction{
 				Name:  "read",
 				Value: FuncAYRIE(file.Read),
 			}, //
 			// chmod(mode int) => error
-			"chmod": &vvm.UserFunction{
+			"chmod": &vvm.BuiltinFunction{
 				Name: "chmod",
 				Value: func(args ...vvm.Object) (vvm.Object, error) {
 					if len(args) != 1 {
@@ -73,7 +73,7 @@ func makeOSFile(file *os.File) *vvm.ImmutableMap {
 				},
 			},
 			// seek(offset int, whence int) => int/error
-			"seek": &vvm.UserFunction{
+			"seek": &vvm.BuiltinFunction{
 				Name: "seek",
 				Value: func(args ...vvm.Object) (vvm.Object, error) {
 					if len(args) != 2 {
@@ -103,7 +103,7 @@ func makeOSFile(file *os.File) *vvm.ImmutableMap {
 				},
 			},
 			// stat() => imap(fileinfo)/error
-			"stat": &vvm.UserFunction{
+			"stat": &vvm.BuiltinFunction{
 				Name: "stat",
 				Value: func(args ...vvm.Object) (vvm.Object, error) {
 					if len(args) != 0 {

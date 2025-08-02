@@ -18,215 +18,215 @@ var mathModule = map[string]vvm.Object{
 	"log2E":   &vvm.Float{Value: math.Log2E},
 	"ln10":    &vvm.Float{Value: math.Ln10},
 	"log10E":  &vvm.Float{Value: math.Log10E},
-	"abs": &vvm.UserFunction{
+	"abs": &vvm.BuiltinFunction{
 		Name:  "abs",
 		Value: FuncAFRF(math.Abs),
 	},
-	"acos": &vvm.UserFunction{
+	"acos": &vvm.BuiltinFunction{
 		Name:  "acos",
 		Value: FuncAFRF(math.Acos),
 	},
-	"acosh": &vvm.UserFunction{
+	"acosh": &vvm.BuiltinFunction{
 		Name:  "acosh",
 		Value: FuncAFRF(math.Acosh),
 	},
-	"asin": &vvm.UserFunction{
+	"asin": &vvm.BuiltinFunction{
 		Name:  "asin",
 		Value: FuncAFRF(math.Asin),
 	},
-	"asinh": &vvm.UserFunction{
+	"asinh": &vvm.BuiltinFunction{
 		Name:  "asinh",
 		Value: FuncAFRF(math.Asinh),
 	},
-	"atan": &vvm.UserFunction{
+	"atan": &vvm.BuiltinFunction{
 		Name:  "atan",
 		Value: FuncAFRF(math.Atan),
 	},
-	"atan2": &vvm.UserFunction{
+	"atan2": &vvm.BuiltinFunction{
 		Name:  "atan2",
 		Value: FuncAFFRF(math.Atan2),
 	},
-	"atanh": &vvm.UserFunction{
+	"atanh": &vvm.BuiltinFunction{
 		Name:  "atanh",
 		Value: FuncAFRF(math.Atanh),
 	},
-	"cbrt": &vvm.UserFunction{
+	"cbrt": &vvm.BuiltinFunction{
 		Name:  "cbrt",
 		Value: FuncAFRF(math.Cbrt),
 	},
-	"ceil": &vvm.UserFunction{
+	"ceil": &vvm.BuiltinFunction{
 		Name:  "ceil",
 		Value: FuncAFRF(math.Ceil),
 	},
-	"copysign": &vvm.UserFunction{
+	"copysign": &vvm.BuiltinFunction{
 		Name:  "copysign",
 		Value: FuncAFFRF(math.Copysign),
 	},
-	"cos": &vvm.UserFunction{
+	"cos": &vvm.BuiltinFunction{
 		Name:  "cos",
 		Value: FuncAFRF(math.Cos),
 	},
-	"cosh": &vvm.UserFunction{
+	"cosh": &vvm.BuiltinFunction{
 		Name:  "cosh",
 		Value: FuncAFRF(math.Cosh),
 	},
-	"dim": &vvm.UserFunction{
+	"dim": &vvm.BuiltinFunction{
 		Name:  "dim",
 		Value: FuncAFFRF(math.Dim),
 	},
-	"erf": &vvm.UserFunction{
+	"erf": &vvm.BuiltinFunction{
 		Name:  "erf",
 		Value: FuncAFRF(math.Erf),
 	},
-	"erfc": &vvm.UserFunction{
+	"erfc": &vvm.BuiltinFunction{
 		Name:  "erfc",
 		Value: FuncAFRF(math.Erfc),
 	},
-	"exp": &vvm.UserFunction{
+	"exp": &vvm.BuiltinFunction{
 		Name:  "exp",
 		Value: FuncAFRF(math.Exp),
 	},
-	"exp2": &vvm.UserFunction{
+	"exp2": &vvm.BuiltinFunction{
 		Name:  "exp2",
 		Value: FuncAFRF(math.Exp2),
 	},
-	"expm1": &vvm.UserFunction{
+	"expm1": &vvm.BuiltinFunction{
 		Name:  "expm1",
 		Value: FuncAFRF(math.Expm1),
 	},
-	"floor": &vvm.UserFunction{
+	"floor": &vvm.BuiltinFunction{
 		Name:  "floor",
 		Value: FuncAFRF(math.Floor),
 	},
-	"gamma": &vvm.UserFunction{
+	"gamma": &vvm.BuiltinFunction{
 		Name:  "gamma",
 		Value: FuncAFRF(math.Gamma),
 	},
-	"hypot": &vvm.UserFunction{
+	"hypot": &vvm.BuiltinFunction{
 		Name:  "hypot",
 		Value: FuncAFFRF(math.Hypot),
 	},
-	"ilogb": &vvm.UserFunction{
+	"ilogb": &vvm.BuiltinFunction{
 		Name:  "ilogb",
 		Value: FuncAFRI(math.Ilogb),
 	},
-	"inf": &vvm.UserFunction{
+	"inf": &vvm.BuiltinFunction{
 		Name:  "inf",
 		Value: FuncAIRF(math.Inf),
 	},
-	"is_inf": &vvm.UserFunction{
+	"is_inf": &vvm.BuiltinFunction{
 		Name:  "is_inf",
 		Value: FuncAFIRB(math.IsInf),
 	},
-	"is_nan": &vvm.UserFunction{
+	"is_nan": &vvm.BuiltinFunction{
 		Name:  "is_nan",
 		Value: FuncAFRB(math.IsNaN),
 	},
-	"j0": &vvm.UserFunction{
+	"j0": &vvm.BuiltinFunction{
 		Name:  "j0",
 		Value: FuncAFRF(math.J0),
 	},
-	"j1": &vvm.UserFunction{
+	"j1": &vvm.BuiltinFunction{
 		Name:  "j1",
 		Value: FuncAFRF(math.J1),
 	},
-	"jn": &vvm.UserFunction{
+	"jn": &vvm.BuiltinFunction{
 		Name:  "jn",
 		Value: FuncAIFRF(math.Jn),
 	},
-	"ldexp": &vvm.UserFunction{
+	"ldexp": &vvm.BuiltinFunction{
 		Name:  "ldexp",
 		Value: FuncAFIRF(math.Ldexp),
 	},
-	"log": &vvm.UserFunction{
+	"log": &vvm.BuiltinFunction{
 		Name:  "log",
 		Value: FuncAFRF(math.Log),
 	},
-	"log10": &vvm.UserFunction{
+	"log10": &vvm.BuiltinFunction{
 		Name:  "log10",
 		Value: FuncAFRF(math.Log10),
 	},
-	"log1p": &vvm.UserFunction{
+	"log1p": &vvm.BuiltinFunction{
 		Name:  "log1p",
 		Value: FuncAFRF(math.Log1p),
 	},
-	"log2": &vvm.UserFunction{
+	"log2": &vvm.BuiltinFunction{
 		Name:  "log2",
 		Value: FuncAFRF(math.Log2),
 	},
-	"logb": &vvm.UserFunction{
+	"logb": &vvm.BuiltinFunction{
 		Name:  "logb",
 		Value: FuncAFRF(math.Logb),
 	},
-	"max": &vvm.UserFunction{
+	"max": &vvm.BuiltinFunction{
 		Name:  "max",
 		Value: FuncAFFRF(math.Max),
 	},
-	"min": &vvm.UserFunction{
+	"min": &vvm.BuiltinFunction{
 		Name:  "min",
 		Value: FuncAFFRF(math.Min),
 	},
-	"mod": &vvm.UserFunction{
+	"mod": &vvm.BuiltinFunction{
 		Name:  "mod",
 		Value: FuncAFFRF(math.Mod),
 	},
-	"nan": &vvm.UserFunction{
+	"nan": &vvm.BuiltinFunction{
 		Name:  "nan",
 		Value: FuncARF(math.NaN),
 	},
-	"nextafter": &vvm.UserFunction{
+	"nextafter": &vvm.BuiltinFunction{
 		Name:  "nextafter",
 		Value: FuncAFFRF(math.Nextafter),
 	},
-	"pow": &vvm.UserFunction{
+	"pow": &vvm.BuiltinFunction{
 		Name:  "pow",
 		Value: FuncAFFRF(math.Pow),
 	},
-	"pow10": &vvm.UserFunction{
+	"pow10": &vvm.BuiltinFunction{
 		Name:  "pow10",
 		Value: FuncAIRF(math.Pow10),
 	},
-	"remainder": &vvm.UserFunction{
+	"remainder": &vvm.BuiltinFunction{
 		Name:  "remainder",
 		Value: FuncAFFRF(math.Remainder),
 	},
-	"signbit": &vvm.UserFunction{
+	"signbit": &vvm.BuiltinFunction{
 		Name:  "signbit",
 		Value: FuncAFRB(math.Signbit),
 	},
-	"sin": &vvm.UserFunction{
+	"sin": &vvm.BuiltinFunction{
 		Name:  "sin",
 		Value: FuncAFRF(math.Sin),
 	},
-	"sinh": &vvm.UserFunction{
+	"sinh": &vvm.BuiltinFunction{
 		Name:  "sinh",
 		Value: FuncAFRF(math.Sinh),
 	},
-	"sqrt": &vvm.UserFunction{
+	"sqrt": &vvm.BuiltinFunction{
 		Name:  "sqrt",
 		Value: FuncAFRF(math.Sqrt),
 	},
-	"tan": &vvm.UserFunction{
+	"tan": &vvm.BuiltinFunction{
 		Name:  "tan",
 		Value: FuncAFRF(math.Tan),
 	},
-	"tanh": &vvm.UserFunction{
+	"tanh": &vvm.BuiltinFunction{
 		Name:  "tanh",
 		Value: FuncAFRF(math.Tanh),
 	},
-	"trunc": &vvm.UserFunction{
+	"trunc": &vvm.BuiltinFunction{
 		Name:  "trunc",
 		Value: FuncAFRF(math.Trunc),
 	},
-	"y0": &vvm.UserFunction{
+	"y0": &vvm.BuiltinFunction{
 		Name:  "y0",
 		Value: FuncAFRF(math.Y0),
 	},
-	"y1": &vvm.UserFunction{
+	"y1": &vvm.BuiltinFunction{
 		Name:  "y1",
 		Value: FuncAFRF(math.Y1),
 	},
-	"yn": &vvm.UserFunction{
+	"yn": &vvm.BuiltinFunction{
 		Name:  "yn",
 		Value: FuncAIFRF(math.Yn),
 	},

@@ -561,7 +561,7 @@ func funcCall(
 	fn vvm.CallableFunc,
 	args ...vvm.Object,
 ) (vvm.Object, error) {
-	userFunc := &vvm.UserFunction{Value: fn}
+	userFunc := &vvm.BuiltinFunction{Value: fn}
 	return userFunc.Call(args...)
 }
 

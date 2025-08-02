@@ -6,7 +6,7 @@ import (
 )
 
 var cuiModule = map[string]vvm.Object{
-	"new": &vvm.UserFunction{
+	"new": &vvm.BuiltinFunction{
 		Value: func(args ...vvm.Object) (vvm.Object, error) {
 			app := cui.NewApplication()
 			txt := cui.NewTextView()

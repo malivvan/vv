@@ -118,7 +118,7 @@ func (c callres) call(funcName string, args ...interface{}) callres {
 				"function not found: %s", funcName)}
 		}
 
-		f, ok := m.(*vvm.UserFunction)
+		f, ok := m.(*vvm.BuiltinFunction)
 		if !ok {
 			return callres{t: c.t, e: fmt.Errorf(
 				"non-callable: %s", funcName)}
@@ -126,7 +126,7 @@ func (c callres) call(funcName string, args ...interface{}) callres {
 
 		res, err := f.Value(oargs...)
 		return callres{t: c.t, o: res, e: err}
-	case *vvm.UserFunction:
+	case *vvm.BuiltinFunction:
 		res, err := o.Value(oargs...)
 		return callres{t: c.t, o: res, e: err}
 	case *vvm.ImmutableMap:
@@ -135,7 +135,7 @@ func (c callres) call(funcName string, args ...interface{}) callres {
 			return callres{t: c.t, e: fmt.Errorf("function not found: %s", funcName)}
 		}
 
-		f, ok := m.(*vvm.UserFunction)
+		f, ok := m.(*vvm.BuiltinFunction)
 		if !ok {
 			return callres{t: c.t, e: fmt.Errorf("non-callable: %s", funcName)}
 		}

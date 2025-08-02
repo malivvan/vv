@@ -7,35 +7,35 @@ import (
 )
 
 var randModule = map[string]vvm.Object{
-	"int": &vvm.UserFunction{
+	"int": &vvm.BuiltinFunction{
 		Name:  "int",
 		Value: FuncARI64(rand.Int63),
 	},
-	"float": &vvm.UserFunction{
+	"float": &vvm.BuiltinFunction{
 		Name:  "float",
 		Value: FuncARF(rand.Float64),
 	},
-	"intn": &vvm.UserFunction{
+	"intn": &vvm.BuiltinFunction{
 		Name:  "intn",
 		Value: FuncAI64RI64(rand.Int63n),
 	},
-	"exp_float": &vvm.UserFunction{
+	"exp_float": &vvm.BuiltinFunction{
 		Name:  "exp_float",
 		Value: FuncARF(rand.ExpFloat64),
 	},
-	"norm_float": &vvm.UserFunction{
+	"norm_float": &vvm.BuiltinFunction{
 		Name:  "norm_float",
 		Value: FuncARF(rand.NormFloat64),
 	},
-	"perm": &vvm.UserFunction{
+	"perm": &vvm.BuiltinFunction{
 		Name:  "perm",
 		Value: FuncAIRIs(rand.Perm),
 	},
-	"seed": &vvm.UserFunction{
+	"seed": &vvm.BuiltinFunction{
 		Name:  "seed",
 		Value: FuncAI64R(rand.Seed),
 	},
-	"read": &vvm.UserFunction{
+	"read": &vvm.BuiltinFunction{
 		Name: "read",
 		Value: func(args ...vvm.Object) (ret vvm.Object, err error) {
 			if len(args) != 1 {
@@ -57,7 +57,7 @@ var randModule = map[string]vvm.Object{
 			return &vvm.Int{Value: int64(res)}, nil
 		},
 	},
-	"rand": &vvm.UserFunction{
+	"rand": &vvm.BuiltinFunction{
 		Name: "rand",
 		Value: func(args ...vvm.Object) (vvm.Object, error) {
 			if len(args) != 1 {
@@ -80,35 +80,35 @@ var randModule = map[string]vvm.Object{
 func randRand(r *rand.Rand) *vvm.ImmutableMap {
 	return &vvm.ImmutableMap{
 		Value: map[string]vvm.Object{
-			"int": &vvm.UserFunction{
+			"int": &vvm.BuiltinFunction{
 				Name:  "int",
 				Value: FuncARI64(r.Int63),
 			},
-			"float": &vvm.UserFunction{
+			"float": &vvm.BuiltinFunction{
 				Name:  "float",
 				Value: FuncARF(r.Float64),
 			},
-			"intn": &vvm.UserFunction{
+			"intn": &vvm.BuiltinFunction{
 				Name:  "intn",
 				Value: FuncAI64RI64(r.Int63n),
 			},
-			"exp_float": &vvm.UserFunction{
+			"exp_float": &vvm.BuiltinFunction{
 				Name:  "exp_float",
 				Value: FuncARF(r.ExpFloat64),
 			},
-			"norm_float": &vvm.UserFunction{
+			"norm_float": &vvm.BuiltinFunction{
 				Name:  "norm_float",
 				Value: FuncARF(r.NormFloat64),
 			},
-			"perm": &vvm.UserFunction{
+			"perm": &vvm.BuiltinFunction{
 				Name:  "perm",
 				Value: FuncAIRIs(r.Perm),
 			},
-			"seed": &vvm.UserFunction{
+			"seed": &vvm.BuiltinFunction{
 				Name:  "seed",
 				Value: FuncAI64R(r.Seed),
 			},
-			"read": &vvm.UserFunction{
+			"read": &vvm.BuiltinFunction{
 				Name: "read",
 				Value: func(args ...vvm.Object) (
 					ret vvm.Object,

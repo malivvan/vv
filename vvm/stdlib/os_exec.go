@@ -10,32 +10,32 @@ func makeOSExecCommand(cmd *exec.Cmd) *vvm.ImmutableMap {
 	return &vvm.ImmutableMap{
 		Value: map[string]vvm.Object{
 			// combined_output() => bytes/error
-			"combined_output": &vvm.UserFunction{
+			"combined_output": &vvm.BuiltinFunction{
 				Name:  "combined_output",
 				Value: FuncARYE(cmd.CombinedOutput),
 			},
 			// output() => bytes/error
-			"output": &vvm.UserFunction{
+			"output": &vvm.BuiltinFunction{
 				Name:  "output",
 				Value: FuncARYE(cmd.Output),
 			}, //
 			// run() => error
-			"run": &vvm.UserFunction{
+			"run": &vvm.BuiltinFunction{
 				Name:  "run",
 				Value: FuncARE(cmd.Run),
 			}, //
 			// start() => error
-			"start": &vvm.UserFunction{
+			"start": &vvm.BuiltinFunction{
 				Name:  "start",
 				Value: FuncARE(cmd.Start),
 			}, //
 			// wait() => error
-			"wait": &vvm.UserFunction{
+			"wait": &vvm.BuiltinFunction{
 				Name:  "wait",
 				Value: FuncARE(cmd.Wait),
 			}, //
 			// set_path(path string)
-			"set_path": &vvm.UserFunction{
+			"set_path": &vvm.BuiltinFunction{
 				Name: "set_path",
 				Value: func(args ...vvm.Object) (vvm.Object, error) {
 					if len(args) != 1 {
@@ -54,7 +54,7 @@ func makeOSExecCommand(cmd *exec.Cmd) *vvm.ImmutableMap {
 				},
 			},
 			// set_dir(dir string)
-			"set_dir": &vvm.UserFunction{
+			"set_dir": &vvm.BuiltinFunction{
 				Name: "set_dir",
 				Value: func(args ...vvm.Object) (vvm.Object, error) {
 					if len(args) != 1 {
@@ -73,7 +73,7 @@ func makeOSExecCommand(cmd *exec.Cmd) *vvm.ImmutableMap {
 				},
 			},
 			// set_env(env array(string))
-			"set_env": &vvm.UserFunction{
+			"set_env": &vvm.BuiltinFunction{
 				Name: "set_env",
 				Value: func(args ...vvm.Object) (vvm.Object, error) {
 					if len(args) != 1 {
@@ -105,7 +105,7 @@ func makeOSExecCommand(cmd *exec.Cmd) *vvm.ImmutableMap {
 				},
 			},
 			// process() => imap(process)
-			"process": &vvm.UserFunction{
+			"process": &vvm.BuiltinFunction{
 				Name: "process",
 				Value: func(args ...vvm.Object) (vvm.Object, error) {
 					if len(args) != 0 {

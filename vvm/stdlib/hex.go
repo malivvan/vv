@@ -6,6 +6,6 @@ import (
 )
 
 var hexModule = map[string]vvm.Object{
-	"encode": &vvm.UserFunction{Value: FuncAYRS(hex.EncodeToString)},
-	"decode": &vvm.UserFunction{Value: FuncASRYE(hex.DecodeString)},
+	"encode": &vvm.BuiltinFunction{Value: FuncAYRS(hex.EncodeToString)},
+	"decode": &vvm.BuiltinFunction{Value: FuncASRYE(hex.DecodeString)},
 }

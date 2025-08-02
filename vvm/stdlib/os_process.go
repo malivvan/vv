@@ -10,19 +10,19 @@ import (
 func makeOSProcessState(state *os.ProcessState) *vvm.ImmutableMap {
 	return &vvm.ImmutableMap{
 		Value: map[string]vvm.Object{
-			"exited": &vvm.UserFunction{
+			"exited": &vvm.BuiltinFunction{
 				Name:  "exited",
 				Value: FuncARB(state.Exited),
 			},
-			"pid": &vvm.UserFunction{
+			"pid": &vvm.BuiltinFunction{
 				Name:  "pid",
 				Value: FuncARI(state.Pid),
 			},
-			"string": &vvm.UserFunction{
+			"string": &vvm.BuiltinFunction{
 				Name:  "string",
 				Value: FuncARS(state.String),
 			},
-			"success": &vvm.UserFunction{
+			"success": &vvm.BuiltinFunction{
 				Name:  "success",
 				Value: FuncARB(state.Success),
 			},
@@ -33,15 +33,15 @@ func makeOSProcessState(state *os.ProcessState) *vvm.ImmutableMap {
 func makeOSProcess(proc *os.Process) *vvm.ImmutableMap {
 	return &vvm.ImmutableMap{
 		Value: map[string]vvm.Object{
-			"kill": &vvm.UserFunction{
+			"kill": &vvm.BuiltinFunction{
 				Name:  "kill",
 				Value: FuncARE(proc.Kill),
 			},
-			"release": &vvm.UserFunction{
+			"release": &vvm.BuiltinFunction{
 				Name:  "release",
 				Value: FuncARE(proc.Release),
 			},
-			"signal": &vvm.UserFunction{
+			"signal": &vvm.BuiltinFunction{
 				Name: "signal",
 				Value: func(args ...vvm.Object) (vvm.Object, error) {
 					if len(args) != 1 {
@@ -58,7 +58,7 @@ func makeOSProcess(proc *os.Process) *vvm.ImmutableMap {
 					return wrapError(proc.Signal(syscall.Signal(i1))), nil
 				},
 			},
-			"wait": &vvm.UserFunction{
+			"wait": &vvm.BuiltinFunction{
 				Name: "wait",
 				Value: func(args ...vvm.Object) (vvm.Object, error) {
 					if len(args) != 0 {

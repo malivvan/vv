@@ -11,191 +11,191 @@ import (
 )
 
 var textModule = map[string]vvm.Object{
-	"re_match": &vvm.UserFunction{
+	"re_match": &vvm.BuiltinFunction{
 		Name:  "re_match",
 		Value: textREMatch,
 	}, // re_match(pattern, text) => bool/error
-	"re_find": &vvm.UserFunction{
+	"re_find": &vvm.BuiltinFunction{
 		Name:  "re_find",
 		Value: textREFind,
 	}, // re_find(pattern, text, count) => [[{text:,begin:,end:}]]/undefined
-	"re_replace": &vvm.UserFunction{
+	"re_replace": &vvm.BuiltinFunction{
 		Name:  "re_replace",
 		Value: textREReplace,
 	}, // re_replace(pattern, text, repl) => string/error
-	"re_split": &vvm.UserFunction{
+	"re_split": &vvm.BuiltinFunction{
 		Name:  "re_split",
 		Value: textRESplit,
 	}, // re_split(pattern, text, count) => [string]/error
-	"re_compile": &vvm.UserFunction{
+	"re_compile": &vvm.BuiltinFunction{
 		Name:  "re_compile",
 		Value: textRECompile,
 	}, // re_compile(pattern) => Regexp/error
-	"compare": &vvm.UserFunction{
+	"compare": &vvm.BuiltinFunction{
 		Name:  "compare",
 		Value: FuncASSRI(strings.Compare),
 	}, // compare(a, b) => int
-	"contains": &vvm.UserFunction{
+	"contains": &vvm.BuiltinFunction{
 		Name:  "contains",
 		Value: FuncASSRB(strings.Contains),
 	}, // contains(s, substr) => bool
-	"contains_any": &vvm.UserFunction{
+	"contains_any": &vvm.BuiltinFunction{
 		Name:  "contains_any",
 		Value: FuncASSRB(strings.ContainsAny),
 	}, // contains_any(s, chars) => bool
-	"count": &vvm.UserFunction{
+	"count": &vvm.BuiltinFunction{
 		Name:  "count",
 		Value: FuncASSRI(strings.Count),
 	}, // count(s, substr) => int
-	"equal_fold": &vvm.UserFunction{
+	"equal_fold": &vvm.BuiltinFunction{
 		Name:  "equal_fold",
 		Value: FuncASSRB(strings.EqualFold),
 	}, // "equal_fold(s, t) => bool
-	"fields": &vvm.UserFunction{
+	"fields": &vvm.BuiltinFunction{
 		Name:  "fields",
 		Value: FuncASRSs(strings.Fields),
 	}, // fields(s) => [string]
-	"has_prefix": &vvm.UserFunction{
+	"has_prefix": &vvm.BuiltinFunction{
 		Name:  "has_prefix",
 		Value: FuncASSRB(strings.HasPrefix),
 	}, // has_prefix(s, prefix) => bool
-	"has_suffix": &vvm.UserFunction{
+	"has_suffix": &vvm.BuiltinFunction{
 		Name:  "has_suffix",
 		Value: FuncASSRB(strings.HasSuffix),
 	}, // has_suffix(s, suffix) => bool
-	"index": &vvm.UserFunction{
+	"index": &vvm.BuiltinFunction{
 		Name:  "index",
 		Value: FuncASSRI(strings.Index),
 	}, // index(s, substr) => int
-	"index_any": &vvm.UserFunction{
+	"index_any": &vvm.BuiltinFunction{
 		Name:  "index_any",
 		Value: FuncASSRI(strings.IndexAny),
 	}, // index_any(s, chars) => int
-	"join": &vvm.UserFunction{
+	"join": &vvm.BuiltinFunction{
 		Name:  "join",
 		Value: textJoin,
 	}, // join(arr, sep) => string
-	"last_index": &vvm.UserFunction{
+	"last_index": &vvm.BuiltinFunction{
 		Name:  "last_index",
 		Value: FuncASSRI(strings.LastIndex),
 	}, // last_index(s, substr) => int
-	"last_index_any": &vvm.UserFunction{
+	"last_index_any": &vvm.BuiltinFunction{
 		Name:  "last_index_any",
 		Value: FuncASSRI(strings.LastIndexAny),
 	}, // last_index_any(s, chars) => int
-	"repeat": &vvm.UserFunction{
+	"repeat": &vvm.BuiltinFunction{
 		Name:  "repeat",
 		Value: textRepeat,
 	}, // repeat(s, count) => string
-	"replace": &vvm.UserFunction{
+	"replace": &vvm.BuiltinFunction{
 		Name:  "replace",
 		Value: textReplace,
 	}, // replace(s, old, new, n) => string
-	"substr": &vvm.UserFunction{
+	"substr": &vvm.BuiltinFunction{
 		Name:  "substr",
 		Value: textSubstring,
 	}, // substr(s, lower, upper) => string
-	"split": &vvm.UserFunction{
+	"split": &vvm.BuiltinFunction{
 		Name:  "split",
 		Value: FuncASSRSs(strings.Split),
 	}, // split(s, sep) => [string]
-	"split_after": &vvm.UserFunction{
+	"split_after": &vvm.BuiltinFunction{
 		Name:  "split_after",
 		Value: FuncASSRSs(strings.SplitAfter),
 	}, // split_after(s, sep) => [string]
-	"split_after_n": &vvm.UserFunction{
+	"split_after_n": &vvm.BuiltinFunction{
 		Name:  "split_after_n",
 		Value: FuncASSIRSs(strings.SplitAfterN),
 	}, // split_after_n(s, sep, n) => [string]
-	"split_n": &vvm.UserFunction{
+	"split_n": &vvm.BuiltinFunction{
 		Name:  "split_n",
 		Value: FuncASSIRSs(strings.SplitN),
 	}, // split_n(s, sep, n) => [string]
-	"title": &vvm.UserFunction{
+	"title": &vvm.BuiltinFunction{
 		Name:  "title",
 		Value: FuncASRS(strings.Title),
 	}, // title(s) => string
-	"to_lower": &vvm.UserFunction{
+	"to_lower": &vvm.BuiltinFunction{
 		Name:  "to_lower",
 		Value: FuncASRS(strings.ToLower),
 	}, // to_lower(s) => string
-	"to_title": &vvm.UserFunction{
+	"to_title": &vvm.BuiltinFunction{
 		Name:  "to_title",
 		Value: FuncASRS(strings.ToTitle),
 	}, // to_title(s) => string
-	"to_upper": &vvm.UserFunction{
+	"to_upper": &vvm.BuiltinFunction{
 		Name:  "to_upper",
 		Value: FuncASRS(strings.ToUpper),
 	}, // to_upper(s) => string
-	"pad_left": &vvm.UserFunction{
+	"pad_left": &vvm.BuiltinFunction{
 		Name:  "pad_left",
 		Value: textPadLeft,
 	}, // pad_left(s, pad_len, pad_with) => string
-	"pad_right": &vvm.UserFunction{
+	"pad_right": &vvm.BuiltinFunction{
 		Name:  "pad_right",
 		Value: textPadRight,
 	}, // pad_right(s, pad_len, pad_with) => string
-	"trim": &vvm.UserFunction{
+	"trim": &vvm.BuiltinFunction{
 		Name:  "trim",
 		Value: FuncASSRS(strings.Trim),
 	}, // trim(s, cutset) => string
-	"trim_left": &vvm.UserFunction{
+	"trim_left": &vvm.BuiltinFunction{
 		Name:  "trim_left",
 		Value: FuncASSRS(strings.TrimLeft),
 	}, // trim_left(s, cutset) => string
-	"trim_prefix": &vvm.UserFunction{
+	"trim_prefix": &vvm.BuiltinFunction{
 		Name:  "trim_prefix",
 		Value: FuncASSRS(strings.TrimPrefix),
 	}, // trim_prefix(s, prefix) => string
-	"trim_right": &vvm.UserFunction{
+	"trim_right": &vvm.BuiltinFunction{
 		Name:  "trim_right",
 		Value: FuncASSRS(strings.TrimRight),
 	}, // trim_right(s, cutset) => string
-	"trim_space": &vvm.UserFunction{
+	"trim_space": &vvm.BuiltinFunction{
 		Name:  "trim_space",
 		Value: FuncASRS(strings.TrimSpace),
 	}, // trim_space(s) => string
-	"trim_suffix": &vvm.UserFunction{
+	"trim_suffix": &vvm.BuiltinFunction{
 		Name:  "trim_suffix",
 		Value: FuncASSRS(strings.TrimSuffix),
 	}, // trim_suffix(s, suffix) => string
-	"atoi": &vvm.UserFunction{
+	"atoi": &vvm.BuiltinFunction{
 		Name:  "atoi",
 		Value: FuncASRIE(strconv.Atoi),
 	}, // atoi(str) => int/error
-	"format_bool": &vvm.UserFunction{
+	"format_bool": &vvm.BuiltinFunction{
 		Name:  "format_bool",
 		Value: textFormatBool,
 	}, // format_bool(b) => string
-	"format_float": &vvm.UserFunction{
+	"format_float": &vvm.BuiltinFunction{
 		Name:  "format_float",
 		Value: textFormatFloat,
 	}, // format_float(f, fmt, prec, bits) => string
-	"format_int": &vvm.UserFunction{
+	"format_int": &vvm.BuiltinFunction{
 		Name:  "format_int",
 		Value: textFormatInt,
 	}, // format_int(i, base) => string
-	"itoa": &vvm.UserFunction{
+	"itoa": &vvm.BuiltinFunction{
 		Name:  "itoa",
 		Value: FuncAIRS(strconv.Itoa),
 	}, // itoa(i) => string
-	"parse_bool": &vvm.UserFunction{
+	"parse_bool": &vvm.BuiltinFunction{
 		Name:  "parse_bool",
 		Value: textParseBool,
 	}, // parse_bool(str) => bool/error
-	"parse_float": &vvm.UserFunction{
+	"parse_float": &vvm.BuiltinFunction{
 		Name:  "parse_float",
 		Value: textParseFloat,
 	}, // parse_float(str, bits) => float/error
-	"parse_int": &vvm.UserFunction{
+	"parse_int": &vvm.BuiltinFunction{
 		Name:  "parse_int",
 		Value: textParseInt,
 	}, // parse_int(str, base, bits) => int/error
-	"quote": &vvm.UserFunction{
+	"quote": &vvm.BuiltinFunction{
 		Name:  "quote",
 		Value: FuncASRS(strconv.Quote),
 	}, // quote(str) => string
-	"unquote": &vvm.UserFunction{
+	"unquote": &vvm.BuiltinFunction{
 		Name:  "unquote",
 		Value: FuncASRSE(strconv.Unquote),
 	}, // unquote(str) => string/error

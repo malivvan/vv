@@ -45,139 +45,139 @@ var timesModule = map[string]vvm.Object{
 		Value:     timesSleep,
 		NeedVMObj: true,
 	}, // sleep(int)
-	"parse_duration": &vvm.UserFunction{
+	"parse_duration": &vvm.BuiltinFunction{
 		Name:  "parse_duration",
 		Value: timesParseDuration,
 	}, // parse_duration(str) => int
-	"since": &vvm.UserFunction{
+	"since": &vvm.BuiltinFunction{
 		Name:  "since",
 		Value: timesSince,
 	}, // since(time) => int
-	"until": &vvm.UserFunction{
+	"until": &vvm.BuiltinFunction{
 		Name:  "until",
 		Value: timesUntil,
 	}, // until(time) => int
-	"duration_hours": &vvm.UserFunction{
+	"duration_hours": &vvm.BuiltinFunction{
 		Name:  "duration_hours",
 		Value: timesDurationHours,
 	}, // duration_hours(int) => float
-	"duration_minutes": &vvm.UserFunction{
+	"duration_minutes": &vvm.BuiltinFunction{
 		Name:  "duration_minutes",
 		Value: timesDurationMinutes,
 	}, // duration_minutes(int) => float
-	"duration_nanoseconds": &vvm.UserFunction{
+	"duration_nanoseconds": &vvm.BuiltinFunction{
 		Name:  "duration_nanoseconds",
 		Value: timesDurationNanoseconds,
 	}, // duration_nanoseconds(int) => int
-	"duration_seconds": &vvm.UserFunction{
+	"duration_seconds": &vvm.BuiltinFunction{
 		Name:  "duration_seconds",
 		Value: timesDurationSeconds,
 	}, // duration_seconds(int) => float
-	"duration_string": &vvm.UserFunction{
+	"duration_string": &vvm.BuiltinFunction{
 		Name:  "duration_string",
 		Value: timesDurationString,
 	}, // duration_string(int) => string
-	"month_string": &vvm.UserFunction{
+	"month_string": &vvm.BuiltinFunction{
 		Name:  "month_string",
 		Value: timesMonthString,
 	}, // month_string(int) => string
-	"date": &vvm.UserFunction{
+	"date": &vvm.BuiltinFunction{
 		Name:  "date",
 		Value: timesDate,
 	}, // date(year, month, day, hour, min, sec, nsec) => time
-	"now": &vvm.UserFunction{
+	"now": &vvm.BuiltinFunction{
 		Name:  "now",
 		Value: timesNow,
 	}, // now() => time
-	"parse": &vvm.UserFunction{
+	"parse": &vvm.BuiltinFunction{
 		Name:  "parse",
 		Value: timesParse,
 	}, // parse(format, str) => time
-	"unix": &vvm.UserFunction{
+	"unix": &vvm.BuiltinFunction{
 		Name:  "unix",
 		Value: timesUnix,
 	}, // unix(sec, nsec) => time
-	"add": &vvm.UserFunction{
+	"add": &vvm.BuiltinFunction{
 		Name:  "add",
 		Value: timesAdd,
 	}, // add(time, int) => time
-	"add_date": &vvm.UserFunction{
+	"add_date": &vvm.BuiltinFunction{
 		Name:  "add_date",
 		Value: timesAddDate,
 	}, // add_date(time, years, months, days) => time
-	"sub": &vvm.UserFunction{
+	"sub": &vvm.BuiltinFunction{
 		Name:  "sub",
 		Value: timesSub,
 	}, // sub(t time, u time) => int
-	"after": &vvm.UserFunction{
+	"after": &vvm.BuiltinFunction{
 		Name:  "after",
 		Value: timesAfter,
 	}, // after(t time, u time) => bool
-	"before": &vvm.UserFunction{
+	"before": &vvm.BuiltinFunction{
 		Name:  "before",
 		Value: timesBefore,
 	}, // before(t time, u time) => bool
-	"time_year": &vvm.UserFunction{
+	"time_year": &vvm.BuiltinFunction{
 		Name:  "time_year",
 		Value: timesTimeYear,
 	}, // time_year(time) => int
-	"time_month": &vvm.UserFunction{
+	"time_month": &vvm.BuiltinFunction{
 		Name:  "time_month",
 		Value: timesTimeMonth,
 	}, // time_month(time) => int
-	"time_day": &vvm.UserFunction{
+	"time_day": &vvm.BuiltinFunction{
 		Name:  "time_day",
 		Value: timesTimeDay,
 	}, // time_day(time) => int
-	"time_weekday": &vvm.UserFunction{
+	"time_weekday": &vvm.BuiltinFunction{
 		Name:  "time_weekday",
 		Value: timesTimeWeekday,
 	}, // time_weekday(time) => int
-	"time_hour": &vvm.UserFunction{
+	"time_hour": &vvm.BuiltinFunction{
 		Name:  "time_hour",
 		Value: timesTimeHour,
 	}, // time_hour(time) => int
-	"time_minute": &vvm.UserFunction{
+	"time_minute": &vvm.BuiltinFunction{
 		Name:  "time_minute",
 		Value: timesTimeMinute,
 	}, // time_minute(time) => int
-	"time_second": &vvm.UserFunction{
+	"time_second": &vvm.BuiltinFunction{
 		Name:  "time_second",
 		Value: timesTimeSecond,
 	}, // time_second(time) => int
-	"time_nanosecond": &vvm.UserFunction{
+	"time_nanosecond": &vvm.BuiltinFunction{
 		Name:  "time_nanosecond",
 		Value: timesTimeNanosecond,
 	}, // time_nanosecond(time) => int
-	"time_unix": &vvm.UserFunction{
+	"time_unix": &vvm.BuiltinFunction{
 		Name:  "time_unix",
 		Value: timesTimeUnix,
 	}, // time_unix(time) => int
-	"time_unix_nano": &vvm.UserFunction{
+	"time_unix_nano": &vvm.BuiltinFunction{
 		Name:  "time_unix_nano",
 		Value: timesTimeUnixNano,
 	}, // time_unix_nano(time) => int
-	"time_format": &vvm.UserFunction{
+	"time_format": &vvm.BuiltinFunction{
 		Name:  "time_format",
 		Value: timesTimeFormat,
 	}, // time_format(time, format) => string
-	"time_location": &vvm.UserFunction{
+	"time_location": &vvm.BuiltinFunction{
 		Name:  "time_location",
 		Value: timesTimeLocation,
 	}, // time_location(time) => string
-	"time_string": &vvm.UserFunction{
+	"time_string": &vvm.BuiltinFunction{
 		Name:  "time_string",
 		Value: timesTimeString,
 	}, // time_string(time) => string
-	"is_zero": &vvm.UserFunction{
+	"is_zero": &vvm.BuiltinFunction{
 		Name:  "is_zero",
 		Value: timesIsZero,
 	}, // is_zero(time) => bool
-	"to_local": &vvm.UserFunction{
+	"to_local": &vvm.BuiltinFunction{
 		Name:  "to_local",
 		Value: timesToLocal,
 	}, // to_local(time) => time
-	"to_utc": &vvm.UserFunction{
+	"to_utc": &vvm.BuiltinFunction{
 		Name:  "to_utc",
 		Value: timesToUTC,
 	}, // to_utc(time) => time

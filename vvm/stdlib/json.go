@@ -9,19 +9,19 @@ import (
 )
 
 var jsonModule = map[string]vvm.Object{
-	"decode": &vvm.UserFunction{
+	"decode": &vvm.BuiltinFunction{
 		Name:  "decode",
 		Value: jsonDecode,
 	},
-	"encode": &vvm.UserFunction{
+	"encode": &vvm.BuiltinFunction{
 		Name:  "encode",
 		Value: jsonEncode,
 	},
-	"indent": &vvm.UserFunction{
+	"indent": &vvm.BuiltinFunction{
 		Name:  "encode",
 		Value: jsonIndent,
 	},
-	"html_escape": &vvm.UserFunction{
+	"html_escape": &vvm.BuiltinFunction{
 		Name:  "html_escape",
 		Value: jsonHTMLEscape,
 	},

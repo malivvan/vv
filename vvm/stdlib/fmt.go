@@ -10,7 +10,7 @@ var fmtModule = map[string]vvm.Object{
 	"print":   &vvm.BuiltinFunction{Value: fmtPrint, NeedVMObj: true},
 	"printf":  &vvm.BuiltinFunction{Value: fmtPrintf, NeedVMObj: true},
 	"println": &vvm.BuiltinFunction{Value: fmtPrintln, NeedVMObj: true},
-	"sprintf": &vvm.UserFunction{Name: "sprintf", Value: fmtSprintf},
+	"sprintf": &vvm.BuiltinFunction{Name: "sprintf", Value: fmtSprintf},
 }
 
 func fmtPrint(args ...vvm.Object) (ret vvm.Object, err error) {

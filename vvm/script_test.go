@@ -171,7 +171,7 @@ for i:=1; i<=d; i++ {
 e := mod1.double(s)
 `)
 	mod1 := map[string]vvm.Object{
-		"double": &vvm.UserFunction{
+		"double": &vvm.BuiltinFunction{
 			Value: func(args ...vvm.Object) (
 				ret vvm.Object,
 				err error,
@@ -349,7 +349,7 @@ func TestScriptSourceModule(t *testing.T) {
 		[]byte(`text := import("text"); export text.title("foo")`))
 	mods.AddBuiltinModule("text",
 		map[string]vvm.Object{
-			"title": &vvm.UserFunction{
+			"title": &vvm.BuiltinFunction{
 				Name: "title",
 				Value: func(args ...vvm.Object) (vvm.Object, error) {
 					s, _ := vvm.ToString(args[0])

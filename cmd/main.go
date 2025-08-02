@@ -208,7 +208,7 @@ func RunREPL(modules *vvm.ModuleMap, in io.Reader, out io.Writer) {
 
 	// embed println function
 	symbol := symbolTable.Define("__repl_println__")
-	globals[symbol.Index] = &vvm.UserFunction{
+	globals[symbol.Index] = &vvm.BuiltinFunction{
 		Name: "println",
 		Value: func(args ...vvm.Object) (ret vvm.Object, err error) {
 			var printArgs []interface{}

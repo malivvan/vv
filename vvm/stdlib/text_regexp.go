@@ -10,7 +10,7 @@ func makeTextRegexp(re *regexp.Regexp) *vvm.ImmutableMap {
 	return &vvm.ImmutableMap{
 		Value: map[string]vvm.Object{
 			// match(text) => bool
-			"match": &vvm.UserFunction{
+			"match": &vvm.BuiltinFunction{
 				Value: func(args ...vvm.Object) (
 					ret vvm.Object,
 					err error,
@@ -42,7 +42,7 @@ func makeTextRegexp(re *regexp.Regexp) *vvm.ImmutableMap {
 
 			// find(text) 			=> array(array({text:,begin:,end:}))/undefined
 			// find(text, maxCount) => array(array({text:,begin:,end:}))/undefined
-			"find": &vvm.UserFunction{
+			"find": &vvm.BuiltinFunction{
 				Value: func(args ...vvm.Object) (
 					ret vvm.Object,
 					err error,
@@ -136,7 +136,7 @@ func makeTextRegexp(re *regexp.Regexp) *vvm.ImmutableMap {
 			},
 
 			// replace(src, repl) => string
-			"replace": &vvm.UserFunction{
+			"replace": &vvm.BuiltinFunction{
 				Value: func(args ...vvm.Object) (
 					ret vvm.Object,
 					err error,
@@ -179,7 +179,7 @@ func makeTextRegexp(re *regexp.Regexp) *vvm.ImmutableMap {
 
 			// split(text) 			 => array(string)
 			// split(text, maxCount) => array(string)
-			"split": &vvm.UserFunction{
+			"split": &vvm.BuiltinFunction{
 				Value: func(args ...vvm.Object) (
 					ret vvm.Object,
 					err error,

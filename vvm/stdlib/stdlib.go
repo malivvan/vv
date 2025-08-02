@@ -34,9 +34,9 @@ func GetModuleMap(names ...string) *vvm.ModuleMap {
 	return modules
 }
 
-// Func returns a UserFunction from the given function value.
-func Func(function any) *vvm.UserFunction {
-	if f, ok := Prop(function).get().(*vvm.UserFunction); ok {
+// Func returns a BuiltinFunction from the given function value.
+func Func(function any) *vvm.BuiltinFunction {
+	if f, ok := Prop(function).get().(*vvm.BuiltinFunction); ok {
 		return f
 	}
 	return nil
@@ -66,7 +66,7 @@ func Prop(property any) *Property {
 	case func() error:
 		return &Property{
 			get: func() vvm.Object {
-				return &vvm.UserFunction{
+				return &vvm.BuiltinFunction{
 					Value: FuncARE(v),
 				}
 			},
@@ -74,7 +74,7 @@ func Prop(property any) *Property {
 	case func([]byte) (int, error):
 		return &Property{
 			get: func() vvm.Object {
-				return &vvm.UserFunction{
+				return &vvm.BuiltinFunction{
 					Value: FuncAYRIE(v),
 				}
 			},
@@ -104,13 +104,13 @@ func (prop *Property) Set(value vvm.Object) error {
 
 // CanCall checks if the property is callable.
 func (prop *Property) CanCall() bool {
-	_, ok := prop.get().(*vvm.UserFunction)
+	_, ok := prop.get().(*vvm.BuiltinFunction)
 	return ok
 }
 
 // Call invokes the property as a function if it is callable.
 func (prop *Property) Call(args ...vvm.Object) (vvm.Object, error) {
-	if f, ok := prop.get().(*vvm.UserFunction); ok {
+	if f, ok := prop.get().(*vvm.BuiltinFunction); ok {
 		return f.Value(args...)
 	}
 	return nil, fmt.Errorf("property is not callable")
