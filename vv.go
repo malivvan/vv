@@ -252,6 +252,15 @@ func NewCli(ui cli.ActionFunc) (*cli.App, error) {
 	app.Action = ui
 	app.Commands = []*cli.Command{
 		{
+			Name:    "version",
+			Aliases: []string{"v"},
+			Usage:   "print version information",
+			Action: func(c *cli.Context) error {
+				fmt.Printf("vv v%s [%s]\n", Version(), Commit())
+				return nil
+			},
+		},
+		{
 			Name:    "sh",
 			Aliases: []string{"shell"},
 			Usage:   "run shell",
