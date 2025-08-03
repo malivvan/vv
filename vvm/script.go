@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/gob"
 	"fmt"
+	"github.com/malivvan/vv/pkg/xxhash"
 	"io"
 	"path/filepath"
 	"sync"
@@ -97,7 +98,7 @@ func (s *Script) Compile() (*Program, error) {
 	}
 
 	fileSet := parser.NewFileSet()
-	srcFile := fileSet.AddFile("(main)", -1, len(s.input))
+	srcFile := fileSet.AddFile("(main)", -1, len(s.input), xxhash.Sum64(s.input))
 	p := parser.NewParser(srcFile, s.input, nil)
 	file, err := p.ParseFile()
 	if err != nil {
@@ -195,6 +196,16 @@ type Program struct {
 	globals       []Object
 	maxAllocs     int64
 	lock          sync.RWMutex
+}
+
+// Bytecode returns the compiled bytecode of the Program.
+func (p *Program) Bytecode() *Bytecode {
+	p.lock.RLock()
+	defer p.lock.RUnlock()
+	if p.bytecode == nil {
+		return &Bytecode{}
+	}
+	return p.bytecode
 }
 
 // Decode deserializes the Program from a byte slice.

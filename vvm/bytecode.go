@@ -47,10 +47,10 @@ func (b *Bytecode) Equals(other *Bytecode) bool {
 
 // Encode writes Bytecode data to the writer.
 func (b *Bytecode) Encode(w io.Writer) error {
-	enc := gob.NewEncoder(w)
-	if err := enc.Encode(b.FileSet); err != nil {
+	if err := b.FileSet.Encode(w); err != nil {
 		return err
 	}
+	enc := gob.NewEncoder(w)
 	if err := enc.Encode(b.MainFunction); err != nil {
 		return err
 	}
@@ -97,10 +97,12 @@ func (b *Bytecode) Decode(r io.Reader, modules *ModuleMap) error {
 		modules = NewModuleMap()
 	}
 
-	dec := gob.NewDecoder(r)
-	if err := dec.Decode(&b.FileSet); err != nil {
+	b.FileSet = &parser.SourceFileSet{}
+	if err := b.FileSet.Decode(r); err != nil {
 		return err
 	}
+	dec := gob.NewDecoder(r)
+
 	// TODO: files in b.FileSet.File does not have their 'set' field properly
 	//  set to b.FileSet as it's private field and not serialized by gob
 	//  encoder/decoder.
@@ -307,8 +309,6 @@ func inferModuleName(mod *ImmutableMap) string {
 }
 
 func init() {
-	gob.Register(&parser.SourceFileSet{})
-	gob.Register(&parser.SourceFile{})
 	gob.Register(&Array{})
 	gob.Register(&Bool{})
 	gob.Register(&Bytes{})

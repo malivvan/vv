@@ -2,6 +2,7 @@ package parser_test
 
 import (
 	"fmt"
+	"github.com/malivvan/vv/pkg/xxhash"
 	"math/rand"
 	"strings"
 	"testing"
@@ -216,13 +217,8 @@ func TestStripCR(t *testing.T) {
 	}
 }
 
-func scanExpect(
-	t *testing.T,
-	input string,
-	mode parser.ScanMode,
-	expected ...scanResult,
-) {
-	testFile := testFileSet.AddFile("test", -1, len(input))
+func scanExpect(t *testing.T, input string, mode parser.ScanMode, expected ...scanResult) {
+	testFile := testFileSet.AddFile("test", -1, len(input), xxhash.Sum64String(input))
 
 	s := parser.NewScanner(
 		testFile,

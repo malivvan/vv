@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/malivvan/vv/pkg/xxhash"
 	"math"
 	"math/rand"
 	"reflect"
@@ -3877,7 +3878,7 @@ func formatGlobals(globals []vvm.Object) (formatted []string) {
 
 func parse(t *testing.T, input string) *parser.File {
 	testFileSet := parser.NewFileSet()
-	testFile := testFileSet.AddFile("test", -1, len(input))
+	testFile := testFileSet.AddFile("test", -1, len(input), xxhash.Sum64String(input))
 
 	p := parser.NewParser(testFile, []byte(input), nil)
 	file, err := p.ParseFile()

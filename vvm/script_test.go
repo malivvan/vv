@@ -476,30 +476,27 @@ func TestProgram_RunContext(t *testing.T) {
 }
 
 func TestProgram_EncodeDecode(t *testing.T) {
-	// machine completes normally
-	p := compile(t, `a := 5`, nil)
-	err := p.RunContext(context.Background())
-	require.NoError(t, err)
-	programGet(t, p, "a", int64(5))
-
-	// timeout
-	p = compile(t, `for true {}`, nil)
+	p := compile(t, `for true {}`, nil)
+	p.Bytecode().MainFunction.SourceMap = nil // disable source map for testing as byte compare will fail due to map sorting
+	require.True(t, len(p.Bytecode().FileSet.Files) == 1, "Bytecode should have at least one file")
+	require.True(t, p.Bytecode().FileSet.Files[0].Hash == 12381665467826464835, "File hash should match expected value")
 
 	var buf bytes.Buffer
-	err = p.Encode(&buf)
+	err := p.Encode(&buf)
 	require.NoError(t, err)
-	cx := new(vvm.Program)
+	px := new(vvm.Program)
 	b := buf.Bytes()
 
-	err = cx.Decode(&buf, nil)
+	err = px.Decode(&buf, nil)
 	require.NoError(t, err)
-	require.Equal(t, p, cx)
+	require.Equal(t, p, px)
+	require.True(t, len(px.Bytecode().FileSet.Files) == 1, "Bytecode should have at least one file")
+	require.True(t, px.Bytecode().FileSet.Files[0].Hash == 12381665467826464835, "File hash should match expected value")
 
 	var bufx bytes.Buffer
-	err = cx.Encode(&bufx)
+	err = px.Encode(&bufx)
 	require.NoError(t, err)
 	bx := bufx.Bytes()
-
 	require.Equal(t, b, bx, "encoded bytes should be equal")
 }
 

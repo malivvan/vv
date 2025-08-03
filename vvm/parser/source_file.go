@@ -1,7 +1,9 @@
 package parser
 
 import (
+	"encoding/gob"
 	"fmt"
+	"io"
 	"sort"
 )
 
@@ -49,6 +51,30 @@ type SourceFileSet struct {
 	Files []*SourceFile // list of files in the order added to the set
 }
 
+// Encode encodes the SourceFileSet into the writer using gob encoding.
+func (s *SourceFileSet) Encode(w io.Writer) error {
+	enc := gob.NewEncoder(w)
+	if err := enc.Encode(s.Base); err != nil {
+		return fmt.Errorf("failed to encode base: %w", err)
+	}
+	if err := enc.Encode(s.Files); err != nil {
+		return fmt.Errorf("failed to encode number of files: %w", err)
+	}
+	return nil
+}
+
+// Decode decodes the SourceFileSet from the reader using gob encoding.
+func (s *SourceFileSet) Decode(r io.Reader) error {
+	dec := gob.NewDecoder(r)
+	if err := dec.Decode(&s.Base); err != nil {
+		return fmt.Errorf("failed to decode base: %w", err)
+	}
+	if err := dec.Decode(&s.Files); err != nil {
+		return fmt.Errorf("failed to decode number of files: %w", err)
+	}
+	return nil
+}
+
 // NewFileSet creates a new file set.
 func NewFileSet() *SourceFileSet {
 	return &SourceFileSet{
@@ -73,7 +99,7 @@ func (s *SourceFileSet) Equals(other *SourceFileSet) bool {
 }
 
 // AddFile adds a new file in the file set.
-func (s *SourceFileSet) AddFile(filename string, base, size int) *SourceFile {
+func (s *SourceFileSet) AddFile(filename string, base, size int, hash uint64) *SourceFile {
 	if base < 0 {
 		base = s.Base
 	}
@@ -85,6 +111,7 @@ func (s *SourceFileSet) AddFile(filename string, base, size int) *SourceFile {
 		Name:  filename,
 		Base:  base,
 		Size:  size,
+		Hash:  hash,
 		Lines: []int{0},
 	}
 	base += size + 1 // +1 because EOF also has a position
@@ -150,6 +177,8 @@ type SourceFile struct {
 	Base int
 	// SourceFile size as provided to AddFile
 	Size int
+	// Hash is a xxhash64 checksum of the file content.
+	Hash uint64
 	// Lines contains the offset of the first character for each line
 	// (the first entry is always 0)
 	Lines []int

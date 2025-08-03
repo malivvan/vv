@@ -2,6 +2,7 @@ package parser_test
 
 import (
 	"fmt"
+	"github.com/malivvan/vv/pkg/xxhash"
 	"io"
 	"reflect"
 	"strings"
@@ -1528,7 +1529,7 @@ func (o *parseTracer) Write(p []byte) (n int, err error) {
 
 func expectParse(t *testing.T, input string, fn expectedFn) {
 	testFileSet := NewFileSet()
-	testFile := testFileSet.AddFile("test", -1, len(input))
+	testFile := testFileSet.AddFile("test", -1, len(input), xxhash.Sum64String(input))
 
 	var ok bool
 	defer func() {
@@ -1562,7 +1563,7 @@ func expectParse(t *testing.T, input string, fn expectedFn) {
 
 func expectParseError(t *testing.T, input string) {
 	testFileSet := NewFileSet()
-	testFile := testFileSet.AddFile("test", -1, len(input))
+	testFile := testFileSet.AddFile("test", -1, len(input), xxhash.Sum64String(input))
 
 	var ok bool
 	defer func() {
@@ -2065,10 +2066,7 @@ func equalStmts(t *testing.T, expected, actual []Stmt) {
 	}
 }
 
-func equalMapElements(
-	t *testing.T,
-	expected, actual []*MapElementLit,
-) {
+func equalMapElements(t *testing.T, expected, actual []*MapElementLit) {
 	require.Equal(t, len(expected), len(actual))
 	for i := 0; i < len(expected); i++ {
 		require.Equal(t, expected[i].Key, actual[i].Key)
@@ -2078,13 +2076,9 @@ func equalMapElements(
 	}
 }
 
-func parseSource(
-	filename string,
-	src []byte,
-	trace io.Writer,
-) (res *File, err error) {
+func parseSource(filename string, src []byte, trace io.Writer) (res *File, err error) {
 	fileSet := NewFileSet()
-	file := fileSet.AddFile(filename, -1, len(src))
+	file := fileSet.AddFile(filename, -1, len(src), xxhash.Sum64(src))
 
 	p := NewParser(file, src, trace)
 	return p.ParseFile()

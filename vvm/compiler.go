@@ -2,6 +2,7 @@ package vvm
 
 import (
 	"fmt"
+	"github.com/malivvan/vv/pkg/xxhash"
 	"io"
 	"os"
 	"path/filepath"
@@ -952,12 +953,7 @@ func (c *Compiler) checkCyclicImports(node parser.Node, modulePath string) error
 	return nil
 }
 
-func (c *Compiler) compileModule(
-	node parser.Node,
-	modulePath string,
-	src []byte,
-	isFile bool,
-) (*CompiledFunction, error) {
+func (c *Compiler) compileModule(node parser.Node, modulePath string, src []byte, isFile bool) (*CompiledFunction, error) {
 	if err := c.checkCyclicImports(node, modulePath); err != nil {
 		return nil, err
 	}
@@ -967,7 +963,7 @@ func (c *Compiler) compileModule(
 		return compiledModule, nil
 	}
 
-	modFile := c.file.Set().AddFile(modulePath, -1, len(src))
+	modFile := c.file.Set().AddFile(modulePath, -1, len(src), xxhash.Sum64(src))
 	p := parser.NewParser(modFile, src, nil)
 	file, err := p.ParseFile()
 	if err != nil {

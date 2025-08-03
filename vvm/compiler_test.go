@@ -2,6 +2,7 @@ package vvm_test
 
 import (
 	"fmt"
+	"github.com/malivvan/vv/pkg/xxhash"
 	"strings"
 	"testing"
 
@@ -1301,12 +1302,9 @@ func (o *compileTracer) Write(p []byte) (n int, err error) {
 	return len(p), nil
 }
 
-func traceCompile(
-	input string,
-	symbols map[string]vvm.Object,
-) (res *vvm.Bytecode, trace []string, err error) {
+func traceCompile(input string, symbols map[string]vvm.Object) (res *vvm.Bytecode, trace []string, err error) {
 	fileSet := parser.NewFileSet()
-	file := fileSet.AddFile("test", -1, len(input))
+	file := fileSet.AddFile("test", -1, len(input), xxhash.Sum64String(input))
 
 	p := parser.NewParser(file, []byte(input), nil)
 
