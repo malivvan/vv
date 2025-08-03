@@ -10,3 +10,5 @@
 | `cui/menu`            | [github.com/Racinettee/tmenu](https://github.com/Racinettee/tmenu/tree/73ccc3e8d2b648710839be343c76bd8d5a921188)         | [BSD 3-Clause License](cui/menu/LICENSE)                         |
 | `cui/vte`             | [git.sr.ht/~rockorager/tcell-term](https://git.sr.ht/~rockorager/tcell-term/refs/v0.10.0)                                | [MIT](cui/vte/LICENSE)                                           |
 | `readline`            | [github.com/ergochat/readline](https://github.com/ergochat/readline/tree/16c2b715d64d44ca79cc211873c4492404cd0bd1)       | [MIT](readline/LICENSE)                                          |
+| `rpc`                 | [github.com/lithdew/monte](https://github.com/lithdew/monte/commit/273283c7e8b7370892a968bb354366ff2c868a5f)             | [MIT](rpc/LICENSE)                                               |
+| `rpc/bytesutil`       | [github.com/lithdew/bytesutil](https://github.com/lithdew/bytesutil/tree/d98389230a59fe2e5ed99140f358c6539617655c)       | [MIT](rpc/bytesutil/LICENSE)                                     |

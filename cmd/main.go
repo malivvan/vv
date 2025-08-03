@@ -9,6 +9,9 @@ import (
 	"github.com/malivvan/vv/pkg/cui"
 	"github.com/malivvan/vv/pkg/cui/mdview"
 	"io"
+	"log"
+	"net/http"
+	_ "net/http/pprof"
 	"os"
 	"path/filepath"
 	"strings"
@@ -30,6 +33,9 @@ var (
 )
 
 func init() {
+	go func() {
+		log.Println(http.ListenAndServe("localhost:6060", nil))
+	}()
 	flag.BoolVar(&showHelp, "help", false, "Show help")
 	flag.StringVar(&compileOutput, "o", "", "Compile output file")
 	flag.BoolVar(&showVersion, "version", false, "Show version")
@@ -142,7 +148,7 @@ func CompileOnly(modules *vvm.ModuleMap, data []byte, inputFile, outputFile stri
 		outputFile = basename(inputFile) + ".out"
 	}
 
-	out, err := os.OpenFile(outputFile, os.O_CREATE|os.O_WRONLY, os.ModePerm)
+	out, err := os.Create(outputFile)
 	if err != nil {
 		return
 	}

@@ -21,4 +21,3 @@ r1.abort()
 
 times.sleep(3 * times.second)
 fmt.println("Aborting all routines")
-abort()
