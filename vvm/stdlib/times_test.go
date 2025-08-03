@@ -10,7 +10,7 @@ import (
 
 func TestTimes(t *testing.T) {
 	// skip on windows for now
-	if runtime.GOOS != "windows" {
+	if runtime.GOOS == "windows" {
 		t.Skipf("skipping test on %s", runtime.GOOS)
 	}
 
