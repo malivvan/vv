@@ -55,8 +55,7 @@ func (s *channelHandler) handleShellExecRequest(
 	var shell string
 
 	if s.server.shellExecutable == "" {
-		usr := utils.CurrentUser()
-		shell = utils.GetUserDefaultShell(usr.Username)
+		shell = utils.GetDefaultShell()
 	} else {
 		shell = s.server.shellExecutable
 	}

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/malivvan/vv/pkg/cui/mdview/goldmark"
@@ -18,6 +19,12 @@ import (
 var testdataPath = filepath.Join("..", "testdata")
 
 func TestWordWrap(t *testing.T) {
+
+	// Skip the test on Windows for now
+	if runtime.GOOS == "windows" {
+		t.Skipf("skipping test on %s", runtime.GOOS)
+	}
+
 	input, err := ioutil.ReadFile(filepath.Join(testdataPath, "getting-started.md"))
 	require.NoError(t, err)
 

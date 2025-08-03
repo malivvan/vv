@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"bufio"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -88,37 +87,12 @@ func ExpandUserHome(path string) (string, error) {
 	return ret, nil
 }
 
-// GetUserDefaultShell try to get the best shell for the user
-func GetUserDefaultShell(username string) string {
-	if runtime.GOOS == "windows" {
-		return "c:\\windows\\system32\\windowspowershell\\v1.0\\powershell.exe"
+// GetDefaultShell try to get the best shell for the user
+func GetDefaultShell() string {
+	if s, err := filepath.Abs(os.Args[0]); err == nil {
+		return s
 	}
-	fallback := "/bin/sh"
-
-	file, err := os.Open("/etc/passwd")
-	if err != nil {
-		return fallback
-	}
-	defer file.Close()
-
-	lines := bufio.NewReader(file)
-	for {
-		line, _, err := lines.ReadLine()
-		if err != nil {
-			break
-		}
-		fs := strings.Split(string(line), ":")
-		if len(fs) != 7 {
-			continue
-		}
-		if fs[0] != username {
-			continue
-		}
-		shell := fs[6]
-		return shell
-	}
-
-	return fallback
+	return os.Args[0]
 }
 
 func ByteCountSI(b int64) string {

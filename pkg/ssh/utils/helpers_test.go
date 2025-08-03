@@ -65,13 +65,6 @@ func TestExpandHome(t *testing.T) {
 	}
 }
 
-func TestDefaultShell(t *testing.T) {
-	shell := GetUserDefaultShell("notexistsinguser")
-	if shell != "/bin/sh" {
-		t.Fail()
-	}
-}
-
 func TestByteCountSI(t *testing.T) {
 	list := []int64{
 		1000,
