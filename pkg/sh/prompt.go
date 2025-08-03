@@ -1,7 +1,7 @@
 package sh
 
 import (
-	"github.com/malivvan/vv/pkg/sh/interp"
+	"mvdan.cc/sh/v3/interp"
 	"os"
 	"strings"
 )

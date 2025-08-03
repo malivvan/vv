@@ -2,9 +2,9 @@ package sh
 
 import (
 	"flag"
-	"github.com/malivvan/vv/pkg/sh/interp"
 	"github.com/malivvan/vv/pkg/sh/readline/term"
 	"io"
+	"mvdan.cc/sh/v3/interp"
 	"os"
 	"strings"
 )
