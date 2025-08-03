@@ -12,7 +12,6 @@ const (
 
 func TestList(t *testing.T) {
 	t.Parallel()
-
 	// Initialize
 
 	l := NewList()
