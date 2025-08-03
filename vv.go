@@ -2,7 +2,6 @@ package vv
 
 import (
 	"bufio"
-	"bytes"
 	"context"
 	"fmt"
 	"github.com/malivvan/vv/vvm"
@@ -40,11 +39,15 @@ func CompileOnly(data []byte, inputFile, outputFile string) (err error) {
 		}
 	}()
 
-	err = program.Encode(out)
+	b, err := program.Marshal()
 	if err != nil {
 		return
 	}
-	fmt.Println(outputFile)
+	_, err = out.Write(b)
+	if err != nil {
+		return fmt.Errorf("error writing to output file %s: %w", outputFile, err)
+	}
+
 	return
 }
 
@@ -61,7 +64,7 @@ func CompileAndRun(ctx context.Context, data []byte, inputFile string) (err erro
 // RunCompiled reads the compiled binary from file and executes it.
 func RunCompiled(ctx context.Context, data []byte) (err error) {
 	p := &Program{}
-	err = p.Decode(bytes.NewReader(data), Modules)
+	err = p.Unmarshal(data)
 	if err != nil {
 		return
 	}

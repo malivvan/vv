@@ -1,7 +1,6 @@
 package vvm_test
 
 import (
-	"bytes"
 	"testing"
 	"time"
 
@@ -284,12 +283,11 @@ func testBytecodeRemoveDuplicates(
 }
 
 func testBytecodeSerialization(t *testing.T, b *vvm.Bytecode) {
-	var buf bytes.Buffer
-	err := b.Encode(&buf)
+	bc, err := b.Marshal()
 	require.NoError(t, err)
 
 	r := &vvm.Bytecode{}
-	err = r.Decode(bytes.NewReader(buf.Bytes()), nil)
+	err = r.Unmarshal(bc, nil)
 	require.NoError(t, err)
 
 	require.Equal(t, b.FileSet, r.FileSet)

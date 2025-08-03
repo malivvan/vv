@@ -1,7 +1,6 @@
 package vv_test
 
 import (
-	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -517,8 +516,7 @@ func TestProgram_RunContext(t *testing.T) {
 
 	// timeout
 	p = compile(t, `for true {}`, nil)
-	ctx, cancel := context.WithTimeout(context.Background(),
-		1*time.Millisecond)
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Millisecond)
 	defer cancel()
 	err = p.RunContext(ctx)
 	require.Equal(t, context.DeadlineExceeded, err)
@@ -526,22 +524,18 @@ func TestProgram_RunContext(t *testing.T) {
 
 func TestProgram_EncodeDecode(t *testing.T) {
 	p := compile(t, `for true {}`, nil)
-	p.Bytecode().MainFunction.SourceMap = nil // remove source map as gob map encoding is not sorted deterministically
+	p.Bytecode().MainFunction.SourceMap = nil
 
-	var buf bytes.Buffer
-	err := p.Encode(&buf)
+	b, err := p.Marshal()
 	require.NoError(t, err)
 	cx := new(vv.Program)
-	b := buf.Bytes()
 
-	err = cx.Decode(&buf, nil)
+	err = cx.Unmarshal(b)
 	require.NoError(t, err)
 	require.Equal(t, p, cx)
 
-	var bufx bytes.Buffer
-	err = cx.Encode(&bufx)
+	bx, err := cx.Marshal()
 	require.NoError(t, err)
-	bx := bufx.Bytes()
 
 	require.Equal(t, b, bx, "encoded bytes should be equal")
 }

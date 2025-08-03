@@ -1,16 +1,14 @@
 package vv
 
 import (
-	"bytes"
-	"compress/flate"
 	"context"
 	"encoding/binary"
-	"encoding/gob"
-	"errors"
+
 	"fmt"
 	"github.com/malivvan/vv/vvm"
+	"github.com/malivvan/vv/vvm/encoding"
+
 	"hash/crc64"
-	"io"
 	"path/filepath"
 	"sync"
 
@@ -221,117 +219,97 @@ func (p *Program) Bytecode() *vvm.Bytecode {
 	return p.bytecode
 }
 
-// Decode deserializes the Program from a byte slice.
-func (p *Program) Decode(r io.Reader, modules *vvm.ModuleMap) error {
+// Unmarshal deserializes the Program from a byte slice.
+func (p *Program) Unmarshal(b []byte) (err error) {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 
-	var magic [len(Magic)]byte
-	_, err := r.Read(magic[:])
+	if len(b) < 16 {
+		return fmt.Errorf("invalid byte slice length: %d", len(b))
+	}
+	head := b[:8]
+	body := b[8 : len(b)-8]
+	tail := b[len(b)-8:]
+
+	if string(head[:4]) != Magic {
+		return fmt.Errorf("invalid magic number: %s", head[:4])
+	}
+	size := binary.LittleEndian.Uint32(head[4:8])
+	if size != uint32(len(body)) {
+		return fmt.Errorf("invalid size: %d != %d", size, len(body))
+	}
+	hash := binary.LittleEndian.Uint64(tail[:8])
+	crc := crc64.New(crc64.MakeTable(crc64.ECMA))
+	_, err = crc.Write(body)
+	if err != nil {
+		return fmt.Errorf("failed to calculate crc64: %w", err)
+	}
+	if crc.Sum64() != hash {
+		return fmt.Errorf("invalid crc64: %d != %d", hash, crc.Sum64())
+	}
+
+	n := 0
+	n, p.globalIndices, err = encoding.UnmarshalMap[string, int](n, body, encoding.UnmarshalString, encoding.UnmarshalInt)
 	if err != nil {
 		return err
 	}
-	if string(magic[:]) != Magic {
-		return fmt.Errorf("invalid magic number: %s", magic)
-	}
-	var size [4]byte
-	_, err = r.Read(size[:])
+	n, p.globals, err = encoding.UnmarshalSlice[vvm.Object](n, body, vvm.UnmarshalObject)
 	if err != nil {
 		return err
 	}
-	buf := make([]byte, int(binary.LittleEndian.Uint32(size[:])))
-	_, err = r.Read(buf[:])
-	if err != nil {
-		return err
-	}
-	var hash [8]byte
-	_, err = r.Read(hash[:])
-	if err != nil {
-		return err
-	}
-	b, err := inflate(buf)
+	n, p.maxAllocs, err = encoding.UnmarshalInt64(n, body)
 	if err != nil {
 		return err
 	}
 
-	if crc64.Checksum(buf[:], crc64.MakeTable(crc64.ECMA)) != binary.LittleEndian.Uint64(hash[:]) {
-		return errors.New("bad crc64")
-	}
-
-	r = bytes.NewReader(b)
-	p.globalIndices = make(map[string]int)
-	dec := gob.NewDecoder(r)
-	err = dec.Decode(&p.globalIndices)
-	if err != nil {
-		return err
-	}
-	err = dec.Decode(&p.globals)
-	if err != nil {
-		return err
-	}
-	err = dec.Decode(&p.maxAllocs)
-	if err != nil {
-		return err
-	}
 	p.bytecode = &vvm.Bytecode{}
-	err = p.bytecode.Decode(r, modules)
+	err = p.bytecode.Unmarshal(body[n:], Modules)
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
-// Encode serializes the Program into a byte slice.
-func (p *Program) Encode(w io.Writer) error {
+// Marshal serializes the Program into a byte slice.
+func (p *Program) Marshal() ([]byte, error) {
 	p.lock.RLock()
 	defer p.lock.RUnlock()
 
-	buf := bytes.NewBuffer(nil)
-	enc := gob.NewEncoder(buf)
-	err := enc.Encode(p.globalIndices)
+	code, err := p.bytecode.Marshal()
 	if err != nil {
-		return err
-	}
-	err = enc.Encode(p.globals)
-	if err != nil {
-		return err
-	}
-	err = enc.Encode(p.maxAllocs)
-	if err != nil {
-		return err
+		return nil, err
 	}
 
-	err = p.bytecode.Encode(buf)
-	if err != nil {
-		return err
-	}
-	b, err := deflate(buf.Bytes())
-	if err != nil {
-		return err
+	n := 0
+	data := make([]byte,
+		encoding.SizeMap[string, int](p.globalIndices, encoding.SizeString, encoding.SizeInt)+
+			encoding.SizeSlice[vvm.Object](p.globals, vvm.SizeOfObject)+
+			encoding.SizeInt64())
+	n = encoding.MarshalMap[string, int](n, data, p.globalIndices, encoding.MarshalString, encoding.MarshalInt)
+	n = encoding.MarshalSlice[vvm.Object](n, data, p.globals, vvm.MarshalObject)
+	n = encoding.MarshalInt64(n, data, p.maxAllocs)
+	if n != len(data) {
+		return nil, fmt.Errorf("encoded length mismatch: %d != %d", n, len(data))
 	}
 
-	var size [4]byte
-	binary.LittleEndian.PutUint32(size[:], uint32(len(b)))
-	var hash [8]byte
-	binary.LittleEndian.PutUint64(hash[:], crc64.Checksum(b, crc64.MakeTable(crc64.ECMA)))
+	body := append(data, code...)
 
-	_, err = w.Write([]byte(Magic))
-	if err != nil {
-		return err
+	var head [8]byte
+	head[0] = Magic[0]
+	head[1] = Magic[1]
+	head[2] = Magic[2]
+	head[3] = Magic[3]
+	binary.LittleEndian.PutUint32(head[4:], uint32(len(body)))
+
+	var tail [8]byte
+	crc := crc64.New(crc64.MakeTable(crc64.ECMA))
+	if _, err := crc.Write(body); err != nil {
+		return nil, fmt.Errorf("failed to calculate crc64: %w", err)
 	}
-	_, err = w.Write(size[:])
-	if err != nil {
-		return err
-	}
-	_, err = w.Write(b)
-	if err != nil {
-		return err
-	}
-	_, err = w.Write(hash[:])
-	if err != nil {
-		return err
-	}
-	return nil
+	binary.LittleEndian.PutUint64(tail[:], crc.Sum64())
+
+	return append(append(head[:], body...), tail[:]...), nil
 }
 
 // Run executes the compiled script in the virtual machine.
@@ -485,38 +463,4 @@ func (p *Program) Equals(other *Program) bool {
 		return false
 	}
 	return true
-}
-
-func deflate(b []byte) ([]byte, error) {
-	var buf bytes.Buffer
-	w, err := flate.NewWriter(&buf, flate.BestCompression)
-	if err != nil {
-		return nil, err
-	}
-	_, err = w.Write(b)
-	if err != nil {
-		return nil, err
-	}
-	err = w.Flush()
-	if err != nil {
-		return nil, err
-	}
-	err = w.Close()
-	if err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
-}
-
-func inflate(b []byte) ([]byte, error) {
-	r := flate.NewReader(bytes.NewBuffer(b))
-	b, err := io.ReadAll(r)
-	if err != nil {
-		return nil, err
-	}
-	err = r.Close()
-	if err != nil {
-		return nil, err
-	}
-	return b, nil
 }

@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"github.com/malivvan/vv"
 	"github.com/malivvan/vv/pkg/sh/readline"
-	"github.com/malivvan/vv/vvm/stdlib"
 	"io"
 	"mvdan.cc/sh/v3/interp"
 	"mvdan.cc/sh/v3/syntax"
@@ -20,14 +19,13 @@ func vvMiddleware(next interp.ExecHandlerFunc) interp.ExecHandlerFunc {
 		if len(args) == 0 {
 			return fmt.Errorf("no command provided")
 		}
-		f, err := os.Open(args[0])
+		b, err := os.ReadFile(args[0])
 		if err != nil {
 			return err
 		}
-		defer f.Close()
 
 		p := &vv.Program{}
-		err = p.Decode(f, stdlib.GetModuleMap(stdlib.AllModuleNames()...))
+		err = p.Unmarshal(b)
 		if err == nil {
 			err = p.Run()
 			if err != nil {
@@ -36,7 +34,6 @@ func vvMiddleware(next interp.ExecHandlerFunc) interp.ExecHandlerFunc {
 			return nil
 		}
 
-		_ = f.Close()
 		return next(ctx, args)
 	}
 }

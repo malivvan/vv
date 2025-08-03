@@ -1,12 +1,10 @@
 package vvm
 
 import (
-	"encoding/gob"
 	"fmt"
-	"io"
-	"reflect"
-
+	"github.com/malivvan/vv/vvm/encoding"
 	"github.com/malivvan/vv/vvm/parser"
+	"reflect"
 )
 
 // Bytecode is a compiled instructions and constants.
@@ -45,16 +43,17 @@ func (b *Bytecode) Equals(other *Bytecode) bool {
 	return true
 }
 
-// Encode writes Bytecode data to the writer.
-func (b *Bytecode) Encode(w io.Writer) error {
-	enc := gob.NewEncoder(w)
-	if err := enc.Encode(b.FileSet); err != nil {
-		return err
+// Marshal writes Bytecode data to the writer.
+func (b *Bytecode) Marshal() ([]byte, error) {
+	n := 0
+	c := make([]byte, parser.SizeFileSet(b.FileSet)+SizeOfObject(b.MainFunction)+encoding.SizeSlice[Object](b.Constants, SizeOfObject))
+	n = parser.MarshalFileSet(n, c, b.FileSet)
+	n = MarshalObject(n, c, b.MainFunction)
+	n = encoding.MarshalSlice(n, c, b.Constants, MarshalObject)
+	if n != len(c) {
+		return nil, fmt.Errorf("encoded length mismatch: %d != %d", n, len(c))
 	}
-	if err := enc.Encode(b.MainFunction); err != nil {
-		return err
-	}
-	return enc.Encode(b.Constants)
+	return c, nil
 }
 
 // CountObjects returns the number of objects found in Constants.
@@ -91,25 +90,35 @@ func (b *Bytecode) FormatConstants() (output []string) {
 	return
 }
 
-// Decode reads Bytecode data from the reader.
-func (b *Bytecode) Decode(r io.Reader, modules *ModuleMap) error {
+// Unmarshal decodes Bytecode from the given data.
+func (b *Bytecode) Unmarshal(data []byte, modules *ModuleMap) (err error) {
 	if modules == nil {
 		modules = NewModuleMap()
 	}
 
-	dec := gob.NewDecoder(r)
-	if err := dec.Decode(&b.FileSet); err != nil {
+	n := 0
+	n, b.FileSet, err = parser.UnmarshalFileSet(n, data)
+	if err != nil {
+
 		return err
 	}
-	// TODO: files in b.FileSet.File does not have their 'set' field properly
-	//  set to b.FileSet as it's private field and not serialized by gob
-	//  encoder/decoder.
-	if err := dec.Decode(&b.MainFunction); err != nil {
+
+	var mainFuncObj Object
+	n, mainFuncObj, err = UnmarshalObject(n, data)
+	if err != nil {
 		return err
 	}
-	if err := dec.Decode(&b.Constants); err != nil {
+	mainFunc, ok := mainFuncObj.(*CompiledFunction)
+	if !ok {
+		return fmt.Errorf("main function is not a compiled function")
+	}
+	b.MainFunction = mainFunc
+
+	n, b.Constants, err = encoding.UnmarshalSlice[Object](n, data, UnmarshalObject)
+	if err != nil {
 		return err
 	}
+
 	for i, v := range b.Constants {
 		fv, err := fixDecodedObject(v, modules)
 		if err != nil {
@@ -117,6 +126,11 @@ func (b *Bytecode) Decode(r io.Reader, modules *ModuleMap) error {
 		}
 		b.Constants[i] = fv
 	}
+
+	if len(b.Constants) == 0 {
+		b.Constants = nil
+	}
+
 	return nil
 }
 
@@ -304,24 +318,4 @@ func inferModuleName(mod *ImmutableMap) string {
 		return modName.Value
 	}
 	return ""
-}
-
-func init() {
-	gob.Register(&parser.SourceFileSet{})
-	gob.Register(&parser.SourceFile{})
-	gob.Register(&Array{})
-	gob.Register(&Bool{})
-	gob.Register(&Bytes{})
-	gob.Register(&Char{})
-	gob.Register(&CompiledFunction{})
-	gob.Register(&Error{})
-	gob.Register(&Float{})
-	gob.Register(&ImmutableArray{})
-	gob.Register(&ImmutableMap{})
-	gob.Register(&Int{})
-	gob.Register(&Map{})
-	gob.Register(&String{})
-	gob.Register(&Time{})
-	gob.Register(&Undefined{})
-	gob.Register(&BuiltinFunction{})
 }
