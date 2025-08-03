@@ -24,7 +24,7 @@ define build
 	  -ldflags="$(3) \
 	  -buildid=$(SERIAL) \
 	  -X github.com/malivvan/vv.commit=$(COMMIT) \
-	  -X github.com/malivvan/vv.version=$(VERSION) \
+	  -X github.com/malivvan/vv.version=$(VERSION)" \
 	  -o build/$(OUTPUT) ./cmd
 	@if [ ! -f build/release.md ]; then \
 	  echo "| filename | serial |" > build/release.md; \
