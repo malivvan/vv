@@ -255,7 +255,7 @@ func TestBytecode_CountObjects(t *testing.T) {
 func fileSet(files ...srcfile) *parser.SourceFileSet {
 	fileSet := parser.NewFileSet()
 	for _, f := range files {
-		fileSet.AddFile(f.name, -1, f.size, 0)
+		fileSet.AddFile(f.name, -1, f.size)
 	}
 	return fileSet
 }

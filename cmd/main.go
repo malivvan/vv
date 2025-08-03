@@ -8,7 +8,6 @@ import (
 	"fmt"
 	"github.com/malivvan/vv/pkg/cui"
 	"github.com/malivvan/vv/pkg/cui/mdview"
-	"github.com/malivvan/vv/pkg/xxhash"
 	"io"
 	"os"
 	"path/filepath"
@@ -231,7 +230,7 @@ func RunREPL(ctx context.Context, modules *vvm.ModuleMap, in io.Reader, out io.W
 		}
 
 		line := stdin.Text()
-		srcFile := fileSet.AddFile("repl", -1, len(line), xxhash.Sum64String(line))
+		srcFile := fileSet.AddFile("repl", -1, len(line))
 		p := parser.NewParser(srcFile, []byte(line), nil)
 		file, err := p.ParseFile()
 		if err != nil {
@@ -256,9 +255,13 @@ func RunREPL(ctx context.Context, modules *vvm.ModuleMap, in io.Reader, out io.W
 	}
 }
 
-func compileSrc(modules *vvm.ModuleMap, src []byte, inputFile string) (*vvm.Bytecode, error) {
+func compileSrc(
+	modules *vvm.ModuleMap,
+	src []byte,
+	inputFile string,
+) (*vvm.Bytecode, error) {
 	fileSet := parser.NewFileSet()
-	srcFile := fileSet.AddFile(filepath.Base(inputFile), -1, len(src), xxhash.Sum64(src))
+	srcFile := fileSet.AddFile(filepath.Base(inputFile), -1, len(src))
 
 	p := parser.NewParser(srcFile, src, nil)
 	file, err := p.ParseFile()

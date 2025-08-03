@@ -477,26 +477,23 @@ func TestProgram_RunContext(t *testing.T) {
 
 func TestProgram_EncodeDecode(t *testing.T) {
 	p := compile(t, `for true {}`, nil)
-	p.Bytecode().MainFunction.SourceMap = nil // disable source map for testing as byte compare will fail due to map sorting
-	require.True(t, len(p.Bytecode().FileSet.Files) == 1, "Bytecode should have at least one file")
-	require.True(t, p.Bytecode().FileSet.Files[0].Hash == 12381665467826464835, "File hash should match expected value")
+	p.Bytecode().MainFunction.SourceMap = nil // remove source map as gob map encoding is not sorted deterministically
 
 	var buf bytes.Buffer
 	err := p.Encode(&buf)
 	require.NoError(t, err)
-	px := new(vvm.Program)
+	cx := new(vvm.Program)
 	b := buf.Bytes()
 
-	err = px.Decode(&buf, nil)
+	err = cx.Decode(&buf, nil)
 	require.NoError(t, err)
-	require.Equal(t, p, px)
-	require.True(t, len(px.Bytecode().FileSet.Files) == 1, "Bytecode should have at least one file")
-	require.True(t, px.Bytecode().FileSet.Files[0].Hash == 12381665467826464835, "File hash should match expected value")
+	require.Equal(t, p, cx)
 
 	var bufx bytes.Buffer
-	err = px.Encode(&bufx)
+	err = cx.Encode(&bufx)
 	require.NoError(t, err)
 	bx := bufx.Bytes()
+
 	require.Equal(t, b, bx, "encoded bytes should be equal")
 }
 
