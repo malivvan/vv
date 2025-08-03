@@ -43,6 +43,7 @@ endef
 install:
 	@go install golang.org/x/lint/golint@latest
 	@go install github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@latest
+	@go install gotest.tools/gotestsum@latest
 
 lint:
 	@golint -set_exit_status ./vvm/...
