@@ -5,7 +5,6 @@ import (
 	"github.com/malivvan/vv/pkg/cui"
 	"github.com/malivvan/vv/pkg/cui/chart"
 	"github.com/malivvan/vv/pkg/cui/editor"
-	"github.com/malivvan/vv/pkg/cui/mdview"
 	"github.com/malivvan/vv/pkg/cui/menu"
 	"github.com/malivvan/vv/pkg/cui/vte"
 	"github.com/malivvan/vv/vvm"
@@ -14,7 +13,6 @@ import (
 var _ cui.Primitive = (*chart.BarChart)(nil)
 var _ cui.Primitive = (*menu.MenuBar)(nil)
 var _ cui.Primitive = (*vte.Terminal)(nil)
-var _ cui.Primitive = (*mdview.Panel)(nil)
 var _ cui.Primitive = (*editor.View)(nil)
 
 var cuiModule = map[string]vvm.Object{
