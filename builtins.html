@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="img/icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="img/icon.ico">
+  <title>builtin functions</title>
+  <meta name="title" content="builtin functions" />
+  <meta name="description" content="the vv language" />
+  <meta name="keywords" content="vv" />
+
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/highlight.css">
+  <link rel="stylesheet" href="css/site.css">
+  <link rel="stylesheet" href="css/board.css">
+  <script src="js/highlight.js"></script>
+  <script src="js/live.js"></script>
+  <script src="js/umbrella.js"></script>
+
+</head>
+
+<body>
+<nav>
+  <a id="brand" href="./">VV</a>
+  <a href="./release.html">RELEASE</a>
+  <a href="https://github.com/malivvan/vv">SOURCE</a>
+</nav>
+<header>
+  <h1>builtin functions</h1>
+</header>
+<article><h2 id="format">format <a class="anchor" href="#format"> </a></h2>
+<p>Returns a formatted string. The first argument must be a String object. See
+<a href="https://github.com/malivvan/vv/blob/master/docs/formatting.md">this</a> for more
+details on formatting.</p>
+<pre><code class="language-golang">a := [1, 2, 3]
+s := format(&quot;Foo: %v&quot;, a) // s == &quot;Foo: [1, 2, 3]&quot;
+</code></pre>
+<h2 id="len">len <a class="anchor" href="#len"> </a></h2>
+<p>Returns the number of elements if the given variable is array, string, map, or
+module map.</p>
+<pre><code class="language-golang">v := [1, 2, 3]
+l := len(v) // l == 3
+</code></pre>
+<h2 id="copy">copy <a class="anchor" href="#copy"> </a></h2>
+<p>Creates a copy of the given variable. <code>copy</code> function calls <code>Object.Copy</code>
+interface method, which is expected to return a deep-copy of the value it holds.</p>
+<pre><code class="language-golang">v1 := [1, 2, 3]
+v2 := v1
+v3 := copy(v1)
+v1[1] = 0
+print(v2[1]) // &quot;0&quot;; 'v1' and 'v2' referencing the same array
+print(v3[1]) // &quot;2&quot;; 'v3' not affected by 'v1'
+</code></pre>
+<h2 id="append">append <a class="anchor" href="#append"> </a></h2>
+<p>Appends object(s) to an array (first argument) and returns a new array object.
+(Like Go&rsquo;s <code>append</code> builtin.) Currently, this function takes array type only.</p>
+<pre><code class="language-golang">v := [1]
+v = append(v, 2, 3) // v == [1, 2, 3]
+</code></pre>
+<h2 id="delete">delete <a class="anchor" href="#delete"> </a></h2>
+<p>Deletes the element with the specified key from the map type.
+First argument must be a map type and second argument must be a string type.
+(Like Go&rsquo;s <code>delete</code> builtin except keys are always string).
+<code>delete</code> returns <code>undefined</code> value if successful and it mutates given map.</p>
+<pre><code class="language-golang">v := {key: &quot;value&quot;}
+delete(v, &quot;key&quot;) // v == {}
+</code></pre>
+<pre><code class="language-golang">v := {key: &quot;value&quot;}
+delete(v, &quot;missing&quot;) // v == {&quot;key&quot;: &quot;value&quot;}
+</code></pre>
+<pre><code class="language-golang">delete({}) // runtime error, second argument is missing
+delete({}, 1) // runtime error, second argument must be a string type
+</code></pre>
+<h2 id="splice">splice <a class="anchor" href="#splice"> </a></h2>
+<p>Deletes and/or changes the contents of a given array and returns
+deleted items as a new array. <code>splice</code> is similar to
+JS <code>Array.prototype.splice()</code> except splice is a builtin function and
+first argument must an array. First argument must be an array, and
+if second and third arguments are provided those must be integers
+otherwise runtime error is returned.</p>
+<p>Usage:</p>
+<p><code>deleted_items := splice(array[, start[, delete_count[, item1[, item2[, ...]]]])</code></p>
+<pre><code class="language-golang">v := [1, 2, 3]
+items := splice(v, 0) // items == [1, 2, 3], v == []
+</code></pre>
+<pre><code class="language-golang">v := [1, 2, 3]
+items := splice(v, 1) // items == [2, 3], v == [1]
+</code></pre>
+<pre><code class="language-golang">v := [1, 2, 3]
+items := splice(v, 0, 1) // items == [1], v == [2, 3]
+</code></pre>
+<pre><code class="language-golang">// deleting
+v := [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]
+items := splice(v, 1, 2) // items == [&quot;b&quot;, &quot;c&quot;], v == [&quot;a&quot;]
+// splice(v, 1, 3) or splice(v, 1, 99) has same effect for this example
+</code></pre>
+<pre><code class="language-golang">// appending
+v := [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]
+items := splice(v, 3, 0, &quot;d&quot;, &quot;e&quot;) // items == [], v == [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;, &quot;d&quot;, &quot;e&quot;]
+</code></pre>
+<pre><code class="language-golang">// replacing
+v := [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]
+items := splice(v, 2, 1, &quot;d&quot;) // items == [&quot;c&quot;], v == [&quot;a&quot;, &quot;b&quot;, &quot;d&quot;]
+</code></pre>
+<pre><code class="language-golang">// inserting
+v := [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]
+items := splice(v, 0, 0, &quot;d&quot;, &quot;e&quot;) // items == [], v == [&quot;d&quot;, &quot;e&quot;, &quot;a&quot;, &quot;b&quot;, &quot;c&quot;]
+</code></pre>
+<pre><code class="language-golang">// deleting and inserting
+v := [&quot;a&quot;, &quot;b&quot;, &quot;c&quot;]
+items := splice(v, 1, 1, &quot;d&quot;, &quot;e&quot;) // items == [&quot;b&quot;], v == [&quot;a&quot;, &quot;d&quot;, &quot;e&quot;, &quot;c&quot;]
+</code></pre>
+<h1 id="routine-builtins">routine builtins <a class="anchor" href="#routine-builtins"> </a></h1>
+<h2 id="start">start <a class="anchor" href="#start"> </a></h2>
+<p>Starts an independent concurrent routine which runs fn(arg1, arg2, &hellip;)</p>
+<p>If fn is CompiledFunction, the current running VM will be cloned to create
+a new VM in which the CompiledFunction will be running.
+The fn can also be any object that has Call() method, such as BuiltinFunction,
+in which case no cloned VM will be created.
+Returns a routineVM object that has wait, result, abort methods.</p>
+<p>The routineVM will not exit unless:</p>
+<ol>
+<li>All its descendant routineVMs exit</li>
+<li>It calls abort()</li>
+<li>Its routineVM object abort() is called on behalf of its parent VM
+The latter 2 cases will trigger aborting procedure of all the descendant
+routineVMs, which will further result in #1 above.</li>
+</ol>
+<pre><code class="language-golang">var := 0
+
+f1 := func(a,b) { var = 10; return a+b }
+f2 := func(a,b,c) { var = 11; return a+b+c }
+
+rvm1 := start(f1,1,2)
+rvm2 := start(f2,1,2,5)
+
+fmt.println(rvm1.result()) // 3
+fmt.println(rvm2.result()) // 8
+fmt.println(var) // 10 or 11
+</code></pre>
+<ul>
+<li>wait() waits for the routineVM to complete up to timeout seconds and
+returns true if the routineVM exited(successfully or not) within the
+timeout. It waits forever if the optional timeout not specified,
+or timeout &lt; 0.</li>
+<li>abort() triggers the termination process of the routineVM and all
+its descendant VMs.</li>
+<li>result() waits the routineVM to complete, returns Error object if
+any runtime error occurred during the execution, otherwise returns the
+result value of fn(arg1, arg2, &hellip;)</li>
+</ul>
+<h3 id="1-client-1-server">1 client 1 server <a class="anchor" href="#1-client-1-server"> </a></h3>
+<p>Below is a simple client server example:</p>
+<pre><code class="language-golang">reqChan := chan(8)
+repChan := chan(8)
+
+client := func(interval) {
+	reqChan.send(&quot;hello&quot;)
+	for i := 0; true; i++ {
+		fmt.println(repChan.recv())
+		times.sleep(interval*times.second)
+		reqChan.send(i)
+	}
+}
+
+server := func() {
+	for {
+		req := reqChan.recv()
+		if req == &quot;hello&quot; {
+			fmt.println(req)
+			repChan.send(&quot;world&quot;)
+		} else {
+			repChan.send(req+100)
+		}
+	}
+}
+
+rClient := start(client, 2)
+rServer := start(server)
+
+if ok := rClient.wait(5); !ok {
+	rClient.abort()
+}
+rServer.abort()
+
+//output:
+//hello
+//world
+//100
+//101
+</code></pre>
+<h3 id="n-client-n-server-channel-in-channel">n client n server, channel in channel <a class="anchor" href="#n-client-n-server-channel-in-channel"> </a></h3>
+<pre><code class="language-golang">sharedReqChan := chan(128)
+
+client = func(name, interval, timeout) {
+	print := func(s) {
+		fmt.println(name, s)
+	}
+	print(&quot;started&quot;)
+
+	repChan := chan(1)
+	msg := {chan:repChan}
+
+	msg.data = &quot;hello&quot;
+	sharedReqChan.send(msg)
+	print(repChan.recv())
+
+	for i := 0; i * interval &lt; timeout; i++ {
+		msg.data = i
+		sharedReqChan.send(msg)
+		print(repChan.recv())
+		times.sleep(interval*times.second)
+	}
+}
+
+server = func(name) {
+	print := func(s) {
+		fmt.println(name, s)
+	}
+	print(&quot;started&quot;)
+
+	for {
+		req := sharedReqChan.recv()
+		if req.data == &quot;hello&quot; {
+			req.chan.send(&quot;world&quot;)
+		} else {
+			req.chan.send(req.data+100)
+		}
+	}
+}
+
+clients := func() {
+	for i :=0; i &lt; 5; i++ {
+		start(client, format(&quot;client %d: &quot;, i), 1, 4)
+	}
+}
+
+servers := func() {
+	for i :=0; i &lt; 2; i++ {
+		start(server, format(&quot;server %d: &quot;, i))
+	}
+}
+
+// After 4 seconds, all clients should have exited normally
+rclts := start(clients)
+// If servers exit earlier than clients, then clients may be
+// blocked forever waiting for the reply chan, because servers
+// were aborted with the req fetched from sharedReqChan before
+// sending back the reply.
+// In such case, do below to abort() the clients manually
+//start(func(){times.sleep(6*times.second); gclts.abort()})
+
+// Servers are infinite loop, abort() them after 5 seconds
+rsrvs := start(servers)
+if ok := rsrvs.wait(5); !ok {
+	rsrvs.abort()
+}
+
+// Main VM waits here until all the child &quot;go&quot; finish
+
+// If somehow the main VM is stuck, that is because there is
+// at least one child VM that has not exited as expected, we
+// can do abort() to force exit.
+abort()
+
+//output:
+//3
+//8
+//hello
+//world
+//100
+//101
+
+//unordered output:
+//client 4: started
+//server 0: started
+//client 4: world
+//client 4: 100
+//client 3: started
+//client 3: world
+//client 3: 100
+//client 2: started
+//client 2: world
+//client 2: 100
+//client 0: started
+//client 0: world
+//client 0: 100
+//client 1: started
+//client 1: world
+//client 1: 100
+//server 1: started
+//client 1: 101
+//client 2: 101
+//client 4: 101
+//client 0: 101
+//client 3: 101
+//client 3: 102
+//client 0: 102
+//client 2: 102
+//client 1: 102
+//client 4: 102
+//client 0: 103
+//client 3: 103
+//client 2: 103
+//client 1: 103
+//client 4: 103
+
+</code></pre>
+<h2 id="abort">abort <a class="anchor" href="#abort"> </a></h2>
+<p>Triggers the termination process of the current VM and all its descendant VMs.</p>
+<h2 id="chan">chan <a class="anchor" href="#chan"> </a></h2>
+<p>Makes a channel to send/receive object and returns a chan object that has
+send, recv, close methods.</p>
+<pre><code class="language-golang">unbufferedChan := chan()
+bufferedChan := chan(128)
+
+// Send will block if the channel is full.
+bufferedChan.send(&quot;hello&quot;) // send string
+bufferedChan.send(55) // send int
+bufferedChan.send([66, chan(1)]) // channel in channel
+
+// Receive will block if the channel is empty.
+obj := bufferedChan.recv()
+
+// Send to a closed channel causes panic.
+// Receive from a closed channel returns undefined value.
+unbufferedChan.close()
+bufferedChan.close()
+</code></pre>
+<p>On the time the VM that the chan is running in is aborted, the sending
+or receiving call returns immediately.</p>
+<h2 id="type-name">type_name <a class="anchor" href="#type-name"> </a></h2>
+<p>Returns the type_name of an object.</p>
+<pre><code class="language-golang">type_name(1) // int
+type_name(&quot;str&quot;) // string
+type_name([1, 2, 3]) // array
+</code></pre>
+<h2 id="string">string <a class="anchor" href="#string"> </a></h2>
+<p>Tries to convert an object to string object. See
+<a href="https://github.com/malivvan/vv/blob/master/docs/runtime-types.md">Runtime Types</a>
+for more details on type conversion.</p>
+<pre><code class="language-golang">x := string(123) //  x == &quot;123&quot;
+</code></pre>
+<p>Optionally it can take the second argument, which will be returned if the first
+argument cannot be converted to string. Note that the second argument does not
+have to be string.</p>
+<pre><code class="language-golang">v = string(undefined, &quot;foo&quot;)  // v == &quot;foo&quot;
+v = string(undefined, false)  // v == false
+</code></pre>
+<h2 id="int">int <a class="anchor" href="#int"> </a></h2>
+<p>Tries to convert an object to int object. See
+<a href="https://github.com/malivvan/vv/blob/master/docs/runtime-types.md">this</a>
+for more details on type conversion.</p>
+<pre><code class="language-golang">v := int(&quot;123&quot;) //  v == 123
+</code></pre>
+<p>Optionally it can take the second argument, which will be returned if the first
+argument cannot be converted to int. Note that the second argument does not have
+to be int.</p>
+<pre><code class="language-golang">v = int(undefined, 10)    // v == 10
+v = int(undefined, false) // v == false
+</code></pre>
+<h2 id="bool">bool <a class="anchor" href="#bool"> </a></h2>
+<p>Tries to convert an object to bool object. See
+<a href="https://github.com/malivvan/vv/blob/master/docs/runtime-types.md">this</a> for more
+details on type conversion.</p>
+<pre><code class="language-golang">v := bool(1) //  v == true
+</code></pre>
+<h2 id="float">float <a class="anchor" href="#float"> </a></h2>
+<p>Tries to convert an object to float object. See
+<a href="https://github.com/malivvan/vv/blob/master/docs/runtime-types.md">this</a> for more
+details on type conversion.</p>
+<pre><code class="language-golang">v := float(&quot;19.84&quot;) //  v == 19.84
+</code></pre>
+<p>Optionally it can take the second argument, which will be returned if the first
+argument cannot be converted to float. Note that the second argument does not
+have to be float.</p>
+<pre><code class="language-golang">v = float(undefined, 19.84)    // v == 19.84
+v = float(undefined, false)    // v == false
+</code></pre>
+<h2 id="char">char <a class="anchor" href="#char"> </a></h2>
+<p>Tries to convert an object to char object. See
+<a href="https://github.com/malivvan/vv/blob/master/docs/runtime-types.md">this</a> for more
+details on type conversion.</p>
+<pre><code class="language-golang">v := char(89) //  v == 'Y'
+</code></pre>
+<p>Optionally it can take the second argument, which will be returned if the first
+argument cannot be converted to float. Note that the second argument does not
+have to be float.</p>
+<pre><code class="language-golang">v = char(undefined, 'X')    // v == 'X'
+v = char(undefined, false)  // v == false
+</code></pre>
+<h2 id="bytes">bytes <a class="anchor" href="#bytes"> </a></h2>
+<p>Tries to convert an object to bytes object. See
+<a href="https://github.com/malivvan/vv/blob/master/docs/runtime-types.md">this</a> for more
+details on type conversion.</p>
+<pre><code class="language-golang">v := bytes(&quot;foo&quot;) //  v == [102 111 111]
+</code></pre>
+<p>Optionally it can take the second argument, which will be returned if the first
+argument cannot be converted to float. Note that the second argument does not
+have to be float.</p>
+<pre><code class="language-golang">v = bytes(undefined, bytes(&quot;foo&quot;))    // v == bytes(&quot;foo&quot;)
+v = bytes(undefined, false)           // v == false
+</code></pre>
+<p>If you pass an int to <code>bytes()</code> function, it will create a new byte object with
+the given size.</p>
+<pre><code class="language-golang">v := bytes(100)
+</code></pre>
+<h2 id="time">time <a class="anchor" href="#time"> </a></h2>
+<p>Tries to convert an object to time value.</p>
+<pre><code class="language-golang">v := time(1257894000) // 2009-11-10 23:00:00 +0000 UTC
+</code></pre>
+<h2 id="is-string">is_string <a class="anchor" href="#is-string"> </a></h2>
+<p>Returns <code>true</code> if the object&rsquo;s type is string. Or it returns <code>false</code>.</p>
+<h2 id="is-int">is_int <a class="anchor" href="#is-int"> </a></h2>
+<p>Returns <code>true</code> if the object&rsquo;s type is int. Or it returns <code>false</code>.</p>
+<h2 id="is-bool">is_bool <a class="anchor" href="#is-bool"> </a></h2>
+<p>Returns <code>true</code> if the object&rsquo;s type is bool. Or it returns <code>false</code>.</p>
+<h2 id="is-float">is_float <a class="anchor" href="#is-float"> </a></h2>
+<p>Returns <code>true</code> if the object&rsquo;s type is float. Or it returns <code>false</code>.</p>
+<h2 id="is-char">is_char <a class="anchor" href="#is-char"> </a></h2>
+<p>Returns <code>true</code> if the object&rsquo;s type is char. Or it returns <code>false</code>.</p>
+<h2 id="is-bytes">is_bytes <a class="anchor" href="#is-bytes"> </a></h2>
+<p>Returns <code>true</code> if the object&rsquo;s type is bytes. Or it returns <code>false</code>.</p>
+<h2 id="is-error">is_error <a class="anchor" href="#is-error"> </a></h2>
+<p>Returns <code>true</code> if the object&rsquo;s type is error. Or it returns <code>false</code>.</p>
+<h2 id="is-undefined">is_undefined <a class="anchor" href="#is-undefined"> </a></h2>
+<p>Returns <code>true</code> if the object&rsquo;s type is undefined. Or it returns <code>false</code>.</p>
+<h2 id="is-function">is_function <a class="anchor" href="#is-function"> </a></h2>
+<p>Returns <code>true</code> if the object&rsquo;s type is function or closure. Or it returns
+<code>false</code>. Note that <code>is_function</code> returns <code>false</code> for builtin functions and
+user-provided callable objects.</p>
+<h2 id="is-callable">is_callable <a class="anchor" href="#is-callable"> </a></h2>
+<p>Returns <code>true</code> if the object is callable (e.g. function, closure, builtin
+function, or user-provided callable objects). Or it returns <code>false</code>.</p>
+<h2 id="is-array">is_array <a class="anchor" href="#is-array"> </a></h2>
+<p>Returns <code>true</code> if the object&rsquo;s type is array. Or it returns <code>false</code>.</p>
+<h2 id="is-immutable-array">is_immutable_array <a class="anchor" href="#is-immutable-array"> </a></h2>
+<p>Returns <code>true</code> if the object&rsquo;s type is immutable array. Or it returns <code>false</code>.</p>
+<h2 id="is-map">is_map <a class="anchor" href="#is-map"> </a></h2>
+<p>Returns <code>true</code> if the object&rsquo;s type is map. Or it returns <code>false</code>.</p>
+<h2 id="is-immutable-map">is_immutable_map <a class="anchor" href="#is-immutable-map"> </a></h2>
+<p>Returns <code>true</code> if the object&rsquo;s type is immutable map. Or it returns <code>false</code>.</p>
+<h2 id="is-iterable">is_iterable <a class="anchor" href="#is-iterable"> </a></h2>
+<p>Returns <code>true</code> if the object&rsquo;s type is iterable: array, immutable array, map,
+immutable map, string, and bytes are iterable types in VV.</p>
+<h2 id="is-time">is_time <a class="anchor" href="#is-time"> </a></h2>
+<p>Returns <code>true</code> if the object&rsquo;s type is time. Or it returns <code>false</code>.</p>
+</article>
+<footer>
+  <div style="float: left;">Copyright &copy; malivvan</div>
+  <div style="float: right;">Last modified <time datetime="2025-08-03T08:54:47Z+00:00
+">Sun Aug  3 08:54:47 UTC 2025
+</time></div>
+</footer>
+<script>
+  hljs.highlightAll();
+</script>
+</body>
+
+</html>

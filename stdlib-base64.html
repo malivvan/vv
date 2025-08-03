@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="img/icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="img/icon.ico">
+  <title>Standard Library - base64</title>
+  <meta name="title" content="Standard Library - base64" />
+  <meta name="description" content="the vv language" />
+  <meta name="keywords" content="vv" />
+
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/highlight.css">
+  <link rel="stylesheet" href="css/site.css">
+  <link rel="stylesheet" href="css/board.css">
+  <script src="js/highlight.js"></script>
+  <script src="js/live.js"></script>
+  <script src="js/umbrella.js"></script>
+
+</head>
+
+<body>
+<nav>
+  <a id="brand" href="./">VV</a>
+  <a href="./release.html">RELEASE</a>
+  <a href="https://github.com/malivvan/vv">SOURCE</a>
+</nav>
+<header>
+  <h1>Standard Library - base64</h1>
+</header>
+<article><pre><code class="language-golang">fmt := import(&quot;base64&quot;)
+</code></pre>
+<h2 id="functions">Functions <a class="anchor" href="#functions"> </a></h2>
+<ul>
+<li><code>encode(src)</code>: returns the base64 encoding of src.</li>
+<li><code>decode(s)</code>: returns the bytes represented by the base64 string s.</li>
+<li><code>raw_encode(src)</code>: returns the base64 encoding of src but omits the padding.</li>
+<li><code>raw_decode(s)</code>: returns the bytes represented by the base64 string s which
+omits the padding.</li>
+<li><code>url_encode(src)</code>: returns the url-base64 encoding of src.</li>
+<li><code>url_decode(s)</code>: returns the bytes represented by the url-base64 string s.</li>
+<li><code>raw_url_encode(src)</code>: returns the url-base64 encoding of src but omits the
+padding.</li>
+<li><code>raw_url_decode(s)</code>: returns the bytes represented by the url-base64 string
+s which omits the padding.</li>
+</ul>
+</article>
+<footer>
+  <div style="float: left;">Copyright &copy; malivvan</div>
+  <div style="float: right;">Last modified <time datetime="2025-08-03T08:54:47Z+00:00
+">Sun Aug  3 08:54:47 UTC 2025
+</time></div>
+</footer>
+<script>
+  hljs.highlightAll();
+</script>
+</body>
+
+</html>

@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="img/icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="img/icon.ico">
+  <title>Standard Library - math</title>
+  <meta name="title" content="Standard Library - math" />
+  <meta name="description" content="the vv language" />
+  <meta name="keywords" content="vv" />
+
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/highlight.css">
+  <link rel="stylesheet" href="css/site.css">
+  <link rel="stylesheet" href="css/board.css">
+  <script src="js/highlight.js"></script>
+  <script src="js/live.js"></script>
+  <script src="js/umbrella.js"></script>
+
+</head>
+
+<body>
+<nav>
+  <a id="brand" href="./">VV</a>
+  <a href="./release.html">RELEASE</a>
+  <a href="https://github.com/malivvan/vv">SOURCE</a>
+</nav>
+<header>
+  <h1>Standard Library - math</h1>
+</header>
+<article><pre><code class="language-golang">math := import(&quot;math&quot;)
+</code></pre>
+<h2 id="constants">Constants <a class="anchor" href="#constants"> </a></h2>
+<ul>
+<li><code>e</code></li>
+<li><code>pi</code></li>
+<li><code>phi</code></li>
+<li><code>sqrt2</code></li>
+<li><code>sqrtE</code></li>
+<li><code>sprtPi</code></li>
+<li><code>sqrtPhi</code></li>
+<li><code>ln2</code></li>
+<li><code>log2E</code></li>
+<li><code>ln10</code></li>
+<li><code>ln10E</code></li>
+</ul>
+<h2 id="functions">Functions <a class="anchor" href="#functions"> </a></h2>
+<ul>
+<li><code>abs(x float) =&gt; float</code>: returns the absolute value of x.</li>
+<li><code>acos(x float) =&gt; float</code>: returns the arccosine, in radians, of x.</li>
+<li><code>acosh(x float) =&gt; float</code>: returns the inverse hyperbolic cosine of x.</li>
+<li><code>asin(x float) =&gt; float</code>: returns the arcsine, in radians, of x.</li>
+<li><code>asinh(x float) =&gt; float</code>: returns the inverse hyperbolic sine of x.</li>
+<li><code>atan(x float) =&gt; float</code>: returns the arctangent, in radians, of x.</li>
+<li><code>atan2(y float, xfloat) =&gt; float</code>: returns the arc tangent of y/x, using the
+signs of the two to determine the quadrant of the return value.</li>
+<li><code>atanh(x float) =&gt; float</code>: returns the inverse hyperbolic tangent of x.</li>
+<li><code>cbrt(x float) =&gt; float</code>: returns the cube root of x.</li>
+<li><code>ceil(x float) =&gt; float</code>: returns the least integer value greater than or
+equal to x.</li>
+<li><code>copysign(x float, y float) =&gt; float</code>: returns a value with the magnitude of
+x and the sign of y.</li>
+<li><code>cos(x float) =&gt; float</code>: returns the cosine of the radian argument x.</li>
+<li><code>cosh(x float) =&gt; float</code>: returns the hyperbolic cosine of x.</li>
+<li><code>dim(x float, y float) =&gt; float</code>: returns the maximum of x-y or 0.</li>
+<li><code>erf(x float) =&gt; float</code>: returns the error function of x.</li>
+<li><code>erfc(x float) =&gt; float</code>: returns the complementary error function of x.</li>
+<li><code>exp(x float) =&gt; float</code>: returns e**x, the base-e exponential of x.</li>
+<li><code>exp2(x float) =&gt; float</code>: returns 2**x, the base-2 exponential of x.</li>
+<li><code>expm1(x float) =&gt; float</code>: returns e**x - 1, the base-e exponential of x
+minus 1. It is more accurate than Exp(x) - 1 when x is near zero.</li>
+<li><code>floor(x float) =&gt; float</code>: returns the greatest integer value less than or
+equal to x.</li>
+<li><code>gamma(x float) =&gt; float</code>: returns the Gamma function of x.</li>
+<li><code>hypot(p float, q float) =&gt; float</code>: returns <code>Sqrt(p * p + q * q)</code>, taking care
+to avoid unnecessary overflow and underflow.</li>
+<li><code>ilogb(x float) =&gt; float</code>: returns the binary exponent of x as an integer.</li>
+<li><code>inf(sign int) =&gt; float</code>: returns positive infinity if sign &gt;= 0, negative
+infinity if sign &lt; 0.</li>
+<li><code>is_inf(f float, sign int) =&gt; float</code>: reports whether f is an infinity,
+according to sign. If sign &gt; 0, IsInf reports whether f is positive infinity.
+If sign &lt; 0, IsInf reports whether f is negative infinity. If sign == 0,
+IsInf reports whether f is either infinity.</li>
+<li><code>is_nan(f float) =&gt; float</code>: reports whether f is an IEEE 754 ``not-a-number&rsquo;'
+value.</li>
+<li><code>j0(x float) =&gt; float</code>: returns the order-zero Bessel function of the first
+kind.</li>
+<li><code>j1(x float) =&gt; float</code>: returns the order-one Bessel function of the first
+kind.</li>
+<li><code>jn(n int, x float) =&gt; float</code>: returns the order-n Bessel function of the
+first kind.</li>
+<li><code>ldexp(frac float, exp int) =&gt; float</code>: is the inverse of frexp. It returns
+frac × 2**exp.</li>
+<li><code>log(x float) =&gt; float</code>: returns the natural logarithm of x.</li>
+<li><code>log10(x float) =&gt; float</code>: returns the decimal logarithm of x.</li>
+<li><code>log1p(x float) =&gt; float</code>: returns the natural logarithm of 1 plus its
+argument x. It is more accurate than Log(1 + x) when x is near zero.</li>
+<li><code>log2(x float) =&gt; float</code>: returns the binary logarithm of x.</li>
+<li><code>logb(x float) =&gt; float</code>: returns the binary exponent of x.</li>
+<li><code>max(x float, y float) =&gt; float</code>: returns the larger of x or y.</li>
+<li><code>min(x float, y float) =&gt; float</code>: returns the smaller of x or y.</li>
+<li><code>mod(x float, y float) =&gt; float</code>: returns the floating-point remainder of x/y.</li>
+<li><code>nan() =&gt; float</code>: returns an IEEE 754 ``not-a-number&rsquo;&rsquo; value.</li>
+<li><code>nextafter(x float, y float) =&gt; float</code>: returns the next representable
+float64 value after x towards y.</li>
+<li><code>pow(x float, y float) =&gt; float</code>: returns x**y, the base-x exponential of y.</li>
+<li><code>pow10(n int) =&gt; float</code>: returns 10**n, the base-10 exponential of n.</li>
+<li><code>remainder(x float, y float) =&gt; float</code>: returns the IEEE 754 floating-point
+remainder of x/y.</li>
+<li><code>signbit(x float) =&gt; float</code>: returns true if x is negative or negative zero.</li>
+<li><code>sin(x float) =&gt; float</code>: returns the sine of the radian argument x.</li>
+<li><code>sinh(x float) =&gt; float</code>: returns the hyperbolic sine of x.</li>
+<li><code>sqrt(x float) =&gt; float</code>: returns the square root of x.</li>
+<li><code>tan(x float) =&gt; float</code>: returns the tangent of the radian argument x.</li>
+<li><code>tanh(x float) =&gt; float</code>: returns the hyperbolic tangent of x.</li>
+<li><code>trunc(x float) =&gt; float</code>: returns the integer value of x.</li>
+<li><code>y0(x float) =&gt; float</code>: returns the order-zero Bessel function of the second
+kind.</li>
+<li><code>y1(x float) =&gt; float</code>: returns the order-one Bessel function of the second
+kind.</li>
+<li><code>yn(n int, x float) =&gt; float</code>: returns the order-n Bessel function of the
+second kind.</li>
+</ul>
+</article>
+<footer>
+  <div style="float: left;">Copyright &copy; malivvan</div>
+  <div style="float: right;">Last modified <time datetime="2025-08-03T08:54:47Z+00:00
+">Sun Aug  3 08:54:47 UTC 2025
+</time></div>
+</footer>
+<script>
+  hljs.highlightAll();
+</script>
+</body>
+
+</html>

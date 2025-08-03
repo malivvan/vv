@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="img/icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="img/icon.ico">
+  <title>operators</title>
+  <meta name="title" content="operators" />
+  <meta name="description" content="the vv language" />
+  <meta name="keywords" content="vv" />
+
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/highlight.css">
+  <link rel="stylesheet" href="css/site.css">
+  <link rel="stylesheet" href="css/board.css">
+  <script src="js/highlight.js"></script>
+  <script src="js/live.js"></script>
+  <script src="js/umbrella.js"></script>
+
+</head>
+
+<body>
+<nav>
+  <a id="brand" href="./">VV</a>
+  <a href="./release.html">RELEASE</a>
+  <a href="https://github.com/malivvan/vv">SOURCE</a>
+</nav>
+<header>
+  <h1>operators</h1>
+</header>
+<article><h2 id="int">Int <a class="anchor" href="#int"> </a></h2>
+<h3 id="equality">Equality <a class="anchor" href="#equality"> </a></h3>
+<ul>
+<li><code>(int) == (int) = (bool)</code>: equality</li>
+<li><code>(int) != (int) = (bool)</code>: inequality</li>
+</ul>
+<h3 id="arithmetic-operators">Arithmetic Operators <a class="anchor" href="#arithmetic-operators"> </a></h3>
+<ul>
+<li><code>(int) + (int) = (int)</code>: sum</li>
+<li><code>(int) - (int) = (int)</code>: difference</li>
+<li><code>(int) * (int) = (int)</code>: product</li>
+<li><code>(int) / (int) = (int)</code>: quotient</li>
+<li><code>(int) % (int) = (int)</code>: remainder</li>
+<li><code>(int) + (float) = (float)</code>: sum</li>
+<li><code>(int) - (float) = (float)</code>: difference</li>
+<li><code>(int) * (float) = (float)</code>: product</li>
+<li><code>(int) / (float) = (float)</code>: quotient</li>
+<li><code>(int) + (char) = (char)</code>: sum</li>
+<li><code>(int) - (char) = (char)</code>: difference</li>
+</ul>
+<h3 id="bitwise-operators">Bitwise Operators <a class="anchor" href="#bitwise-operators"> </a></h3>
+<ul>
+<li><code>(int) &amp; (int) = (int)</code>: bitwise AND</li>
+<li><code>(int) | (int) = (int)</code>: bitwise OR</li>
+<li><code>(int) ^ (int) = (int)</code>: bitwise XOR</li>
+<li><code>(int) &amp;^ (int) = (int)</code>: bitclear (AND NOT)</li>
+<li><code>(int) &lt;&lt; (int) = (int)</code>: left shift</li>
+<li><code>(int) &gt;&gt; (int) = (int)</code>: right shift</li>
+</ul>
+<h3 id="comparison-operators">Comparison Operators <a class="anchor" href="#comparison-operators"> </a></h3>
+<ul>
+<li><code>(int) &lt; (int) = (bool)</code>: less than</li>
+<li><code>(int) &gt; (int) = (bool)</code>: greater than</li>
+<li><code>(int) &lt;= (int) = (bool)</code>: less than or equal to</li>
+<li><code>(int) &gt;= (int) = (bool)</code>: greater than or equal to</li>
+<li><code>(int) &lt; (float) = (bool)</code>: less than</li>
+<li><code>(int) &gt; (float) = (bool)</code>: greater than</li>
+<li><code>(int) &lt;= (float) = (bool)</code>: less than or equal to</li>
+<li><code>(int) &gt;= (float) = (bool)</code>: greater than or equal to</li>
+<li><code>(int) &lt; (char) = (bool)</code>: less than</li>
+<li><code>(int) &gt; (char) = (bool)</code>: greater than</li>
+<li><code>(int) &lt;= (char) = (bool)</code>: less than or equal to</li>
+<li><code>(int) &gt;= (char) = (bool)</code>: greater than or equal to</li>
+</ul>
+<h2 id="float">Float <a class="anchor" href="#float"> </a></h2>
+<h3 id="equality-1">Equality <a class="anchor" href="#equality-1"> </a></h3>
+<ul>
+<li><code>(float) == (float) = (bool)</code>: equality</li>
+<li><code>(float) != (float) = (bool)</code>: inequality</li>
+</ul>
+<h3 id="arithmetic-operators-1">Arithmetic Operators <a class="anchor" href="#arithmetic-operators-1"> </a></h3>
+<ul>
+<li><code>(float) + (float) = (float)</code>: sum</li>
+<li><code>(float) - (float) = (float)</code>: difference</li>
+<li><code>(float) * (float) = (float)</code>: product</li>
+<li><code>(float) / (float) = (float)</code>: quotient</li>
+<li><code>(float) + (int) = (int)</code>: sum</li>
+<li><code>(float) - (int) = (int)</code>: difference</li>
+<li><code>(float) * (int) = (int)</code>: product</li>
+<li><code>(float) / (int) = (int)</code>: quotient</li>
+</ul>
+<h3 id="comparison-operators-1">Comparison Operators <a class="anchor" href="#comparison-operators-1"> </a></h3>
+<ul>
+<li><code>(float) &lt; (float) = (bool)</code>: less than</li>
+<li><code>(float) &gt; (float) = (bool)</code>: greater than</li>
+<li><code>(float) &lt;= (float) = (bool)</code>: less than or equal to</li>
+<li><code>(float) &gt;= (float) = (bool)</code>: greater than or equal to</li>
+<li><code>(float) &lt; (int) = (bool)</code>: less than</li>
+<li><code>(float) &gt; (int) = (bool)</code>: greater than</li>
+<li><code>(float) &lt;= (int) = (bool)</code>: less than or equal to</li>
+<li><code>(float) &gt;= (int) = (bool)</code>: greater than or equal to</li>
+</ul>
+<h2 id="string">String <a class="anchor" href="#string"> </a></h2>
+<h3 id="equality-2">Equality <a class="anchor" href="#equality-2"> </a></h3>
+<ul>
+<li><code>(string) == (string) = (bool)</code>: equality</li>
+<li><code>(string) != (string) = (bool)</code>: inequality</li>
+</ul>
+<h3 id="concatenation">Concatenation <a class="anchor" href="#concatenation"> </a></h3>
+<ul>
+<li><code>(string) + (string) = (string)</code>: concatenation</li>
+<li><code>(string) + (other types) = (string)</code>: concatenation (after string-converted)</li>
+</ul>
+<h3 id="comparison-operators-2">Comparison Operators <a class="anchor" href="#comparison-operators-2"> </a></h3>
+<ul>
+<li><code>(string) &lt; (string) = (bool)</code>: less than</li>
+<li><code>(string) &gt; (string) = (bool)</code>: greater than</li>
+<li><code>(string) &lt;= (string) = (bool)</code>: less than or equal to</li>
+<li><code>(string) &gt;= (string) = (bool)</code>: greater than or equal to</li>
+</ul>
+<h2 id="char">Char <a class="anchor" href="#char"> </a></h2>
+<h3 id="equality-3">Equality <a class="anchor" href="#equality-3"> </a></h3>
+<ul>
+<li><code>(char) == (char) = (bool)</code>: equality</li>
+<li><code>(char) != (char) = (bool)</code>: inequality</li>
+</ul>
+<h3 id="arithmetic-operators-2">Arithmetic Operators <a class="anchor" href="#arithmetic-operators-2"> </a></h3>
+<ul>
+<li><code>(char) + (char) = (char)</code>: sum</li>
+<li><code>(char) - (char) = (char)</code>: difference</li>
+<li><code>(char) + (int) = (char)</code>: sum</li>
+<li><code>(char) - (int) = (char)</code>: difference</li>
+</ul>
+<h3 id="comparison-operators-3">Comparison Operators <a class="anchor" href="#comparison-operators-3"> </a></h3>
+<ul>
+<li><code>(char) &lt; (char) = (bool)</code>: less than</li>
+<li><code>(char) &gt; (char) = (bool)</code>: greater than</li>
+<li><code>(char) &lt;= (char) = (bool)</code>: less than or equal to</li>
+<li><code>(char) &gt;= (char) = (bool)</code>: greater than or equal to</li>
+<li><code>(char) &lt; (int) = (bool)</code>: less than</li>
+<li><code>(char) &gt; (int) = (bool)</code>: greater than</li>
+<li><code>(char) &lt;= (int) = (bool)</code>: less than or equal to</li>
+<li><code>(char) &gt;= (int) = (bool)</code>: greater than or equal to</li>
+</ul>
+<h2 id="bool">Bool <a class="anchor" href="#bool"> </a></h2>
+<h3 id="equality-4">Equality <a class="anchor" href="#equality-4"> </a></h3>
+<ul>
+<li><code>(bool) == (bool) = (bool)</code>: equality</li>
+<li><code>(bool) != (bool) = (bool)</code>: inequality</li>
+</ul>
+<h2 id="bytes">Bytes <a class="anchor" href="#bytes"> </a></h2>
+<h3 id="equality-5">Equality <a class="anchor" href="#equality-5"> </a></h3>
+<p>Test whether two byte array contain the same data. Uses
+<a href="https://golang.org/pkg/bytes/#Compare">bytes.Compare</a> internally.</p>
+<ul>
+<li><code>(bytes) == (bytes) = (bool)</code>: equality</li>
+<li><code>(bytes) != (bytes) = (bool)</code>: inequality</li>
+</ul>
+<h2 id="time">Time <a class="anchor" href="#time"> </a></h2>
+<h3 id="equality-6">Equality <a class="anchor" href="#equality-6"> </a></h3>
+<p>Tests whether two times represent the same time instance. Uses
+<a href="https://golang.org/pkg/time/#Time.Equal">Time.Equal</a> internally.</p>
+<ul>
+<li><code>(time) == (time) = (bool)</code>: equality</li>
+<li><code>(time) != (time) = (bool)</code>: inequality</li>
+</ul>
+<h3 id="arithmetic-operators-3">Arithmetic Operators <a class="anchor" href="#arithmetic-operators-3"> </a></h3>
+<ul>
+<li><code>(time) - (time) = (int)</code>: difference in nanoseconds (duration)</li>
+<li><code>(time) + (int) = (time)</code>: time + duration (nanoseconds)</li>
+<li><code>(time) - (int) = (time)</code>: time - duration (nanoseconds)</li>
+</ul>
+<h3 id="comparison-operators-4">Comparison Operators <a class="anchor" href="#comparison-operators-4"> </a></h3>
+<ul>
+<li><code>(time) &lt; (time) = (bool)</code>: less than</li>
+<li><code>(time) &gt; (time) = (bool)</code>: greater than</li>
+<li><code>(time) &lt;= (time) = (bool)</code>: less than or equal to</li>
+<li><code>(time) &gt;= (time) = (bool)</code>: greater than or equal to</li>
+</ul>
+<h2 id="array-and-immutablearray">Array and ImmutableArray <a class="anchor" href="#array-and-immutablearray"> </a></h2>
+<h3 id="equality-7">Equality <a class="anchor" href="#equality-7"> </a></h3>
+<p>Tests whether two <em>(immutable)</em> arrays contain the same objects.</p>
+<ul>
+<li><code>(array) == (array) = (bool)</code>: equality</li>
+<li><code>(array) != (array) = (bool)</code>: inequality</li>
+<li><code>(array) == (immutable-array) = (bool)</code>: equality</li>
+<li><code>(array) != (immutable-array) = (bool)</code>: inequality</li>
+<li><code>(immutable-array) == (immutable-array) = (bool)</code>: equality</li>
+<li><code>(immutable-array) != (immutable-array) = (bool)</code>: inequality</li>
+<li><code>(immutable-array) == (array) = (bool)</code>: equality</li>
+<li><code>(immutable-array) != (array) = (bool)</code>: inequality</li>
+</ul>
+<h3 id="concatenation-1">Concatenation <a class="anchor" href="#concatenation-1"> </a></h3>
+<ul>
+<li><code>(array) + (array)</code>: return a concatenated array</li>
+</ul>
+<h2 id="map-and-immutablemap">Map and ImmutableMap <a class="anchor" href="#map-and-immutablemap"> </a></h2>
+<h3 id="equality-8">Equality <a class="anchor" href="#equality-8"> </a></h3>
+<p>Tests whether two <em>(immutable)</em> maps contain the same key-objects.</p>
+<ul>
+<li><code>(map) == (map) = (bool)</code>: equality</li>
+<li><code>(map) != (map) = (bool)</code>: inequality</li>
+<li><code>(map) == (immutable-map) = (bool)</code>: equality</li>
+<li><code>(map) != (immutable-map) = (bool)</code>: inequality</li>
+<li><code>(immutable-map) == (immutable-map) = (bool)</code>: equality</li>
+<li><code>(immutable-map) != (immutable-map) = (bool)</code>: inequality</li>
+<li><code>(immutable-map) == (map) = (bool)</code>: equality</li>
+<li><code>(immutable-map) != (map) = (bool)</code>: inequality</li>
+</ul>
+</article>
+<footer>
+  <div style="float: left;">Copyright &copy; malivvan</div>
+  <div style="float: right;">Last modified <time datetime="2025-08-03T08:54:47Z+00:00
+">Sun Aug  3 08:54:47 UTC 2025
+</time></div>
+</footer>
+<script>
+  hljs.highlightAll();
+</script>
+</body>
+
+</html>

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="img/icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="img/icon.ico">
+  <title>cli</title>
+  <meta name="title" content="cli" />
+  <meta name="description" content="the vv language" />
+  <meta name="keywords" content="vv" />
+
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/highlight.css">
+  <link rel="stylesheet" href="css/site.css">
+  <link rel="stylesheet" href="css/board.css">
+  <script src="js/highlight.js"></script>
+  <script src="js/live.js"></script>
+  <script src="js/umbrella.js"></script>
+
+</head>
+
+<body>
+<nav>
+  <a id="brand" href="./">VV</a>
+  <a href="./release.html">RELEASE</a>
+  <a href="https://github.com/malivvan/vv">SOURCE</a>
+</nav>
+<header>
+  <h1>cli</h1>
+</header>
+<article><p>VV is designed as an embedding script language for Go, but, it can also be
+compiled and executed as native binary using <code>vv</code> CLI tool.</p>
+<h2 id="installing-vv-cli">Installing VV CLI <a class="anchor" href="#installing-vv-cli"> </a></h2>
+<p>To install <code>vv</code> tool, run:</p>
+<pre><code class="language-bash">go get github.com/malivvan/vv/cmd/vv
+</code></pre>
+<p>Or, you can download the precompiled binaries from
+<a href="https://github.com/malivvan/vv/releases/latest">here</a>.</p>
+<h2 id="compiling-and-executing-vv-code">Compiling and Executing VV Code <a class="anchor" href="#compiling-and-executing-vv-code"> </a></h2>
+<p>You can directly execute the VV source code by running <code>vv</code> tool with
+your VV source file (<code>*.vv</code>).</p>
+<pre><code class="language-bash">vv myapp.vv
+</code></pre>
+<p>Or, you can compile the code into a binary file and execute it later.</p>
+<pre><code class="language-bash">vv -o myapp myapp.vv   # compile 'myapp.vv' into binary file 'myapp'
+vv myapp                  # execute the compiled binary `myapp`
+</code></pre>
+<p>Or, you can make vv source file executable</p>
+<pre><code class="language-bash"># copy vv executable to a dir where PATH environment variable includes
+cp vv /usr/local/bin/
+
+# add shebang line to source file
+cat &gt; myapp.vv &lt;&lt; EOF
+#!/usr/local/bin/vv
+fmt := import(&quot;fmt&quot;)
+fmt.println(&quot;Hello World!&quot;)
+EOF
+
+# make myapp.vv file executable
+chmod +x myapp.vv
+
+# run your script
+./myapp.vv
+</code></pre>
+<p><strong>Note: Your source file must have <code>.vv</code> extension.</strong></p>
+<h2 id="resolving-relative-import-paths">Resolving Relative Import Paths <a class="anchor" href="#resolving-relative-import-paths"> </a></h2>
+<p>If there are vv source module files which are imported with relative import
+paths, CLI has <code>-resolve</code> flag. Flag enables to import a module relative to
+importing file. This behavior will be default at version 3.</p>
+<h2 id="vv-repl">VV REPL <a class="anchor" href="#vv-repl"> </a></h2>
+<p>You can run VV <a href="https://en.wikipedia.org/wiki/Read%E2%80%93eval%E2%80%93print_loop">REPL</a>
+if you run <code>vv</code> with no arguments.</p>
+<pre><code class="language-bash">vv
+</code></pre>
+</article>
+<footer>
+  <div style="float: left;">Copyright &copy; malivvan</div>
+  <div style="float: right;">Last modified <time datetime="2025-08-03T08:54:47Z+00:00
+">Sun Aug  3 08:54:47 UTC 2025
+</time></div>
+</footer>
+<script>
+  hljs.highlightAll();
+</script>
+</body>
+
+</html>

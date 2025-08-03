@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="img/icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="img/icon.ico">
+  <title>runtime types</title>
+  <meta name="title" content="runtime types" />
+  <meta name="description" content="the vv language" />
+  <meta name="keywords" content="vv" />
+
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/highlight.css">
+  <link rel="stylesheet" href="css/site.css">
+  <link rel="stylesheet" href="css/board.css">
+  <script src="js/highlight.js"></script>
+  <script src="js/live.js"></script>
+  <script src="js/umbrella.js"></script>
+
+</head>
+
+<body>
+<nav>
+  <a id="brand" href="./">VV</a>
+  <a href="./release.html">RELEASE</a>
+  <a href="https://github.com/malivvan/vv">SOURCE</a>
+</nav>
+<header>
+  <h1>runtime types</h1>
+</header>
+<article><ul>
+<li><strong>Int</strong>: signed 64bit integer</li>
+<li><strong>String</strong>: string</li>
+<li><strong>Float</strong>: 64bit floating point</li>
+<li><strong>Bool</strong>: boolean</li>
+<li><strong>Char</strong>: character (<code>rune</code> in Go)</li>
+<li><strong>Bytes</strong>: byte array (<code>[]byte</code> in Go)</li>
+<li><strong>Array</strong>: objects array (<code>[]Object</code> in Go)</li>
+<li><strong>ImmutableArray</strong>: immutable object array (<code>[]Object</code> in Go)</li>
+<li><strong>Map</strong>: objects map with string keys (<code>map[string]Object</code> in Go)</li>
+<li><strong>ImmutableMap</strong>: immutable object map with string keys (<code>map[string]Object</code>
+in Go)</li>
+<li><strong>Time</strong>: time (<code>time.Time</code> in Go)</li>
+<li><strong>Error</strong>: an error with underlying Object value of any type</li>
+<li><strong>Undefined</strong>: undefined</li>
+</ul>
+<h2 id="type-conversioncoercion-table">Type Conversion/Coercion Table <a class="anchor" href="#type-conversioncoercion-table"> </a></h2>
+<table>
+<thead>
+<tr>
+<th align="center">src\dst</th>
+<th align="center">Int</th>
+<th align="center">String</th>
+<th align="center">Float</th>
+<th align="center">Bool</th>
+<th align="center">Char</th>
+<th align="center">Bytes</th>
+<th align="center">Array</th>
+<th align="center">Map</th>
+<th align="center">Time</th>
+<th align="center">Error</th>
+<th align="center">Undefined</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">Int</td>
+<td align="center">-</td>
+<td align="center"><em>strconv</em></td>
+<td align="center">float64(v)</td>
+<td align="center">!IsFalsy()</td>
+<td align="center">rune(v)</td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><em>time.Unix()</em></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+</tr>
+<tr>
+<td align="center">String</td>
+<td align="center"><em>strconv</em></td>
+<td align="center">-</td>
+<td align="center"><em>strconv</em></td>
+<td align="center">!IsFalsy()</td>
+<td align="center"><strong>X</strong></td>
+<td align="center">[]byte(s)</td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+</tr>
+<tr>
+<td align="center">Float</td>
+<td align="center">int64(f)</td>
+<td align="center"><em>strconv</em></td>
+<td align="center">-</td>
+<td align="center">!IsFalsy()</td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+</tr>
+<tr>
+<td align="center">Bool</td>
+<td align="center">1 / 0</td>
+<td align="center">&ldquo;true&rdquo; / &ldquo;false&rdquo;</td>
+<td align="center"><strong>X</strong></td>
+<td align="center">-</td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+</tr>
+<tr>
+<td align="center">Char</td>
+<td align="center">int64(c)</td>
+<td align="center">string(c)</td>
+<td align="center"><strong>X</strong></td>
+<td align="center">!IsFalsy()</td>
+<td align="center">-</td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+</tr>
+<tr>
+<td align="center">Bytes</td>
+<td align="center"><strong>X</strong></td>
+<td align="center">string(y)</td>
+<td align="center"><strong>X</strong></td>
+<td align="center">!IsFalsy()</td>
+<td align="center"><strong>X</strong></td>
+<td align="center">-</td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+</tr>
+<tr>
+<td align="center">Array</td>
+<td align="center"><strong>X</strong></td>
+<td align="center">&ldquo;[&hellip;]&rdquo;</td>
+<td align="center"><strong>X</strong></td>
+<td align="center">!IsFalsy()</td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center">-</td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+</tr>
+<tr>
+<td align="center">Map</td>
+<td align="center"><strong>X</strong></td>
+<td align="center">&ldquo;{&hellip;}&rdquo;</td>
+<td align="center"><strong>X</strong></td>
+<td align="center">!IsFalsy()</td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center">-</td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+</tr>
+<tr>
+<td align="center">Time</td>
+<td align="center"><strong>X</strong></td>
+<td align="center">String()</td>
+<td align="center"><strong>X</strong></td>
+<td align="center">!IsFalsy()</td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center">-</td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+</tr>
+<tr>
+<td align="center">Error</td>
+<td align="center"><strong>X</strong></td>
+<td align="center">&ldquo;error: &hellip;&rdquo;</td>
+<td align="center"><strong>X</strong></td>
+<td align="center">false</td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center">-</td>
+<td align="center"><strong>X</strong></td>
+</tr>
+<tr>
+<td align="center">Undefined</td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center">false</td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center"><strong>X</strong></td>
+<td align="center">-</td>
+</tr>
+</tbody>
+</table>
+<p><em>* <strong>X</strong>: No conversion; Typed value functions for <code>Variable</code> will
+return zero values.</em><br />
+<em>* strconv: converted using Go&rsquo;s conversion functions from <code>strconv</code> package.</em><br />
+<em>* IsFalsy(): use <a href="#objectisfalsy">Object.IsFalsy()</a> function</em><br />
+<em>* String(): use <code>Object.String()</code> function</em>
+<em>* time.Unix(): use <code>time.Unix(v, 0)</code> to convert to Time</em></p>
+<h2 id="objectisfalsy">Object.IsFalsy() <a class="anchor" href="#objectisfalsy"> </a></h2>
+<p><code>Object.IsFalsy()</code> interface method is used to determine if a given value
+should evaluate to <code>false</code> (e.g. for condition expression of <code>if</code> statement).</p>
+<ul>
+<li><strong>Int</strong>: <code>n == 0</code></li>
+<li><strong>String</strong>: <code>len(s) == 0</code></li>
+<li><strong>Float</strong>: <code>isNaN(f)</code></li>
+<li><strong>Bool</strong>: <code>!b</code></li>
+<li><strong>Char</strong>: <code>c == 0</code></li>
+<li><strong>Bytes</strong>: <code>len(bytes) == 0</code></li>
+<li><strong>Array</strong>: <code>len(arr) == 0</code></li>
+<li><strong>Map</strong>: <code>len(map) == 0</code></li>
+<li><strong>Time</strong>: <code>Time.IsZero()</code></li>
+<li><strong>Error</strong>: <code>true</code> <em>(Error is always falsy)</em></li>
+<li><strong>Undefined</strong>: <code>true</code> <em>(Undefined is always falsy)</em></li>
+</ul>
+<h2 id="type-conversion-builtin-functions">Type Conversion Builtin Functions <a class="anchor" href="#type-conversion-builtin-functions"> </a></h2>
+<ul>
+<li><code>string(x)</code>: tries to convert <code>x</code> into string; returns <code>undefined</code> if failed</li>
+<li><code>int(x)</code>: tries to convert <code>x</code> into int; returns <code>undefined</code> if failed</li>
+<li><code>bool(x)</code>: tries to convert <code>x</code> into bool; returns <code>undefined</code> if failed</li>
+<li><code>float(x)</code>: tries to convert <code>x</code> into float; returns <code>undefined</code> if failed</li>
+<li><code>char(x)</code>: tries to convert <code>x</code> into char; returns <code>undefined</code> if failed</li>
+<li><code>bytes(x)</code>: tries to convert <code>x</code> into bytes; returns <code>undefined</code> if failed
+<ul>
+<li><code>bytes(N)</code>: as a special case this will create a Bytes variable with the
+given size <code>N</code> (only if <code>N</code> is int)</li>
+</ul>
+</li>
+<li><code>time(x)</code>: tries to convert <code>x</code> into time; returns <code>undefined</code> if failed</li>
+<li>See <a href="https://github.com/malivvan/vv/blob/master/docs/builtins.md">Builtins</a> for
+the full list of builtin functions.</li>
+</ul>
+<h2 id="type-checking-builtin-functions">Type Checking Builtin Functions <a class="anchor" href="#type-checking-builtin-functions"> </a></h2>
+<ul>
+<li><code>is_string(x)</code>: returns <code>true</code> if <code>x</code> is string; <code>false</code> otherwise</li>
+<li><code>is_int(x)</code>: returns <code>true</code> if <code>x</code> is int; <code>false</code> otherwise</li>
+<li><code>is_bool(x)</code>: returns <code>true</code> if <code>x</code> is bool; <code>false</code> otherwise</li>
+<li><code>is_float(x)</code>: returns <code>true</code> if <code>x</code> is float; <code>false</code> otherwise</li>
+<li><code>is_char(x)</code>: returns <code>true</code> if <code>x</code> is char; <code>false</code> otherwise</li>
+<li><code>is_bytes(x)</code>: returns <code>true</code> if <code>x</code> is bytes; <code>false</code> otherwise</li>
+<li><code>is_array(x)</code>: return <code>true</code> if <code>x</code> is array; <code>false</code> otherwise</li>
+<li><code>is_immutable_array(x)</code>: return <code>true</code> if <code>x</code> is immutable array; <code>false</code>
+otherwise</li>
+<li><code>is_map(x)</code>: return <code>true</code> if <code>x</code> is map; <code>false</code> otherwise</li>
+<li><code>is_immutable_map(x)</code>: return <code>true</code> if <code>x</code> is immutable map; <code>false</code>
+otherwise</li>
+<li><code>is_time(x)</code>: return <code>true</code> if <code>x</code> is time; <code>false</code> otherwise</li>
+<li><code>is_error(x)</code>: returns <code>true</code> if <code>x</code> is error; <code>false</code> otherwise</li>
+<li><code>is_undefined(x)</code>: returns <code>true</code> if <code>x</code> is undefined; <code>false</code> otherwise</li>
+<li>See <a href="https://github.com/malivvan/vv/blob/master/docs/builtins.md">Builtins</a> for
+the full list of builtin functions.</li>
+</ul>
+</article>
+<footer>
+  <div style="float: left;">Copyright &copy; malivvan</div>
+  <div style="float: right;">Last modified <time datetime="2025-08-03T08:54:47Z+00:00
+">Sun Aug  3 08:54:47 UTC 2025
+</time></div>
+</footer>
+<script>
+  hljs.highlightAll();
+</script>
+</body>
+
+</html>

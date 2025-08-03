@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="img/icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="img/icon.ico">
+  <title>formatting</title>
+  <meta name="title" content="formatting" />
+  <meta name="description" content="the vv language" />
+  <meta name="keywords" content="vv" />
+
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/highlight.css">
+  <link rel="stylesheet" href="css/site.css">
+  <link rel="stylesheet" href="css/board.css">
+  <script src="js/highlight.js"></script>
+  <script src="js/live.js"></script>
+  <script src="js/umbrella.js"></script>
+
+</head>
+
+<body>
+<nav>
+  <a id="brand" href="./">VV</a>
+  <a href="./release.html">RELEASE</a>
+  <a href="https://github.com/malivvan/vv">SOURCE</a>
+</nav>
+<header>
+  <h1>formatting</h1>
+</header>
+<article><p>The format &lsquo;verbs&rsquo; are derived from Go&rsquo;s but are simpler.</p>
+<h2 id="the-verbs">The verbs <a class="anchor" href="#the-verbs"> </a></h2>
+<h2 id="general">General <a class="anchor" href="#general"> </a></h2>
+<pre><code>%v  the value in a default format
+%T  a Go-syntax representation of the type of the value
+%%  a literal percent sign; consumes no value
+</code></pre>
+<h2 id="boolean">Boolean <a class="anchor" href="#boolean"> </a></h2>
+<pre><code>%t  the word true or false
+</code></pre>
+<h2 id="integer">Integer <a class="anchor" href="#integer"> </a></h2>
+<pre><code>%b  base 2
+%c  the character represented by the corresponding Unicode code point
+%d  base 10
+%o  base 8
+%O  base 8 with 0o prefix
+%q  a single-quoted character literal safely escaped with Go syntax.
+%x  base 16, with lower-case letters for a-f
+%X  base 16, with upper-case letters for A-F
+%U  Unicode format: U+1234; same as &quot;U+%04X&quot;
+</code></pre>
+<h2 id="float">Float <a class="anchor" href="#float"> </a></h2>
+<pre><code>%b  decimalless scientific notation with exponent a power of two,
+in the manner of Go's strconv.FormatFloat with the 'b' format,
+e.g. -123456p-78
+%e  scientific notation, e.g. -1.234456e+78
+%E  scientific notation, e.g. -1.234456E+78
+%f  decimal point but no exponent, e.g. 123.456
+%F  synonym for %f
+%g  %e for large exponents, %f otherwise. Precision is discussed below.
+%G  %E for large exponents, %F otherwise
+%x  hexadecimal notation (with decimal power of two exponent), e.g. -0x1.23abcp+20
+%X  upper-case hexadecimal notation, e.g. -0X1.23ABCP+20
+</code></pre>
+<h2 id="string-and-bytes">String and Bytes <a class="anchor" href="#string-and-bytes"> </a></h2>
+<pre><code>%s  the uninterpreted bytes of the string or slice
+%q  a double-quoted string safely escaped with Go syntax
+%x  base 16, lower-case, two characters per byte
+%X  base 16, upper-case, two characters per byte
+</code></pre>
+<h2 id="default-format-for-v">Default format for %v <a class="anchor" href="#default-format-for-v"> </a></h2>
+<pre><code>Bool:                    %t
+Int:                     %d
+Float:                   %g
+String:                  %s
+</code></pre>
+<h2 id="compound-objects">Compound Objects <a class="anchor" href="#compound-objects"> </a></h2>
+<pre><code>Array:              [elem0 elem1 ...]
+Maps:               {key1:value1 key2:value2 ...}
+</code></pre>
+<h2 id="width-and-precision">Width and Precision <a class="anchor" href="#width-and-precision"> </a></h2>
+<p>Width is specified by an optional decimal number immediately preceding the verb.
+If absent, the width is whatever is necessary to represent the value.</p>
+<p>Precision is specified after the (optional) width by a period followed by a
+decimal number. If no period is present, a default precision is used. A period
+with no following number specifies a precision of zero.
+Examples:</p>
+<pre><code>%f     default width, default precision
+%9f    width 9, default precision
+%.2f   default width, precision 2
+%9.2f  width 9, precision 2
+%9.f   width 9, precision 0
+</code></pre>
+<p>Width and precision are measured in units of Unicode code points.  Either or
+both of the flags may be replaced with the character &lsquo;*&rsquo;, causing their values
+to be obtained from the next operand (preceding the one to format), which must
+be of type Int.</p>
+<p>For most values, width is the minimum number of runes to output, padding the
+formatted form with spaces if necessary.</p>
+<p>For Strings and Bytes, however, precision limits the length of the input to be
+formatted (not the size of the output), truncating if necessary. Normally it is
+measured in units of Unicode code points, but for these types when formatted
+with the %x or %X format it is measured in bytes.</p>
+<p>For floating-point values, width sets the minimum width of the field and
+precision sets the number of places after the decimal, if appropriate, except
+that for %g/%G precision sets the maximum number of significant digits
+(trailing zeros are removed).</p>
+<p>For example, given 12.345 the format %6.3f prints 12.345 while %.3g prints 12.3.</p>
+<p>The default precision for %e, %f and %#g is 6; for %g it is the smallest number
+of digits necessary to identify the value uniquely.</p>
+<p>For complex numbers, the width and precision apply to the two components
+independently and the result is parenthesized, so %f applied to 1.2+3.4i
+produces (1.200000+3.400000i).</p>
+<h2 id="other-flags">Other flags <a class="anchor" href="#other-flags"> </a></h2>
+<pre><code>+   always print a sign for numeric values;
+guarantee ASCII-only output for %q (%+q)
+-   pad with spaces on the right rather than the left (left-justify the field)
+#   alternate format: add leading 0b for binary (%#b), 0 for octal (%#o),
+0x or 0X for hex (%#x or %#X);
+for %q, print a raw (backquoted) string if strconv.CanBackquote returns true;
+always print a decimal point for %e, %E, %f, %F, %g and %G;
+do not remove trailing zeros for %g and %G;
+write e.g. U+0078 'x' if the character is printable for %U (%#U).
+' ' (space) leave a space for elided sign in numbers (% d);
+put spaces between bytes printing strings or slices in hex (% x, % X)
+0   pad with leading zeros rather than spaces;
+for numbers, this moves the padding after the sign
+</code></pre>
+<p>Flags are ignored by verbs that do not expect them.
+For example there is no alternate decimal format, so %#d and %d behave
+identically.</p>
+</article>
+<footer>
+  <div style="float: left;">Copyright &copy; malivvan</div>
+  <div style="float: right;">Last modified <time datetime="2025-08-03T08:54:47Z+00:00
+">Sun Aug  3 08:54:47 UTC 2025
+</time></div>
+</footer>
+<script>
+  hljs.highlightAll();
+</script>
+</body>
+
+</html>

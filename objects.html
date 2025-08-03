@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="img/icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="img/icon.ico">
+  <title>object types</title>
+  <meta name="title" content="object types" />
+  <meta name="description" content="the vv language" />
+  <meta name="keywords" content="vv" />
+
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/highlight.css">
+  <link rel="stylesheet" href="css/site.css">
+  <link rel="stylesheet" href="css/board.css">
+  <script src="js/highlight.js"></script>
+  <script src="js/live.js"></script>
+  <script src="js/umbrella.js"></script>
+
+</head>
+
+<body>
+<nav>
+  <a id="brand" href="./">VV</a>
+  <a href="./release.html">RELEASE</a>
+  <a href="https://github.com/malivvan/vv">SOURCE</a>
+</nav>
+<header>
+  <h1>object types</h1>
+</header>
+<article><h2 id="table-of-contents">Table of Contents <a class="anchor" href="#table-of-contents"> </a></h2>
+<ul>
+<li><a href="#vv-objects">VV Objects</a></li>
+<li><a href="#runtime-object-types">Runtime Object Types</a></li>
+<li><a href="#user-object-types">User Object Types</a></li>
+</ul>
+<h2 id="vv-objects">VV Objects <a class="anchor" href="#vv-objects"> </a></h2>
+<p>In VV, all object types <em>(both <a href="#runtime-object-types">runtime types</a> and
+<a href="#user-object-types">user types</a>)</em> must implement
+<a href="https://godoc.org/github.com/malivvan/vv#Object">Object</a> interface.</p>
+<h3 id="object-interface">Object Interface <a class="anchor" href="#object-interface"> </a></h3>
+<pre><code class="language-golang">TypeName() string
+</code></pre>
+<p>TypeName method should return the name of the type. Type names are not directly
+used by the runtime <em>(except when it reports a run-time error)</em>, but, it is
+generally a good idea to keep it short but distinguishable from other types.</p>
+<pre><code class="language-golang">String() string
+</code></pre>
+<p>String method should return a string representation of the underlying value.
+The value returned by String method will be used whenever string formatting for
+the value is required, most commonly when being converted into String value.</p>
+<pre><code class="language-golang">BinaryOp(op token.Token, rhs Object) (res Object, err error)
+</code></pre>
+<p>In VV, a type can overload binary operators
+(<code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>%</code>, <code>&amp;</code>, <code>|</code>, <code>^</code>, <code>&amp;^</code>, <code>&gt;&gt;</code>, <code>&lt;&lt;</code>, <code>&gt;</code>, <code>&gt;=</code>; <em>note
+that <code>&lt;</code> and <code>&lt;=</code> operators are not overloadable as they&rsquo;re simply implemented
+by switching left-hand side and right-hand side of <code>&gt;</code>/<code>&gt;=</code> operator</em>) by
+implementing BinaryOp method. BinaryOp method takes the operator <code>op</code> and the
+right-hand side object <code>rhs</code>, and, should return a resulting value <code>res</code>.</p>
+<p><strong>Error value vs runtime error</strong></p>
+<p>If BinaryOp method returns an error <code>err</code> (the second return value), it will be
+treated as a run-time error, which will halt the execution (<code>VM.Run() error</code>)
+and will return the error to the user. All runtime type implementations, for
+example, will return an <code>ErrInvalidOperator</code> error when the given operator is
+not supported by the type.</p>
+<p>Alternatively the method can return an <code>Error</code> value as its result <code>res</code>
+(the first return value), which will not halt the runtime and will be treated
+like any other values. As a dynamically typed language, the receiver (another
+expression or statement) can determine how to translate <code>Error</code> value returned
+from binary operator expression.</p>
+<pre><code class="language-golang">IsFalsy() bool
+</code></pre>
+<p>IsFalsy method should return true if the underlying value is considered to be
+<a href="https://github.com/malivvan/vv/blob/master/docs/runtime-types.md#objectisfalsy">falsy</a>.</p>
+<pre><code class="language-golang">Equals(o Object) bool
+</code></pre>
+<p>Equals method should return true if the underlying value is considered to be
+equal to the underlying value of another object <code>o</code>. When comparing values of
+different types, the runtime does not guarantee or force anything, but, it&rsquo;s
+generally a good idea to make the result consistent. For example, a custom
+integer type may return true when comparing against String value, but, it
+should return the same result for the same inputs.</p>
+<pre><code class="language-golang">Copy() Object
+</code></pre>
+<p>Copy method should return a <em>new</em> copy of the object. Builtin function <code>copy</code>
+uses this method to copy values. Default implementation of all runtime types
+return a deep-copy values, but, it&rsquo;s not a requirement by the runtime.</p>
+<pre><code class="language-golang">IndexGet(index Object) (value Object, err error)
+</code></pre>
+<p>IndexGet should take an index Object and return a result Object or an error for
+indexable objects. Indexable is an object that can take an index and return an
+object. If a type is indexable, its values support dot selector
+(value = object.index) and indexer (value = object[index]) syntax.</p>
+<p>If Object is not indexable, ErrNotIndexable should be returned as error. If nil
+is returned as value, it will be converted to Undefined value by the runtime.</p>
+<p>If <code>IndexGet</code> returns an error (<code>err</code>), the VM will treat it as a run-time
+error and ignore the returned value.</p>
+<p>Array and Map implementation forces the type of index Object to be Int and
+String respectively, but, it&rsquo;s not a required behavior of the VM. It is
+completely okay to take various index types as long as it is consistent.</p>
+<p>By convention, Array or Array-like types and Map or Map-like types return
+<code>Undefined</code> value when the key does not exist. But, again, this is not a
+required behavior.</p>
+<pre><code class="language-golang">IndexSet(index, value Object) error
+</code></pre>
+<p>IndexSet should take an index Object and a value Object for index assignable
+objects. Index assignable is an object that can take an index and a value on
+the left-hand side of the assignment statement. If a type is index assignable,
+its values support assignment using dot selector (<code>object.index = value</code>) and
+indexer (<code>object[index] = value</code>) in the assignment statements.</p>
+<p>If Object is not index assignable, ErrNotIndexAssignable should be returned as
+error. If an error is returned, it will be treated as a run-time error.</p>
+<p>Array and Map implementation forces the type of index Object to be Int and
+String respectively, but, it&rsquo;s not a required behavior of the VM. It is
+completely okay to take various index types as long as it is consistent.</p>
+<h4 id="callable-objects">Callable Objects <a class="anchor" href="#callable-objects"> </a></h4>
+<p>If the type is Callable, its values can be invoked as if they were functions.
+Two functions need to be implemented for Callable objects.</p>
+<pre><code class="language-golang">CanCall() bool
+</code></pre>
+<p>CanCall should return whether the Object can be called. When this function
+returns true, the Object is considered Callable.</p>
+<pre><code class="language-golang">Call(args ...Object) (ret Object, err error)
+</code></pre>
+<p>Call should take an arbitrary number of arguments and return a return value
+and/or an error, which the VM will consider as a run-time error.</p>
+<h4 id="iterable-objects">Iterable Objects <a class="anchor" href="#iterable-objects"> </a></h4>
+<p>If a type is iterable, its values can be used in <code>for-in</code> statements
+(<code>for key, value in object { ... }</code>). Two functions need to be implemented
+for Iterable Objects</p>
+<pre><code class="language-golang">CanIterate() bool
+</code></pre>
+<p>CanIterate should return whether the Object can be Iterated.</p>
+<pre><code class="language-golang">Iterate() Iterator
+</code></pre>
+<p>The Iterate method should return another object that implements
+<a href="https://godoc.org/github.com/malivvan/vv#Iterator">Iterator</a> interface.</p>
+<h3 id="iterator-interface">Iterator Interface <a class="anchor" href="#iterator-interface"> </a></h3>
+<pre><code class="language-golang">Next() bool
+</code></pre>
+<p>Next method should return true if there are more elements to iterate. When used
+with <code>for-in</code> statements, the compiler uses Key and Value methods to populate
+the current element&rsquo;s key (or index) and value from the object that this
+iterator represents. The runtime will stop iterating in <code>for-in</code> statement
+when this method returns false.</p>
+<pre><code class="language-golang">Key() Object
+</code></pre>
+<p>Key method should return a key (or an index) Object for the current element of
+the underlying object. It should return the same value until Next method is
+called again. By convention, iterators for the map or map-like objects returns
+the String key, and, iterators for array or array-like objects returns the Int
+ndex. But, it&rsquo;s not a requirement by the VM.</p>
+<pre><code class="language-golang">Value() Object
+</code></pre>
+<p>Value method should return a value Object for the current element of the
+underlying object. It should return the same value until Next method is called
+again.</p>
+<h2 id="runtime-object-types">Runtime Object Types <a class="anchor" href="#runtime-object-types"> </a></h2>
+<p>These are the basic types VV runtime supports out of the box:</p>
+<ul>
+<li>Primitive value types: <a href="https://godoc.org/github.com/malivvan/vv#Int">Int</a>,
+<a href="https://godoc.org/github.com/malivvan/vv#String">String</a>,
+<a href="https://godoc.org/github.com/malivvan/vv#Float">Float</a>,
+<a href="https://godoc.org/github.com/malivvan/vv#ArrayIterator">Bool</a>,
+<a href="https://godoc.org/github.com/malivvan/vv#Char">Char</a>,
+<a href="https://godoc.org/github.com/malivvan/vv#Bytes">Bytes</a>,
+<a href="https://godoc.org/github.com/malivvan/vv#Time">Time</a></li>
+<li>Composite value types: <a href="https://godoc.org/github.com/malivvan/vv#Array">Array</a>,
+<a href="https://godoc.org/github.com/malivvan/vv#ImmutableArray">ImmutableArray</a>,
+<a href="https://godoc.org/github.com/malivvan/vv#Map">Map</a>,
+<a href="https://godoc.org/github.com/malivvan/vv#ImmutableMap">ImmutableMap</a></li>
+<li>Functions:
+<a href="https://godoc.org/github.com/malivvan/vv#CompiledFunction">CompiledFunction</a>,
+<a href="https://godoc.org/github.com/malivvan/vv#BuiltinFunction">BuiltinFunction</a>,
+<a href="https://godoc.org/github.com/malivvan/vv#UserFunction">UserFunction</a></li>
+<li><a href="https://godoc.org/github.com/malivvan/vv#Iterator">Iterators</a>:
+<a href="https://godoc.org/github.com/malivvan/vv#StringIterator">StringIterator</a>,
+<a href="https://godoc.org/github.com/malivvan/vv#ArrayIterator">ArrayIterator</a>,
+<a href="https://godoc.org/github.com/malivvan/vv#MapIterator">MapIterator</a>,
+<a href="https://godoc.org/github.com/malivvan/vv#ImmutableMapIterator">ImmutableMapIterator</a></li>
+<li><a href="https://godoc.org/github.com/malivvan/vv#Error">Error</a></li>
+<li><a href="https://godoc.org/github.com/malivvan/vv#Undefined">Undefined</a></li>
+<li>Other internal objects: <a href="https://godoc.org/github.com/malivvan/vv#Break">Break</a>,
+<a href="https://godoc.org/github.com/malivvan/vv#Continue">Continue</a>,
+<a href="https://godoc.org/github.com/malivvan/vv#ReturnValue">ReturnValue</a></li>
+</ul>
+<p>See
+<a href="https://github.com/malivvan/vv/blob/master/docs/runtime-types.md">Runtime Types</a>
+for more details on these runtime types.</p>
+<h2 id="user-object-types">User Object Types <a class="anchor" href="#user-object-types"> </a></h2>
+<p>Users can easily extend and add their own types by implementing the same
+<a href="https://godoc.org/github.com/malivvan/vv#Object">Object</a> interface and the
+default <code>ObjectImpl</code> implementation. VV runtime will treat them in the
+same way as its runtime types with no performance overhead.</p>
+<p>Here&rsquo;s an example user type implementation, <code>StringArray</code>:</p>
+<pre><code class="language-golang">type StringArray struct {
+    vv.ObjectImpl
+    Value []string
+}
+
+func (o *StringArray) String() string {
+    return strings.Join(o.Value, &quot;, &quot;)
+}
+
+func (o *StringArray) BinaryOp(op token.Token, rhs vv.Object) (vv.Object, error) {
+    if rhs, ok := rhs.(*StringArray); ok {
+        switch op {
+        case token.Add:
+            if len(rhs.Value) == 0 {
+                return o, nil
+            }
+            return &amp;StringArray{Value: append(o.Value, rhs.Value...)}, nil
+        }
+    }
+
+    return nil, vv.ErrInvalidOperator
+}
+
+func (o *StringArray) IsFalsy() bool {
+    return len(o.Value) == 0
+}
+
+func (o *StringArray) Equals(x vv.Object) bool {
+    if x, ok := x.(*StringArray); ok {
+        if len(o.Value) != len(x.Value) {
+            return false
+        }
+
+        for i, v := range o.Value {
+            if v != x.Value[i] {
+                return false
+            }
+        }
+
+        return true
+    }
+
+    return false
+}
+
+func (o *StringArray) Copy() vv.Object {
+    return &amp;StringArray{
+        Value: append([]string{}, o.Value...),
+    }
+}
+
+func (o *StringArray) TypeName() string {
+    return &quot;string-array&quot;
+}
+</code></pre>
+<p>You can use a user type via either
+<a href="https://godoc.org/github.com/malivvan/vv#Script.Add">Script.Add</a> or by directly
+manipulating the symbol table and the global variables. Here&rsquo;s an example code
+to add <code>StringArray</code> to the script:</p>
+<pre><code class="language-golang">// script that uses 'my_list'
+s := vv.NewScript([]byte(`
+    print(my_list + &quot;three&quot;)
+`))
+
+myList := &amp;StringArray{Value: []string{&quot;one&quot;, &quot;two&quot;}}
+s.Add(&quot;my_list&quot;, myList)  // add StringArray value 'my_list'
+s.Run()                   // prints &quot;one, two, three&quot;
+</code></pre>
+<p>It can also implement <code>IndexGet</code> and <code>IndexSet</code>:</p>
+<pre><code class="language-golang">func (o *StringArray) IndexGet(index vv.Object) (vv.Object, error) {
+    intIdx, ok := index.(*vv.Int)
+    if ok {
+        if intIdx.Value &gt;= 0 &amp;&amp; intIdx.Value &lt; int64(len(o.Value)) {
+            return &amp;vv.String{Value: o.Value[intIdx.Value]}, nil
+        }
+
+        return nil, vv.ErrIndexOutOfBounds
+    }
+
+    strIdx, ok := index.(*vv.String)
+    if ok {
+        for vidx, str := range o.Value {
+            if strIdx.Value == str {
+                return &amp;vv.Int{Value: int64(vidx)}, nil
+            }
+        }
+
+        return vv.UndefinedValue, nil
+    }
+
+    return nil, vv.ErrInvalidIndexType
+}
+
+func (o *StringArray) IndexSet(index, value vv.Object) error {
+    strVal, ok := vv.ToString(value)
+    if !ok {
+        return vv.ErrInvalidIndexValueType
+    }
+
+    intIdx, ok := index.(*vv.Int)
+    if ok {
+        if intIdx.Value &gt;= 0 &amp;&amp; intIdx.Value &lt; int64(len(o.Value)) {
+            o.Value[intIdx.Value] = strVal
+            return nil
+        }
+
+        return vv.ErrIndexOutOfBounds
+    }
+
+    return vv.ErrInvalidIndexType
+}
+</code></pre>
+<p>If we implement <code>CanCall</code> and <code>Call</code>:</p>
+<pre><code class="language-golang">func (o *StringArray) CanCall() bool {
+    return true
+}
+
+func (o *StringArray) Call(args ...vv.Object) (ret vv.Object, err error) {
+    if len(args) != 1 {
+        return nil, vv.ErrWrongNumArguments
+    }
+
+    s1, ok := vv.ToString(args[0])
+    if !ok {
+        return nil, vv.ErrInvalidArgumentType{
+            Name:     &quot;first&quot;,
+            Expected: &quot;string&quot;,
+            Found:    args[0].TypeName(),
+        }
+    }
+
+    for i, v := range o.Value {
+        if v == s1 {
+            return &amp;vv.Int{Value: int64(i)}, nil
+        }
+    }
+
+    return vv.UndefinedValue, nil
+}
+</code></pre>
+<p>Then it can be &ldquo;invoked&rdquo;:</p>
+<pre><code class="language-golang">s := vv.NewScript([]byte(`
+    print(my_list(&quot;two&quot;))
+`))
+
+myList := &amp;StringArray{Value: []string{&quot;one&quot;, &quot;two&quot;, &quot;three&quot;}}
+s.Add(&quot;my_list&quot;, myList)  // add StringArray value 'my_list'
+s.Run()                   // prints &quot;1&quot; (index of &quot;two&quot;)
+</code></pre>
+<p>We can also make <code>StringArray</code> iterable:</p>
+<pre><code class="language-golang">func (o *StringArray) CanIterate() bool {
+    return true
+}
+
+func (o *StringArray) Iterate() vv.Iterator {
+    return &amp;StringArrayIterator{
+        strArr: o,
+    }
+}
+
+type StringArrayIterator struct {
+    vv.ObjectImpl
+    strArr *StringArray
+    idx    int
+}
+
+func (i *StringArrayIterator) TypeName() string {
+    return &quot;string-array-iterator&quot;
+}
+
+func (i *StringArrayIterator) Next() bool {
+    i.idx++
+    return i.idx &lt;= len(i.strArr.Value)
+}
+
+func (i *StringArrayIterator) Key() vv.Object {
+    return &amp;vv.Int{Value: int64(i.idx - 1)}
+}
+
+func (i *StringArrayIterator) Value() vv.Object {
+    return &amp;vv.String{Value: i.strArr.Value[i.idx-1]}
+}
+</code></pre>
+<h3 id="objectimpl">ObjectImpl <a class="anchor" href="#objectimpl"> </a></h3>
+<p>ObjectImpl represents a default Object Implementation. To defined a new value
+type, one can embed ObjectImpl in their type declarations to avoid implementing
+all non-significant methods. TypeName() and String() methods still need to be
+implemented.</p>
+</article>
+<footer>
+  <div style="float: left;">Copyright &copy; malivvan</div>
+  <div style="float: right;">Last modified <time datetime="2025-08-03T08:54:47Z+00:00
+">Sun Aug  3 08:54:47 UTC 2025
+</time></div>
+</footer>
+<script>
+  hljs.highlightAll();
+</script>
+</body>
+
+</html>

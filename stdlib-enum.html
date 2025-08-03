@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="img/icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="img/icon.ico">
+  <title>Standard Library - enum</title>
+  <meta name="title" content="Standard Library - enum" />
+  <meta name="description" content="the vv language" />
+  <meta name="keywords" content="vv" />
+
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/highlight.css">
+  <link rel="stylesheet" href="css/site.css">
+  <link rel="stylesheet" href="css/board.css">
+  <script src="js/highlight.js"></script>
+  <script src="js/live.js"></script>
+  <script src="js/umbrella.js"></script>
+
+</head>
+
+<body>
+<nav>
+  <a id="brand" href="./">VV</a>
+  <a href="./release.html">RELEASE</a>
+  <a href="https://github.com/malivvan/vv">SOURCE</a>
+</nav>
+<header>
+  <h1>Standard Library - enum</h1>
+</header>
+<article><pre><code class="language-golang">enum := import(&quot;enum&quot;)
+</code></pre>
+<h2 id="functions">Functions <a class="anchor" href="#functions"> </a></h2>
+<ul>
+<li><code>all(x, fn) =&gt; bool</code>: returns true if the given function <code>fn</code> evaluates to a
+truthy value on all of the items in <code>x</code>. It returns undefined if <code>x</code> is not
+enumerable.</li>
+<li><code>any(x, fn) =&gt; bool</code>: returns true if the given function <code>fn</code> evaluates to a
+truthy value on any of the items in <code>x</code>. It returns undefined if <code>x</code> is not
+enumerable.</li>
+<li><code>chunk(x, size) =&gt; [object]</code>: returns an array of elements split into groups
+the length of size. If <code>x</code> can&rsquo;t be split evenly, the final chunk will be the
+remaining elements. It returns undefined if <code>x</code> is not array.</li>
+<li><code>at(x, key) =&gt; object</code>: returns an element at the given index (if <code>x</code> is
+array) or key (if <code>x</code> is map). It returns undefined if <code>x</code> is not enumerable.</li>
+<li><code>each(x, fn)</code>: iterates over elements of <code>x</code> and invokes <code>fn</code> for each
+element. <code>fn</code> is invoked with two arguments: <code>key</code> and <code>value</code>. <code>key</code> is an
+int index if <code>x</code> is array. <code>key</code> is a string key if <code>x</code> is map. It does not
+iterate and returns undefined if <code>x</code> is not enumerable.`</li>
+<li><code>filter(x, fn) =&gt; [object]</code>: iterates over elements of <code>x</code>, returning an
+array of all elements <code>fn</code> returns truthy for. <code>fn</code> is invoked with two
+arguments: <code>key</code> and <code>value</code>. <code>key</code> is an int index if <code>x</code> is array. <code>key</code> is
+a string key if <code>x</code> is map. It returns undefined if <code>x</code> is not enumerable.</li>
+<li><code>find(x, fn) =&gt; object</code>: iterates over elements of <code>x</code>, returning value of
+the first element <code>fn</code> returns truthy for. <code>fn</code> is invoked with two
+arguments: <code>key</code> and <code>value</code>. <code>key</code> is an int index if <code>x</code> is array. <code>key</code> is
+a string key if <code>x</code> is map. It returns undefined if <code>x</code> is not enumerable.</li>
+<li><code>find_key(x, fn) =&gt; int/string</code>: iterates over elements of <code>x</code>, returning key
+or index of the first element <code>fn</code> returns truthy for. <code>fn</code> is invoked with
+two arguments: <code>key</code> and <code>value</code>. <code>key</code> is an int index if <code>x</code> is array.
+<code>key</code> is a string key if <code>x</code> is map. It returns undefined if <code>x</code> is not
+enumerable.</li>
+<li><code>map(x, fn) =&gt; [object]</code>: creates an array of values by running each element
+in <code>x</code> through <code>fn</code>. <code>fn</code> is invoked with two arguments: <code>key</code> and <code>value</code>.
+<code>key</code> is an int index if <code>x</code> is array. <code>key</code> is a string key if <code>x</code> is map.
+It returns undefined if <code>x</code> is not enumerable.</li>
+<li><code>key(k, _) =&gt; object</code>: returns the first argument.</li>
+<li><code>value(_, v) =&gt; object</code>: returns the second argument.</li>
+</ul>
+</article>
+<footer>
+  <div style="float: left;">Copyright &copy; malivvan</div>
+  <div style="float: right;">Last modified <time datetime="2025-08-03T08:54:47Z+00:00
+">Sun Aug  3 08:54:47 UTC 2025
+</time></div>
+</footer>
+<script>
+  hljs.highlightAll();
+</script>
+</body>
+
+</html>

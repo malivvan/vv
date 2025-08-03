@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/png" href="img/icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="img/icon.ico">
+  <title>tutorial</title>
+  <meta name="title" content="tutorial" />
+  <meta name="description" content="the vv language" />
+  <meta name="keywords" content="vv" />
+
+  <link rel="stylesheet" href="css/theme.css">
+  <link rel="stylesheet" href="css/highlight.css">
+  <link rel="stylesheet" href="css/site.css">
+  <link rel="stylesheet" href="css/board.css">
+  <script src="js/highlight.js"></script>
+  <script src="js/live.js"></script>
+  <script src="js/umbrella.js"></script>
+
+</head>
+
+<body>
+<nav>
+  <a id="brand" href="./">VV</a>
+  <a href="./release.html">RELEASE</a>
+  <a href="https://github.com/malivvan/vv">SOURCE</a>
+</nav>
+<header>
+  <h1>tutorial</h1>
+</header>
+<article><p>VV&rsquo;s syntax is designed to be familiar to Go developers while being a bit
+simpler and more streamlined.</p>
+<p><strong>You can test the VV code in online <a href="https://vvlang.com">Playground</a>.</strong></p>
+<h2 id="values-and-value-types">Values and Value Types <a class="anchor" href="#values-and-value-types"> </a></h2>
+<p>In VV, everything is a value, and, all values are associated with a type.</p>
+<pre><code class="language-golang">19 + 84               // int values
+&quot;aomame&quot; + `kawa`     // string values
+-9.22 + 1e10          // float values
+true || false         // bool values
+'九' &gt; '9'             // char values
+[1, false, &quot;foo&quot;]     // array value
+{a: 12.34, b: &quot;bar&quot;}  // map value
+func() { /*...*/ }    // function value
+</code></pre>
+<p>Here&rsquo;s a list of all available value types in VV.</p>
+<table>
+<thead>
+<tr>
+<th align="center">VV Type</th>
+<th align="center">Description</th>
+<th align="center">Equivalent Type in Go</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">int</td>
+<td align="center">signed 64-bit integer value</td>
+<td align="center"><code>int64</code></td>
+</tr>
+<tr>
+<td align="center">float</td>
+<td align="center">64-bit floating point value</td>
+<td align="center"><code>float64</code></td>
+</tr>
+<tr>
+<td align="center">bool</td>
+<td align="center">boolean value</td>
+<td align="center"><code>bool</code></td>
+</tr>
+<tr>
+<td align="center">char</td>
+<td align="center">unicode character</td>
+<td align="center"><code>rune</code></td>
+</tr>
+<tr>
+<td align="center">string </td>
+<td align="center">unicode string</td>
+<td align="center"><code>string</code></td>
+</tr>
+<tr>
+<td align="center">bytes </td>
+<td align="center">byte array</td>
+<td align="center"><code>[]byte</code></td>
+</tr>
+<tr>
+<td align="center">error</td>
+<td align="center"><a href="#error-values">error</a> value</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td align="center">time</td>
+<td align="center">time value</td>
+<td align="center"><code>time.Time</code></td>
+</tr>
+<tr>
+<td align="center">array</td>
+<td align="center">value array <em>(mutable)</em></td>
+<td align="center"><code>[]interface{}</code></td>
+</tr>
+<tr>
+<td align="center">immutable array</td>
+<td align="center"><a href="#immutable-values">immutable</a> array</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td align="center">map</td>
+<td align="center">value map with string keys <em>(mutable)</em></td>
+<td align="center"><code>map[string]interface{}</code></td>
+</tr>
+<tr>
+<td align="center">immutable map</td>
+<td align="center"><a href="#immutable-values">immutable</a> map</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td align="center">undefined</td>
+<td align="center"><a href="#undefined-values">undefined</a> value</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td align="center">function</td>
+<td align="center"><a href="#function-values">function</a> value</td>
+<td align="center">-</td>
+</tr>
+<tr>
+<td align="center"><em>user-defined</em></td>
+<td align="center">value of <a href="https://github.com/malivvan/vv/blob/master/docs/objects.md">user-defined types</a></td>
+<td align="center">-</td>
+</tr>
+</tbody>
+</table>
+<h3 id="error-values">Error Values <a class="anchor" href="#error-values"> </a></h3>
+<p>In VV, an error can be represented using &ldquo;error&rdquo; typed values. An error
+value is created using <code>error</code> expression, and, it must have an underlying
+value. The underlying value of an error value can be access using <code>.value</code>
+selector.</p>
+<pre><code class="language-golang">err1 := error(&quot;oops&quot;)    // error with string value
+err2 := error(1+2+3)     // error with int value
+if is_error(err1) {      // 'is_error' builtin function
+  err_val := err1.value  // get underlying value
+}  
+</code></pre>
+<h3 id="immutable-values">Immutable Values <a class="anchor" href="#immutable-values"> </a></h3>
+<p>In VV, basically all values (except for array and map) are immutable.</p>
+<pre><code class="language-golang">s := &quot;12345&quot;
+s[1] = 'b'    // illegal: String is immutable
+
+a := [1, 2, 3]
+a[1] = &quot;two&quot;  // ok: a is now [1, &quot;two&quot;, 3]
+</code></pre>
+<p>An array or map value can be made immutable using <code>immutable</code> expression.</p>
+<pre><code class="language-golang">b := immutable([1, 2, 3])
+b[1] = &quot;foo&quot;  // illegal: 'b' references to an immutable array.
+</code></pre>
+<p>Note that re-assigning a new value to the variable has nothing to do with the
+value immutability.</p>
+<pre><code class="language-golang">s := &quot;abc&quot;
+s = &quot;foo&quot;                  // ok
+a := immutable([1, 2, 3])
+a = false                  // ok
+</code></pre>
+<p>Note that, if you copy (using <code>copy</code> builtin function) an immutable value, it
+will return a &ldquo;mutable&rdquo; copy. Also, immutability is not applied to the
+individual elements of the array or map value, unless they are explicitly made
+immutable.</p>
+<pre><code class="language-golang">a := immutable({b: 4, c: [1, 2, 3]})
+a.b = 5        // illegal
+a.c[1] = 5     // ok: because 'a.c' is not immutable
+
+a = immutable({b: 4, c: immutable([1, 2, 3])})
+a.c[1] = 5     // illegal
+</code></pre>
+<h3 id="undefined-values">Undefined Values <a class="anchor" href="#undefined-values"> </a></h3>
+<p>In VV, an &ldquo;undefined&rdquo; value can be used to represent an unexpected or
+non-existing value:</p>
+<ul>
+<li>A function that does not return a value explicitly considered to return
+<code>undefined</code> value.</li>
+<li>Indexer or selector on composite value types may return <code>undefined</code> if the
+key or index does not exist.</li>
+<li>Type conversion builtin functions without a default value will return
+<code>undefined</code> if conversion fails.</li>
+</ul>
+<pre><code class="language-golang">a := func() { b := 4 }()    // a == undefined
+b := [1, 2, 3][10]          // b == undefined
+c := {a: &quot;foo&quot;}[&quot;b&quot;]        // c == undefined
+d := int(&quot;foo&quot;)             // d == undefined
+</code></pre>
+<h3 id="array-values">Array Values <a class="anchor" href="#array-values"> </a></h3>
+<p>In VV, array is an ordered list of values of any types. Elements of an array
+can be accessed using indexer <code>[]</code>.</p>
+<pre><code class="language-golang">[1, 2, 3][0]       // == 1
+[1, 2, 3][2]       // == 3
+[1, 2, 3][3]       // == undefined
+
+[&quot;foo&quot;, &quot;bar&quot;, [1, 2, 3]]   // ok: array with an array element
+</code></pre>
+<h3 id="map-values">Map Values <a class="anchor" href="#map-values"> </a></h3>
+<p>In VV, map is a set of key-value pairs where key is string and the value is
+of any value types. Value of a map can be accessed using indexer <code>[]</code> or
+selector &lsquo;.&rsquo; operators.</p>
+<pre><code class="language-golang">m := { a: 1, b: false, c: &quot;foo&quot; }
+m[&quot;b&quot;]                                // == false
+m.c                                   // == &quot;foo&quot;
+m.x                                   // == undefined
+
+{a: [1,2,3], b: {c: &quot;foo&quot;, d: &quot;bar&quot;}} // ok: map with an array element and a map element  
+</code></pre>
+<h3 id="function-values">Function Values <a class="anchor" href="#function-values"> </a></h3>
+<p>In VV, function is a callable value with a number of function arguments and
+a return value. Just like any other values, functions can be passed into or
+returned from another function.</p>
+<pre><code class="language-golang">my_func := func(arg1, arg2) {
+  return arg1 + arg2
+}
+
+adder := func(base) {
+  return func(x) { return base + x }  // capturing 'base'
+}
+add5 := adder(5)
+nine := add5(4)    // == 9
+</code></pre>
+<p>Unlike Go, VV does not have declarations. So the following code is illegal:</p>
+<pre><code class="language-golang">func my_func(arg1, arg2) {  // illegal
+  return arg1 + arg2
+}
+</code></pre>
+<p>VV also supports variadic functions/closures:</p>
+<pre><code class="language-golang">variadic := func (a, b, ...c) {
+  return [a, b, c]
+}
+variadic(1, 2, 3, 4) // [1, 2, [3, 4]]
+
+variadicClosure := func(a) {
+  return func(b, ...c) {
+    return [a, b, c]
+  }
+}
+variadicClosure(1)(2, 3, 4) // [1, 2, [3, 4]]
+</code></pre>
+<p>Only the last parameter can be variadic. The following code is also illegal:</p>
+<pre><code class="language-golang">// illegal, because a is variadic and is not the last parameter
+illegal := func(a..., b) { /*... */ }
+</code></pre>
+<p>When calling a function, the number of passing arguments must match that of
+function definition.</p>
+<pre><code class="language-golang">f := func(a, b) {}
+f(1, 2, 3) // Runtime Error: wrong number of arguments: want=2, got=3
+</code></pre>
+<p>Like Go, you can use ellipsis <code>...</code> to pass array-type value as its last parameter:</p>
+<pre><code class="language-golang">f1 := func(a, b, c) { return a + b + c }
+f1([1, 2, 3]...)    // =&gt; 6
+f1(1, [2, 3]...)    // =&gt; 6
+f1(1, 2, [3]...)    // =&gt; 6
+f1([1, 2]...)       // Runtime Error: wrong number of arguments: want=3, got=2
+
+f2 := func(a, ...b) {}
+f2(1)               // valid; a = 1, b = []
+f2(1, 2)            // valid; a = 1, b = [2]
+f2(1, 2, 3)         // valid; a = 1, b = [2, 3]
+f2([1, 2, 3]...)    // valid; a = 1, b = [2, 3]
+</code></pre>
+<h2 id="variables-and-scopes">Variables and Scopes <a class="anchor" href="#variables-and-scopes"> </a></h2>
+<p>A value can be assigned to a variable using assignment operator <code>:=</code> and <code>=</code>.</p>
+<ul>
+<li><code>:=</code> operator defines a new variable in the scope and assigns a value.</li>
+<li><code>=</code> operator assigns a new value to an existing variable in the scope.</li>
+</ul>
+<p>Variables are defined either in global scope (defined outside function) or in
+local scope (defined inside function).</p>
+<pre><code class="language-golang">a := &quot;foo&quot;      // define 'a' in global scope
+
+func() {        // function scope A
+  b := 52       // define 'b' in function scope A
+  
+  func() {      // function scope B
+    c := 19.84  // define 'c' in function scope B
+
+    a = &quot;bee&quot;   // ok: assign new value to 'a' from global scope
+    b = 20      // ok: assign new value to 'b' from function scope A
+
+    b := true   // ok: define new 'b' in function scope B
+                //     (shadowing 'b' from function scope A)
+  }
+  
+  a = &quot;bar&quot;     // ok: assigne new value to 'a' from global scope
+  b = 10        // ok: assigne new value to 'b'
+  a := -100     // ok: define new 'a' in function scope A
+                //     (shadowing 'a' from global scope)
+  
+  c = -9.1      // illegal: 'c' is not defined
+  b := [1, 2]   // illegal: 'b' is already defined in the same scope
+}
+
+b = 25          // illegal: 'b' is not defined
+a := {d: 2}     // illegal: 'a' is already defined in the same scope
+</code></pre>
+<p>Unlike Go, a variable can be assigned a value of different types.</p>
+<pre><code class="language-golang">a := 123        // assigned    'int'
+a = &quot;123&quot;       // re-assigned 'string'
+a = [1, 2, 3]   // re-assigned 'array'
+</code></pre>
+<h2 id="type-conversions">Type Conversions <a class="anchor" href="#type-conversions"> </a></h2>
+<p>Although the type is not directly specified in VV, one can use type
+conversion
+<a href="https://github.com/malivvan/vv/blob/master/docs/builtins.md">builtin functions</a>
+to convert between value types.</p>
+<pre><code class="language-golang">s1 := string(1984)    // &quot;1984&quot;
+i2 := int(&quot;-999&quot;)     // -999
+f3 := float(-51)      // -51.0
+b4 := bool(1)         // true
+c5 := char(&quot;X&quot;)       // 'X'
+</code></pre>
+<p>See <a href="https://github.com/malivvan/vv/blob/master/docs/operators.md">Operators</a>
+for more details on type coercions.</p>
+<h2 id="operators">Operators <a class="anchor" href="#operators"> </a></h2>
+<h3 id="unary-operators">Unary Operators <a class="anchor" href="#unary-operators"> </a></h3>
+<table>
+<thead>
+<tr>
+<th align="center">Operator</th>
+<th align="center">Usage</th>
+<th align="center">Types</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><code>+</code></td>
+<td align="center">same as <code>0 + x</code></td>
+<td align="center">int, float</td>
+</tr>
+<tr>
+<td align="center"><code>-</code></td>
+<td align="center">same as <code>0 - x</code></td>
+<td align="center">int, float</td>
+</tr>
+<tr>
+<td align="center"><code>!</code></td>
+<td align="center">logical NOT</td>
+<td align="center">all types*</td>
+</tr>
+<tr>
+<td align="center"><code>^</code></td>
+<td align="center">bitwise complement</td>
+<td align="center">int</td>
+</tr>
+</tbody>
+</table>
+<p><em>In VV, all values can be either
+<a href="https://github.com/malivvan/vv/blob/d5-patch-1/docs/runtime-types.md#objectisfalsy">truthy or falsy</a>.</em></p>
+<h3 id="binary-operators">Binary Operators <a class="anchor" href="#binary-operators"> </a></h3>
+<table>
+<thead>
+<tr>
+<th align="center">Operator</th>
+<th align="center">Usage</th>
+<th align="center">Types</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><code>==</code></td>
+<td align="center">equal</td>
+<td align="center">all types</td>
+</tr>
+<tr>
+<td align="center"><code>!=</code></td>
+<td align="center">not equal</td>
+<td align="center">all types</td>
+</tr>
+<tr>
+<td align="center"><code>&amp;&amp;</code></td>
+<td align="center">logical AND</td>
+<td align="center">all types</td>
+</tr>
+<tr>
+<td align="center"><code>||</code></td>
+<td align="center">logical OR</td>
+<td align="center">all types</td>
+</tr>
+<tr>
+<td align="center"><code>+</code></td>
+<td align="center">add/concat</td>
+<td align="center">int, float, string, char, time, array</td>
+</tr>
+<tr>
+<td align="center"><code>-</code></td>
+<td align="center">subtract</td>
+<td align="center">int, float, char, time</td>
+</tr>
+<tr>
+<td align="center"><code>*</code></td>
+<td align="center">multiply</td>
+<td align="center">int, float</td>
+</tr>
+<tr>
+<td align="center"><code>/</code></td>
+<td align="center">divide</td>
+<td align="center">int, float</td>
+</tr>
+<tr>
+<td align="center"><code>&amp;</code></td>
+<td align="center">bitwise AND</td>
+<td align="center">int</td>
+</tr>
+<tr>
+<td align="center"><code>|</code></td>
+<td align="center">bitwise OR</td>
+<td align="center">int</td>
+</tr>
+<tr>
+<td align="center"><code>^</code></td>
+<td align="center">bitwise XOR</td>
+<td align="center">int</td>
+</tr>
+<tr>
+<td align="center"><code>&amp;^</code></td>
+<td align="center">bitclear (AND NOT)</td>
+<td align="center">int</td>
+</tr>
+<tr>
+<td align="center"><code>&lt;&lt;</code></td>
+<td align="center">shift left</td>
+<td align="center">int</td>
+</tr>
+<tr>
+<td align="center"><code>&gt;&gt;</code></td>
+<td align="center">shift right</td>
+<td align="center">int</td>
+</tr>
+<tr>
+<td align="center"><code>&lt;</code></td>
+<td align="center">less than</td>
+<td align="center">int, float, char, time, string</td>
+</tr>
+<tr>
+<td align="center"><code>&lt;=</code></td>
+<td align="center">less than or equal to</td>
+<td align="center">int, float, char, time, string</td>
+</tr>
+<tr>
+<td align="center"><code>&gt;</code></td>
+<td align="center">greater than</td>
+<td align="center">int, float, char, time, string</td>
+</tr>
+<tr>
+<td align="center"><code>&gt;=</code></td>
+<td align="center">greater than or equal to</td>
+<td align="center">int, float, char, time, string</td>
+</tr>
+</tbody>
+</table>
+<p><em>See <a href="https://github.com/malivvan/vv/blob/master/docs/operators.md">Operators</a>
+for more details.</em></p>
+<h3 id="ternary-operators">Ternary Operators <a class="anchor" href="#ternary-operators"> </a></h3>
+<p>VV has a ternary conditional operator <code>(condition expression) ? (true expression) : (false expression)</code>.</p>
+<pre><code class="language-golang">a := true ? 1 : -1    // a == 1
+
+min := func(a, b) {
+  return a &lt; b ? a : b
+}
+b := min(5, 10)      // b == 5
+</code></pre>
+<h3 id="assignment-and-increment-operators">Assignment and Increment Operators <a class="anchor" href="#assignment-and-increment-operators"> </a></h3>
+<table>
+<thead>
+<tr>
+<th align="center">Operator</th>
+<th align="center">Usage</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center"><code>+=</code></td>
+<td align="center"><code>(lhs) = (lhs) + (rhs)</code></td>
+</tr>
+<tr>
+<td align="center"><code>-=</code></td>
+<td align="center"><code>(lhs) = (lhs) - (rhs)</code></td>
+</tr>
+<tr>
+<td align="center"><code>*=</code></td>
+<td align="center"><code>(lhs) = (lhs) * (rhs)</code></td>
+</tr>
+<tr>
+<td align="center"><code>/=</code></td>
+<td align="center"><code>(lhs) = (lhs) / (rhs)</code></td>
+</tr>
+<tr>
+<td align="center"><code>%=</code></td>
+<td align="center"><code>(lhs) = (lhs) % (rhs)</code></td>
+</tr>
+<tr>
+<td align="center"><code>&amp;=</code></td>
+<td align="center"><code>(lhs) = (lhs) &amp; (rhs)</code></td>
+</tr>
+<tr>
+<td align="center"><code>|=</code></td>
+<td align="center"><code>(lhs) = (lhs) | (rhs)</code></td>
+</tr>
+<tr>
+<td align="center"><code>&amp;^=</code></td>
+<td align="center"><code>(lhs) = (lhs) &amp;^ (rhs)</code></td>
+</tr>
+<tr>
+<td align="center"><code>^=</code></td>
+<td align="center"><code>(lhs) = (lhs) ^ (rhs)</code></td>
+</tr>
+<tr>
+<td align="center"><code>&lt;&lt;=</code></td>
+<td align="center"><code>(lhs) = (lhs) &lt;&lt; (rhs)</code></td>
+</tr>
+<tr>
+<td align="center"><code>&gt;&gt;=</code></td>
+<td align="center"><code>(lhs) = (lhs) &gt;&gt; (rhs)</code></td>
+</tr>
+<tr>
+<td align="center"><code>++</code></td>
+<td align="center"><code>(lhs) = (lhs) + 1</code></td>
+</tr>
+<tr>
+<td align="center"><code>--</code></td>
+<td align="center"><code>(lhs) = (lhs) - 1</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="operator-precedences">Operator Precedences <a class="anchor" href="#operator-precedences"> </a></h3>
+<p>Unary operators have the highest precedence, and, ternary operator has the
+lowest precedence. There are five precedence levels for binary operators.
+Multiplication operators bind strongest, followed by addition operators,
+comparison operators, <code>&amp;&amp;</code> (logical AND), and finally <code>||</code> (logical OR):</p>
+<table>
+<thead>
+<tr>
+<th align="center">Precedence</th>
+<th align="center">Operator</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="center">5</td>
+<td align="center"><code>*</code>  <code>/</code>  <code>%</code>  <code>&lt;&lt;</code>  <code>&gt;&gt;</code>  <code>&amp;</code>  <code>&amp;^</code></td>
+</tr>
+<tr>
+<td align="center">4</td>
+<td align="center"><code>+</code>  <code>-</code>  <code>|</code>  <code>^</code></td>
+</tr>
+<tr>
+<td align="center">3</td>
+<td align="center"><code>==</code>  <code>!=</code>  <code>&lt;</code>  <code>&lt;=</code>  <code>&gt;</code>  <code>&gt;=</code></td>
+</tr>
+<tr>
+<td align="center">2</td>
+<td align="center"><code>&amp;&amp;</code></td>
+</tr>
+<tr>
+<td align="center">1</td>
+<td align="center"><code>||</code></td>
+</tr>
+</tbody>
+</table>
+<p>Like Go, <code>++</code> and <code>--</code> operators form statements, not expressions, they fall
+outside the operator hierarchy.</p>
+<h3 id="selector-and-indexer">Selector and Indexer <a class="anchor" href="#selector-and-indexer"> </a></h3>
+<p>One can use selector (<code>.</code>) and indexer (<code>[]</code>) operators to read or write
+elements of composite types (array, map, string, bytes).</p>
+<pre><code class="language-golang">[&quot;one&quot;, &quot;two&quot;, &quot;three&quot;][1]  // == &quot;two&quot;
+
+m := {
+  a: 1,
+  b: [2, 3, 4],
+  c: func() { return 10 }
+}
+m.a              // == 1
+m[&quot;b&quot;][1]        // == 3
+m.c()            // == 10
+m.x = 5          // add 'x' to map 'm'
+m[&quot;b&quot;][5]        // == undefined
+m[&quot;b&quot;][5].d      // == undefined
+m.b[5] = 0       // == undefined
+m.x.y.z          // == undefined
+</code></pre>
+<p>Like Go, one can use slice operator <code>[:]</code> for sequence value types such as
+array, string, bytes.</p>
+<pre><code class="language-golang">a := [1, 2, 3, 4, 5][1:3]    // == [2, 3]
+b := [1, 2, 3, 4, 5][3:]     // == [4, 5]
+c := [1, 2, 3, 4, 5][:3]     // == [1, 2, 3]
+d := &quot;hello world&quot;[2:10]     // == &quot;llo worl&quot;
+c := [1, 2, 3, 4, 5][-1:10]  // == [1, 2, 3, 4, 5]
+</code></pre>
+<p><strong>Note: Keywords cannot be used as selectors.</strong></p>
+<pre><code class="language-golang">a := {in: true} // Parse Error: expected map key, found 'in'
+a.func = &quot;&quot;     // Parse Error: expected selector, found 'func'
+</code></pre>
+<p>Use double quotes and indexer to use keywords with maps.</p>
+<pre><code class="language-golang">a := {&quot;in&quot;: true}
+a[&quot;func&quot;] = &quot;&quot;
+</code></pre>
+<h2 id="statements">Statements <a class="anchor" href="#statements"> </a></h2>
+<h3 id="if-statement">If Statement <a class="anchor" href="#if-statement"> </a></h3>
+<p>&ldquo;If&rdquo; statement is very similar to Go.</p>
+<pre><code class="language-golang">if a &lt; 0 {
+  // execute if 'a' is negative
+} else if a == 0 {
+  // execute if 'a' is zero
+} else {
+  // execute if 'a' is positive
+}
+</code></pre>
+<p>Like Go, the condition expression may be preceded by a simple statement,
+which executes before the expression is evaluated.</p>
+<pre><code class="language-golang">if a := foo(); a &lt; 0 {
+  // execute if 'a' is negative
+}
+</code></pre>
+<h3 id="for-statement">For Statement <a class="anchor" href="#for-statement"> </a></h3>
+<p>&ldquo;For&rdquo; statement is very similar to Go.</p>
+<pre><code class="language-golang">// for (init); (condition); (post) {}
+for a:=0; a&lt;10; a++ {
+  // ...
+}
+
+// for (condition) {}
+for a &lt; 10 {
+  // ...
+}
+
+// for {}
+for {
+  // ...
+}
+</code></pre>
+<h3 id="for-in-statement">For-In Statement <a class="anchor" href="#for-in-statement"> </a></h3>
+<p>&ldquo;For-In&rdquo; statement is new in VV. It&rsquo;s similar to Go&rsquo;s <code>for range</code> statement.
+&ldquo;For-In&rdquo; statement can iterate any iterable value types (array, map, bytes,
+string, undefined).</p>
+<pre><code class="language-golang">for v in [1, 2, 3] {          // array: element
+  // 'v' is value
+}
+for i, v in [1, 2, 3] {       // array: index and element
+  // 'i' is index
+  // 'v' is value  
+}
+for k, v in {k1: 1, k2: 2} {  // map: key and value
+  // 'k' is key
+  // 'v' is value
+}
+</code></pre>
+<h2 id="modules">Modules <a class="anchor" href="#modules"> </a></h2>
+<p>Module is the basic compilation unit in VV. A module can import another
+module using <code>import</code> expression.</p>
+<p>Main module:</p>
+<pre><code class="language-golang">sum := import(&quot;./sum&quot;)  // load module from a local file
+fmt.print(sum(10))      // module function
+</code></pre>
+<p>Another module in <code>sum.vv</code> file:</p>
+<pre><code class="language-golang">base := 5
+
+export func(x) {
+  return x + base
+}
+</code></pre>
+<p>In VV, modules are very similar to functions.</p>
+<ul>
+<li><code>import</code> expression loads the module code and execute it like a function.</li>
+<li>Module should return a value using <code>export</code> statement.
+<ul>
+<li>Module can return <code>export</code> a value of any types: int, map, function, etc.</li>
+<li><code>export</code> in a module is like <code>return</code> in a function: it stops execution and
+return a value to the importing code.</li>
+<li><code>export</code>-ed values are always immutable.</li>
+<li>If the module does not have any <code>export</code> statement, <code>import</code> expression
+simply returns <code>undefined</code>. <em>(Just like the function that has no <code>return</code>.)</em></li>
+<li>Note that <code>export</code> statement is completely ignored and not evaluated if
+the code is executed as a main module.</li>
+</ul>
+</li>
+</ul>
+<p>Also, you can use <code>import</code> expression to load the
+<a href="https://github.com/malivvan/vv/blob/master/docs/stdlib.md">Standard Library</a> as
+well.</p>
+<pre><code class="language-golang">math := import(&quot;math&quot;)
+a := math.abs(-19.84)  // == 19.84
+</code></pre>
+<h2 id="comments">Comments <a class="anchor" href="#comments"> </a></h2>
+<p>Like Go, VV supports line comments (<code>//...</code>) and block comments
+(<code>/* ... */</code>).</p>
+<pre><code class="language-golang">/*
+  multi-line block comments
+*/
+
+a := 5    // line comments
+</code></pre>
+<h2 id="differences-from-go">Differences from Go <a class="anchor" href="#differences-from-go"> </a></h2>
+<p>Unlike Go, VV does not have the following:</p>
+<ul>
+<li>Declarations</li>
+<li>Imaginary values</li>
+<li>Structs</li>
+<li>Pointers</li>
+<li>Channels</li>
+<li>Goroutines</li>
+<li>Tuple assignment</li>
+<li>Variable parameters</li>
+<li>Switch statement</li>
+<li>Goto statement</li>
+<li>Defer statement</li>
+<li>Panic</li>
+<li>Type assertion</li>
+</ul>
+</article>
+<footer>
+  <div style="float: left;">Copyright &copy; malivvan</div>
+  <div style="float: right;">Last modified <time datetime="2025-08-03T08:54:47Z+00:00
+">Sun Aug  3 08:54:47 UTC 2025
+</time></div>
+</footer>
+<script>
+  hljs.highlightAll();
+</script>
+</body>
+
+</html>
