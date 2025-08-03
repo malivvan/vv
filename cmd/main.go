@@ -116,7 +116,7 @@ func main() {
 			_, _ = fmt.Fprintln(os.Stderr, err.Error())
 			os.Exit(1)
 		}
-	} else if string(inputData[:3]) != vvm.Magic {
+	} else if string(inputData[:len(vvm.Magic)]) != vvm.Magic {
 		err := CompileAndRun(ctx, modules, inputData, inputFile)
 		if err != nil {
 			_, _ = fmt.Fprintln(os.Stderr, err.Error())

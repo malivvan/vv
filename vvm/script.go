@@ -1,9 +1,13 @@
 package vvm
 
 import (
+	"bytes"
 	"context"
+	"encoding/binary"
 	"encoding/gob"
+	"errors"
 	"fmt"
+	"hash/crc64"
 	"io"
 	"path/filepath"
 	"sync"
@@ -12,7 +16,8 @@ import (
 )
 
 // Magic is a magic number every encoded Program starts with.
-const Magic = "VV\x00"
+// format: [4]MAGIC [4]SIZE [N]DATA [8]CRC64
+const Magic = "VVC\x00"
 
 // Script can simplify compilation and execution of embedded scripts.
 type Script struct {
@@ -219,7 +224,7 @@ func (p *Program) Decode(r io.Reader, modules *ModuleMap) error {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 
-	var magic [3]byte
+	var magic [len(Magic)]byte
 	_, err := r.Read(magic[:])
 	if err != nil {
 		return err
@@ -227,6 +232,26 @@ func (p *Program) Decode(r io.Reader, modules *ModuleMap) error {
 	if string(magic[:]) != Magic {
 		return fmt.Errorf("invalid magic number: %s", magic)
 	}
+	var size [4]byte
+	_, err = r.Read(size[:])
+	if err != nil {
+		return err
+	}
+	buf := make([]byte, int(binary.LittleEndian.Uint32(size[:])))
+	_, err = r.Read(buf[:])
+	if err != nil {
+		return err
+	}
+	var hash [8]byte
+	_, err = r.Read(hash[:])
+	if err != nil {
+		return err
+	}
+	if crc64.Checksum(buf[:], crc64.MakeTable(crc64.ISO)) != binary.LittleEndian.Uint64(hash[:]) {
+		return errors.New("crc32 mismatch")
+	}
+
+	r = bytes.NewReader(buf)
 	p.globalIndices = make(map[string]int)
 	dec := gob.NewDecoder(r)
 	err = dec.Decode(&p.globalIndices)
@@ -254,12 +279,9 @@ func (p *Program) Encode(w io.Writer) error {
 	p.lock.RLock()
 	defer p.lock.RUnlock()
 
-	_, err := w.Write([]byte(Magic))
-	if err != nil {
-		return err
-	}
-	enc := gob.NewEncoder(w)
-	err = enc.Encode(p.globalIndices)
+	buf := bytes.NewBuffer(nil)
+	enc := gob.NewEncoder(buf)
+	err := enc.Encode(p.globalIndices)
 	if err != nil {
 		return err
 	}
@@ -271,7 +293,29 @@ func (p *Program) Encode(w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	err = p.bytecode.Encode(w)
+	err = p.bytecode.Encode(buf)
+	if err != nil {
+		return err
+	}
+
+	var size [4]byte
+	binary.LittleEndian.PutUint32(size[:], uint32(buf.Len()))
+	var hash [8]byte
+	binary.LittleEndian.PutUint64(hash[:], crc64.Checksum(buf.Bytes(), crc64.MakeTable(crc64.ISO)))
+
+	_, err = w.Write([]byte(Magic))
+	if err != nil {
+		return err
+	}
+	_, err = w.Write(size[:])
+	if err != nil {
+		return err
+	}
+	_, err = buf.WriteTo(w)
+	if err != nil {
+		return err
+	}
+	_, err = w.Write(hash[:])
 	if err != nil {
 		return err
 	}
