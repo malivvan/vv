@@ -494,7 +494,6 @@ func TestProgram_EncodeDecode(t *testing.T) {
 	require.NoError(t, err)
 	bx := bufx.Bytes()
 
-	t.Log(len(bufx.Bytes()))
 	require.Equal(t, b, bx, "encoded bytes should be equal")
 }
 

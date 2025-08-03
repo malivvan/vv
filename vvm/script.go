@@ -2,6 +2,7 @@ package vvm
 
 import (
 	"bytes"
+	"compress/flate"
 	"context"
 	"encoding/binary"
 	"encoding/gob"
@@ -247,11 +248,16 @@ func (p *Program) Decode(r io.Reader, modules *ModuleMap) error {
 	if err != nil {
 		return err
 	}
-	if crc64.Checksum(buf[:], crc64.MakeTable(crc64.ECMA)) != binary.LittleEndian.Uint64(hash[:]) {
-		return errors.New("crc32 mismatch")
+	b, err := inflate(buf)
+	if err != nil {
+		return err
 	}
 
-	r = bytes.NewReader(buf)
+	if crc64.Checksum(buf[:], crc64.MakeTable(crc64.ECMA)) != binary.LittleEndian.Uint64(hash[:]) {
+		return errors.New("bad crc64")
+	}
+
+	r = bytes.NewReader(b)
 	p.globalIndices = make(map[string]int)
 	dec := gob.NewDecoder(r)
 	err = dec.Decode(&p.globalIndices)
@@ -293,15 +299,20 @@ func (p *Program) Encode(w io.Writer) error {
 	if err != nil {
 		return err
 	}
+
 	err = p.bytecode.Encode(buf)
+	if err != nil {
+		return err
+	}
+	b, err := deflate(buf.Bytes())
 	if err != nil {
 		return err
 	}
 
 	var size [4]byte
-	binary.LittleEndian.PutUint32(size[:], uint32(buf.Len()))
+	binary.LittleEndian.PutUint32(size[:], uint32(len(b)))
 	var hash [8]byte
-	binary.LittleEndian.PutUint64(hash[:], crc64.Checksum(buf.Bytes(), crc64.MakeTable(crc64.ECMA)))
+	binary.LittleEndian.PutUint64(hash[:], crc64.Checksum(b, crc64.MakeTable(crc64.ECMA)))
 
 	_, err = w.Write([]byte(Magic))
 	if err != nil {
@@ -311,7 +322,7 @@ func (p *Program) Encode(w io.Writer) error {
 	if err != nil {
 		return err
 	}
-	_, err = buf.WriteTo(w)
+	_, err = w.Write(b)
 	if err != nil {
 		return err
 	}
@@ -473,4 +484,38 @@ func (p *Program) Equals(other *Program) bool {
 		return false
 	}
 	return true
+}
+
+func deflate(b []byte) ([]byte, error) {
+	var buf bytes.Buffer
+	w, err := flate.NewWriter(&buf, flate.BestCompression)
+	if err != nil {
+		return nil, err
+	}
+	_, err = w.Write(b)
+	if err != nil {
+		return nil, err
+	}
+	err = w.Flush()
+	if err != nil {
+		return nil, err
+	}
+	err = w.Close()
+	if err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+
+func inflate(b []byte) ([]byte, error) {
+	r := flate.NewReader(bytes.NewBuffer(b))
+	b, err := io.ReadAll(r)
+	if err != nil {
+		return nil, err
+	}
+	err = r.Close()
+	if err != nil {
+		return nil, err
+	}
+	return b, nil
 }
