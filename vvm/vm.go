@@ -962,7 +962,7 @@ func (v *VM) run() {
 		case parser.OpGetBuiltin:
 			v.ip++
 			builtinIndex := int(v.curInsts[v.ip])
-			v.stack[v.sp] = BuiltinFuncs[builtinIndex]
+			v.stack[v.sp] = builtinFuncs[builtinIndex]
 			v.sp++
 		case parser.OpClosure:
 			v.ip += 3

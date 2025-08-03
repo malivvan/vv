@@ -3,11 +3,11 @@ package vvm
 import "context"
 
 // BuiltinFuncs is a list of all builtin functions.
-var BuiltinFuncs []*BuiltinFunction
+var builtinFuncs []*BuiltinFunction
 
 // if needVMObj is true, VM will pass [VMObj, args...] to fn when calling it.
 func addBuiltinFunction(name string, fn CallableFunc) {
-	BuiltinFuncs = append(BuiltinFuncs, &BuiltinFunction{Name: name, Value: fn})
+	builtinFuncs = append(builtinFuncs, &BuiltinFunction{Name: name, Value: fn})
 }
 
 func init() {
@@ -46,7 +46,7 @@ func init() {
 
 // GetAllBuiltinFunctions returns all builtin function objects.
 func GetAllBuiltinFunctions() []*BuiltinFunction {
-	return append([]*BuiltinFunction{}, BuiltinFuncs...)
+	return append([]*BuiltinFunction{}, builtinFuncs...)
 }
 
 func builtinTypeName(ctx context.Context, args ...Object) (Object, error) {

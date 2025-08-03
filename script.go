@@ -187,7 +187,7 @@ func (s *Script) prepCompile() (symbolTable *vvm.SymbolTable, globals []vvm.Obje
 	}
 
 	symbolTable = vvm.NewSymbolTable()
-	for idx, fn := range vvm.BuiltinFuncs {
+	for idx, fn := range vvm.GetAllBuiltinFunctions() {
 		symbolTable.DefineBuiltin(idx, fn.Name)
 	}
 

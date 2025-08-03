@@ -1,23 +1,13 @@
 package main
 
 import (
-	"bufio"
-	"bytes"
 	"context"
 	"flag"
 	"fmt"
 	"github.com/malivvan/vv"
-	"github.com/malivvan/vv/pkg/cui"
-	"github.com/malivvan/vv/pkg/cui/mdview"
 	"github.com/malivvan/vv/pkg/sh"
-	"io"
 	"os"
 	"path/filepath"
-	"strings"
-
-	"github.com/malivvan/vv/vvm"
-	"github.com/malivvan/vv/vvm/parser"
-	"github.com/malivvan/vv/vvm/stdlib"
 )
 
 const (
@@ -55,48 +45,10 @@ func main() {
 		}
 		return
 	}
-	if len(os.Args) == 2 && os.Args[1] == "edit" {
-		path := "docs/tutorial.md"
-		f, err := os.Open(path)
-		if err != nil {
-			_, _ = fmt.Fprintf(os.Stderr,
-				"Error opening file: %s\n", err.Error())
-			os.Exit(1)
-		}
-		//info, err := f.Stat()
-		//if err != nil {
-		//	_, _ = fmt.Fprintf(os.Stderr,
-		//		"Error getting file info: %s\n", err.Error())
-		//	os.Exit(1)
-		//}
 
-		data, err := io.ReadAll(f)
-		if err != nil {
-			_, _ = fmt.Fprintf(os.Stderr,
-				"Error reading file: %s\n", err.Error())
-			os.Exit(1)
-		}
-		app := cui.NewApplication()
-
-		mdv := mdview.New(path, string(data), mdview.Pulumi, app)
-		//buf := editor.NewBuffer(f, info.Size(), path)
-		//view := editor.NewView(buf)
-		//view.SetTheme("monokai")
-		frame := cui.NewFrame(mdv)
-		app.SetRoot(frame, true)
-		if err := app.Run(); err != nil {
-			_, _ = fmt.Fprintf(os.Stderr,
-				"Error running application: %s\n", err.Error())
-			os.Exit(1)
-		}
-		return
-	}
-
-	modules := stdlib.GetModuleMap(stdlib.AllModuleNames()...)
 	inputFile := flag.Arg(0)
 	if inputFile == "" {
-		// REPL
-		RunREPL(ctx, modules, os.Stdin, os.Stdout)
+		vv.RunREPL(ctx, os.Stdin, os.Stdout, replPrompt)
 		return
 	}
 
@@ -118,152 +70,23 @@ func main() {
 	}
 
 	if compileOutput != "" {
-		err := CompileOnly(modules, inputData, inputFile,
-			compileOutput)
+		err := vv.CompileOnly(inputData, inputFile, compileOutput)
 		if err != nil {
 			_, _ = fmt.Fprintln(os.Stderr, err.Error())
 			os.Exit(1)
 		}
 	} else if string(inputData[:len(vv.Magic)]) != vv.Magic {
-		err := CompileAndRun(ctx, modules, inputData, inputFile)
+		err := vv.CompileAndRun(ctx, inputData, inputFile)
 		if err != nil {
 			_, _ = fmt.Fprintln(os.Stderr, err.Error())
 			os.Exit(1)
 		}
 	} else {
-		if err := RunCompiled(ctx, modules, inputData); err != nil {
+		if err := vv.RunCompiled(ctx, inputData); err != nil {
 			_, _ = fmt.Fprintln(os.Stderr, err.Error())
 			os.Exit(1)
 		}
 	}
-}
-
-// CompileOnly compiles the source code and writes the compiled binary into
-// outputFile.
-func CompileOnly(modules *vvm.ModuleMap, data []byte, inputFile, outputFile string) (err error) {
-	bytecode, err := compileSrc(modules, data, inputFile)
-	if err != nil {
-		return
-	}
-
-	if outputFile == "" {
-		outputFile = basename(inputFile) + ".out"
-	}
-
-	out, err := os.Create(outputFile)
-	if err != nil {
-		return
-	}
-	defer func() {
-		if err != nil {
-			_ = out.Close()
-		} else {
-			err = out.Close()
-		}
-	}()
-
-	err = bytecode.Encode(out)
-	if err != nil {
-		return
-	}
-	fmt.Println(outputFile)
-	return
-}
-
-// CompileAndRun compiles the source code and executes it.
-func CompileAndRun(ctx context.Context, modules *vvm.ModuleMap, data []byte, inputFile string) (err error) {
-	p, err := compileSrc(modules, data, inputFile)
-	if err != nil {
-		return
-	}
-	err = p.Run()
-	return
-}
-
-// RunCompiled reads the compiled binary from file and executes it.
-func RunCompiled(ctx context.Context, modules *vvm.ModuleMap, data []byte) (err error) {
-	p := &vv.Program{}
-	err = p.Decode(bytes.NewReader(data), modules)
-	if err != nil {
-		return
-	}
-	err = p.Run()
-	return
-}
-
-// RunREPL starts REPL.
-func RunREPL(ctx context.Context, modules *vvm.ModuleMap, in io.Reader, out io.Writer) {
-	stdin := bufio.NewScanner(in)
-	fileSet := parser.NewFileSet()
-	globals := make([]vvm.Object, vvm.GlobalsSize)
-	symbolTable := vvm.NewSymbolTable()
-	for idx, fn := range vvm.GetAllBuiltinFunctions() {
-		symbolTable.DefineBuiltin(idx, fn.Name)
-	}
-
-	// embed println function
-	symbol := symbolTable.Define("__repl_println__")
-	globals[symbol.Index] = &vvm.BuiltinFunction{
-		Name: "println",
-		Value: func(ctx context.Context, args ...vvm.Object) (ret vvm.Object, err error) {
-			var printArgs []interface{}
-			for _, arg := range args {
-				if _, isUndefined := arg.(*vvm.Undefined); isUndefined {
-					printArgs = append(printArgs, "<undefined>")
-				} else {
-					s, _ := vvm.ToString(arg)
-					printArgs = append(printArgs, s)
-				}
-			}
-			printArgs = append(printArgs, "\n")
-			_, _ = fmt.Print(printArgs...)
-			return
-		},
-	}
-
-	var constants []vvm.Object
-	for {
-		_, _ = fmt.Fprint(out, replPrompt)
-		scanned := stdin.Scan()
-		if !scanned {
-			return
-		}
-
-		line := stdin.Text()
-		srcFile := fileSet.AddFile("repl", -1, len(line))
-		p := parser.NewParser(srcFile, []byte(line), nil)
-		file, err := p.ParseFile()
-		if err != nil {
-			_, _ = fmt.Fprintln(out, err.Error())
-			continue
-		}
-
-		file = addPrints(file)
-		c := vvm.NewCompiler(srcFile, symbolTable, constants, modules, nil)
-		if err := c.Compile(file); err != nil {
-			_, _ = fmt.Fprintln(out, err.Error())
-			continue
-		}
-
-		bytecode := c.Bytecode()
-		machine := vvm.NewVM(ctx, bytecode, globals, -1)
-		if err := machine.Run(); err != nil {
-			_, _ = fmt.Fprintln(out, err.Error())
-			continue
-		}
-		constants = bytecode.Constants
-	}
-}
-
-func compileSrc(modules *vvm.ModuleMap, src []byte, inputFile string) (*vv.Program, error) {
-	s := vv.NewScript(src)
-	s.SetName(inputFile)
-	s.SetImports(modules)
-	s.EnableFileImport(true)
-	if err := s.SetImportDir(filepath.Dir(inputFile)); err != nil {
-		return nil, fmt.Errorf("error setting import dir: %w", err)
-	}
-	return s.Compile()
 }
 
 func doHelp() {
@@ -295,45 +118,4 @@ func doHelp() {
 	fmt.Println("	          Run program or script file")
 	fmt.Println()
 	fmt.Println()
-}
-
-func addPrints(file *parser.File) *parser.File {
-	var stmts []parser.Stmt
-	for _, s := range file.Stmts {
-		switch s := s.(type) {
-		case *parser.ExprStmt:
-			stmts = append(stmts, &parser.ExprStmt{
-				Expr: &parser.CallExpr{
-					Func: &parser.Ident{Name: "__repl_println__"},
-					Args: []parser.Expr{s.Expr},
-				},
-			})
-		case *parser.AssignStmt:
-			stmts = append(stmts, s)
-
-			stmts = append(stmts, &parser.ExprStmt{
-				Expr: &parser.CallExpr{
-					Func: &parser.Ident{
-						Name: "__repl_println__",
-					},
-					Args: s.LHS,
-				},
-			})
-		default:
-			stmts = append(stmts, s)
-		}
-	}
-	return &parser.File{
-		InputFile: file.InputFile,
-		Stmts:     stmts,
-	}
-}
-
-func basename(s string) string {
-	s = filepath.Base(s)
-	n := strings.LastIndexByte(s, '.')
-	if n > 0 {
-		return s[:n]
-	}
-	return s
 }
