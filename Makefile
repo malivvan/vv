@@ -11,7 +11,6 @@ TEST_FORMAT ?= pkgname
 
 define build
 	@mkdir -p build
-   	$(eval COMPILED := $(shell date -u +'%Y-%m-%dT%H:%M:%S.%9N'))
 	$(eval OUTPUT := $(if $(filter windows,$(1)),vv-$(1)-$(2).exe,vv-$(1)-$(2)))
 	$(eval URL := $(shell if [ -z "$(VERSION)" ]; then echo -n "" ; else echo -n https://github.com/malivvan/vv/releases/download/$(VERSION)/$(OUTPUT); fi))
 	$(eval SERIAL := $(shell if [ -z "$(VERSION)" ]; then uuidgen --random ; else uuidgen --sha1 --namespace @url --name $(URL); fi))
@@ -24,10 +23,8 @@ define build
 	build -trimpath -tags="$(4)" \
 	  -ldflags="$(3) \
 	  -buildid=$(SERIAL) \
-	  -X main.serial=$(SERIAL) \
-	  -X main.commit=$(COMMIT) \
-	  -X main.version=$(VERSION) \
-	  -X main.compiled=$(COMPILED)" \
+	  -X github.com/malivvan/vv.commit=$(COMMIT) \
+	  -X github.com/malivvan/vv.version=$(VERSION) \
 	  -o build/$(OUTPUT) ./cmd
 	@if [ ! -f build/release.md ]; then \
 	  echo "| filename | serial |" > build/release.md; \
@@ -78,6 +75,9 @@ generate:
 	@go generate ./vvm/...
 
 build: clean
+	$(call build,$(shell go env GOOS),$(shell go env GOARCH),,)
+
+preview: clean
 	$(call build,$(shell go env GOOS),$(shell go env GOARCH),-s -w,)
 
 release: clean

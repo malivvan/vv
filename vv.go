@@ -4,14 +4,36 @@ import (
 	"bufio"
 	"context"
 	"fmt"
+	"github.com/malivvan/vv/pkg/cli"
+	"github.com/malivvan/vv/pkg/sh"
 	"github.com/malivvan/vv/vvm"
 	"github.com/malivvan/vv/vvm/parser"
 	"github.com/malivvan/vv/vvm/stdlib"
 	"io"
+	"mvdan.cc/sh/v3/interp"
 	"os"
 	"path/filepath"
 	"strings"
 )
+
+var (
+	version string
+	commit  string
+)
+
+func Version() string {
+	if version == "" {
+		return "unknown"
+	}
+	return version
+}
+
+func Commit() string {
+	if commit == "" {
+		return "unknown"
+	}
+	return commit
+}
 
 var Modules = stdlib.GetModuleMap(stdlib.AllModuleNames()...)
 
@@ -186,4 +208,127 @@ func basename(s string) string {
 		return s[:n]
 	}
 	return s
+}
+
+func programExecutor(next interp.ExecHandlerFunc) interp.ExecHandlerFunc {
+	return func(ctx context.Context, args []string) error {
+		if len(args) > 0 {
+			if args[0] == "vv" {
+				if app, err := NewCli(nil); err == nil {
+					return app.RunContext(ctx, args)
+				}
+			} else {
+				path := args[0]
+				if !(strings.HasPrefix(path, "./") || strings.HasPrefix(path, "/")) {
+					path = filepath.Join(os.Getenv("VVHOME"), "bin", path)
+				}
+				if b, err := os.ReadFile(path); err == nil && len(b) > len(Magic) && string(b[:len(Magic)]) == Magic {
+					return RunCompiled(ctx, b)
+				}
+			}
+		}
+		return next(ctx, args)
+	}
+}
+
+func NewCli(ui cli.ActionFunc) (*cli.App, error) {
+	app := &cli.App{
+		Name:      "vv",
+		Usage:     "a general-purpose programming language",
+		Version:   version,
+		Reader:    os.Stdin,
+		Writer:    os.Stdout,
+		ErrWriter: os.Stderr,
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:    "home",
+				Usage:   "VV home directory",
+				EnvVars: []string{"VVHOME"},
+				Value:   filepath.Join(os.Getenv("HOME"), ".vv"),
+			},
+		},
+	}
+
+	app.Action = ui
+	app.Commands = []*cli.Command{
+		{
+			Name:    "sh",
+			Aliases: []string{"shell"},
+			Usage:   "run shell",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:    "command",
+					Aliases: []string{"c"},
+					Usage:   "command to run in shell",
+					Value:   "",
+				},
+			},
+			Action: func(c *cli.Context) error {
+				if err := sh.Exec(&sh.Config{
+					Stdin:    c.App.Reader,
+					Stdout:   c.App.Writer,
+					Stderr:   c.App.ErrWriter,
+					Args:     c.Args().Slice(),
+					Command:  c.String("command"),
+					Executor: programExecutor,
+				}); err != nil {
+					_, _ = fmt.Fprintf(os.Stderr, "Error running shell: %s\n", err.Error())
+					os.Exit(1)
+				}
+				return nil
+			},
+		},
+		{
+			Name:    "run",
+			Aliases: []string{"r"},
+			Usage:   "run a VV program",
+			Action: func(ctx *cli.Context) error {
+				if ctx.Args().Len() != 1 {
+					return fmt.Errorf("run command requires exactly one argument")
+				}
+				inputFile := ctx.Args().Get(0)
+				data, err := os.ReadFile(inputFile)
+				if err != nil {
+					return fmt.Errorf("error reading input file %s: %w", inputFile, err)
+				}
+				if string(data[:len(Magic)]) == Magic {
+					return RunCompiled(ctx.Context, data)
+				}
+				return CompileAndRun(ctx.Context, data, inputFile)
+			},
+		},
+		{
+			Name:    "build",
+			Aliases: []string{"b"},
+			Usage:   "build a VV program",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:    "output",
+					Aliases: []string{"o"},
+					Usage:   "output file name",
+					Value:   "",
+				},
+			},
+			Action: func(c *cli.Context) error {
+				if c.Args().Len() != 1 {
+					return fmt.Errorf("build command requires exactly one argument")
+				}
+				inputFile := c.Args().Get(0)
+				outputFile := c.String("output")
+				if outputFile == "" {
+					outputFile = filepath.Base(inputFile) + ".out"
+				}
+				data, err := os.ReadFile(inputFile)
+				if err != nil {
+					return fmt.Errorf("error reading input file %s: %w", inputFile, err)
+				}
+				if err := CompileOnly(data, inputFile, outputFile); err != nil {
+					return fmt.Errorf("error compiling program: %w", err)
+				}
+				fmt.Printf("Compiled %s to %s\n", inputFile, outputFile)
+				return nil
+			},
+		},
+	}
+	return app, nil
 }

@@ -10,6 +10,7 @@ require (
 	github.com/ferama/go-socks v0.0.0-20240510140443-0400c78f7018
 	github.com/gdamore/tcell/v2 v2.8.1
 	github.com/kevinburke/ssh_config v1.2.0
+	github.com/klauspost/compress v1.18.0
 	github.com/lucasb-eyer/go-colorful v1.2.0
 	github.com/mattn/go-runewidth v0.0.16
 	github.com/miekg/dns v1.1.67

@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/malivvan/vv"
 	"github.com/malivvan/vv/pkg/sh/readline"
 	"io"
 	"mvdan.cc/sh/v3/interp"
@@ -14,29 +13,6 @@ import (
 	"strings"
 )
 
-func vvMiddleware(next interp.ExecHandlerFunc) interp.ExecHandlerFunc {
-	return func(ctx context.Context, args []string) error {
-		if len(args) == 0 {
-			return fmt.Errorf("no command provided")
-		}
-		b, err := os.ReadFile(args[0])
-		if err != nil {
-			return err
-		}
-
-		p := &vv.Program{}
-		err = p.Unmarshal(b)
-		if err == nil {
-			err = p.Run()
-			if err != nil {
-				return fmt.Errorf("failed to run program: %w", err)
-			}
-			return nil
-		}
-
-		return next(ctx, args)
-	}
-}
 func runScript(runner *interp.Runner, file string) error {
 	f, err := os.Open(file)
 	if err != nil {

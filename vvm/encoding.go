@@ -45,6 +45,7 @@ var _typeMap = map[byte]func() Object{
 	_immutableMap:     func() Object { return &ImmutableMap{Value: make(map[string]Object)} },
 	_objectPtr:        func() Object { return &ObjectPtr{} },
 	_compiledFunction: func() Object { return &CompiledFunction{SourceMap: make(map[int]parser.Pos)} },
+	_builtinFunction:  func() Object { return &BuiltinFunction{} },
 	_error:            func() Object { return &Error{} },
 }
 
@@ -60,54 +61,6 @@ func MakeObject(code byte) Object {
 // SizeOfObjectPtr returns the size of the given object pointer.
 func SizeOfObjectPtr(op *ObjectPtr) int {
 	return SizeOfObject(*op.Value)
-}
-
-// TypeToString returns the string representation of the given type code.
-func TypeToString(t byte) string {
-	switch t {
-	case _undefined:
-		return "Undefined"
-	case _bool:
-		return "Bool"
-	case _bytes:
-		return "Bytes"
-	case _char:
-		return "Char"
-	case _int:
-		return "Int"
-	case _float:
-		return "Float"
-	case _string:
-		return "String"
-	case _time:
-		return "Time"
-	case _array:
-		return "Array"
-	case _map:
-		return "Map"
-	case _immutableArray:
-		return "ImmutableArray"
-	case _immutableMap:
-		return "ImmutableMap"
-	case _objectPtr:
-		return "ObjectPtr"
-	case _compiledFunction:
-		return "CompiledFunction"
-	case _error:
-		return "Error"
-	case _arrayIterator:
-		return "ArrayIterator"
-	case _mapIterator:
-		return "MapIterator"
-	case _stringIterator:
-		return "StringIterator"
-	case _bytesIterator:
-		return "BytesIterator"
-	case _builtinFunction:
-		return "BuiltinFunction"
-	default:
-		return ""
-	}
 }
 
 // TypeOfObject returns the type code of the given object.
@@ -141,6 +94,8 @@ func TypeOfObject(o Object) byte {
 		return _objectPtr
 	case *CompiledFunction:
 		return _compiledFunction
+	case *BuiltinFunction:
+		return _builtinFunction
 	case *Error:
 		return _error
 	default:
@@ -191,6 +146,9 @@ func SizeOfObject(o Object) int {
 		s += encoding.SizeBool()
 		s += encoding.SizeMap(o.(*CompiledFunction).SourceMap, encoding.SizeInt, parser.SizePos)
 		s += encoding.SizeSlice[*ObjectPtr](o.(*CompiledFunction).Free, SizeOfObjectPtr)
+		return encoding.SizeByte() + s
+	case _builtinFunction:
+		s := encoding.SizeString(o.(*BuiltinFunction).Name)
 		return encoding.SizeByte() + s
 	case _error:
 		return encoding.SizeByte() + SizeOfObject(o.(*Error).Value)
@@ -256,6 +214,9 @@ func MarshalObject(n int, b []byte, o Object) int {
 		n = encoding.MarshalBool(n, b, v.VarArgs)
 		n = encoding.MarshalMap(n, b, v.SourceMap, encoding.MarshalInt, parser.MarshalPos)
 		n = encoding.MarshalSlice(n, b, v.Free, func(n int, b []byte, o *ObjectPtr) int { return MarshalObject(n, b, o) })
+	case _builtinFunction:
+		n = encoding.MarshalByte(n, b, _builtinFunction)
+		n = encoding.MarshalString(n, b, o.(*BuiltinFunction).Name)
 	case _error:
 		n = encoding.MarshalByte(n, b, _error)
 		n = MarshalObject(n, b, o.(*Error).Value)
@@ -391,6 +352,13 @@ func UnmarshalObject(nn int, b []byte) (n int, o Object, err error) {
 			}
 			return n, o, nil
 		})
+		if err != nil {
+			return nn, nil, err
+		}
+		return n, o, nil
+
+	case _builtinFunction:
+		n, o.(*BuiltinFunction).Name, err = encoding.UnmarshalString(n, b)
 		if err != nil {
 			return nn, nil, err
 		}
