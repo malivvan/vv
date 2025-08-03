@@ -9,9 +9,9 @@ import (
 )
 
 func init() {
-	addBuiltinFunction("go", builtinGovm)
+	addBuiltinFunction("start", builtinStart)
 	addBuiltinFunction("abort", builtinAbort)
-	addBuiltinFunction("makechan", builtinMakechan)
+	addBuiltinFunction("chan", builtinChan)
 }
 
 type ret struct {
@@ -19,14 +19,14 @@ type ret struct {
 	err error
 }
 
-type goroutineVM struct {
+type routineVM struct {
 	*VM      // if not nil, run CompiledFunction in VM
 	ret      // return value
 	waitChan chan ret
 	done     int64
 }
 
-// Starts a independent concurrent goroutine which runs fn(arg1, arg2, ...)
+// Starts a independent concurrent routine which runs fn(arg1, arg2, ...)
 //
 // If fn is CompiledFunction, the current running VM will be cloned to create
 // a new VM in which the CompiledFunction will be running.
@@ -34,16 +34,16 @@ type goroutineVM struct {
 // The fn can also be any object that has Call() method, such as BuiltinFunction,
 // in which case no cloned VM will be created.
 //
-// Returns a goroutineVM object that has wait, result, abort methods.
+// Returns a routineVM object that has wait, result, abort methods.
 //
-// The goroutineVM will not exit unless:
-//  1. All its descendant goroutineVMs exit
+// The routineVM will not exit unless:
+//  1. All its descendant routineVMs exit
 //  2. It calls abort()
-//  3. Its goroutineVM object abort() is called on behalf of its parent VM
+//  3. Its routineVM object abort() is called on behalf of its parent VM
 //
-// The latter 2 cases will trigger aborting procedure of all the descendant goroutineVMs,
+// The latter 2 cases will trigger aborting procedure of all the descendant routineVMs,
 // which will further result in #1 above.
-func builtinGovm(ctx context.Context, args ...Object) (Object, error) {
+func builtinStart(ctx context.Context, args ...Object) (Object, error) {
 	vm := ctx.Value(ContextKey("vm")).(*VM)
 	if len(args) == 0 {
 		return nil, ErrWrongNumArguments
@@ -58,7 +58,7 @@ func builtinGovm(ctx context.Context, args ...Object) (Object, error) {
 		}
 	}
 
-	gvm := &goroutineVM{
+	gvm := &routineVM{
 		waitChan: make(chan ret, 1),
 	}
 
@@ -116,8 +116,8 @@ func builtinAbort(ctx context.Context, args ...Object) (Object, error) {
 	return nil, nil
 }
 
-// Returns true if the goroutineVM is done
-func (gvm *goroutineVM) wait(seconds int64) bool {
+// Returns true if the routineVM is done
+func (gvm *routineVM) wait(seconds int64) bool {
 	if atomic.LoadInt64(&gvm.done) == 1 {
 		return true
 	}
@@ -136,10 +136,10 @@ func (gvm *goroutineVM) wait(seconds int64) bool {
 	return true
 }
 
-// Waits for the goroutineVM to complete up to timeout seconds.
-// Returns true if the goroutineVM exited(successfully or not) within the timeout.
+// Waits for the routineVM to complete up to timeout seconds.
+// Returns true if the routineVM exited(successfully or not) within the timeout.
 // Waits forever if the optional timeout not specified, or timeout < 0.
-func (gvm *goroutineVM) waitTimeout(ctx context.Context, args ...Object) (Object, error) {
+func (gvm *routineVM) waitTimeout(ctx context.Context, args ...Object) (Object, error) {
 	if len(args) > 1 {
 		return nil, ErrWrongNumArguments
 	}
@@ -162,8 +162,8 @@ func (gvm *goroutineVM) waitTimeout(ctx context.Context, args ...Object) (Object
 	return FalseValue, nil
 }
 
-// Triggers the termination process of the goroutineVM and all its descendant VMs.
-func (gvm *goroutineVM) abort(ctx context.Context, args ...Object) (Object, error) {
+// Triggers the termination process of the routineVM and all its descendant VMs.
+func (gvm *routineVM) abort(ctx context.Context, args ...Object) (Object, error) {
 	if len(args) != 0 {
 		return nil, ErrWrongNumArguments
 	}
@@ -173,9 +173,9 @@ func (gvm *goroutineVM) abort(ctx context.Context, args ...Object) (Object, erro
 	return nil, nil
 }
 
-// Waits the goroutineVM to complete, return Error object if any runtime error occurred
+// Waits the routineVM to complete, return Error object if any runtime error occurred
 // during the execution, otherwise return the result value of fn(arg1, arg2, ...)
-func (gvm *goroutineVM) getRet(ctx context.Context, args ...Object) (Object, error) {
+func (gvm *routineVM) getRet(ctx context.Context, args ...Object) (Object, error) {
 	if len(args) != 0 {
 		return nil, ErrWrongNumArguments
 	}
@@ -192,7 +192,7 @@ type objchan chan Object
 
 // Makes a channel to send/receive object
 // Returns a chan object that has send, recv, close methods.
-func builtinMakechan(ctx context.Context, args ...Object) (Object, error) {
+func builtinChan(ctx context.Context, args ...Object) (Object, error) {
 	var size int
 	switch len(args) {
 	case 0:

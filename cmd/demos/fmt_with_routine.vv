@@ -11,9 +11,9 @@ writeRoutine := func(num) {
     }
 }
 
-r1 := go(writeRoutine(1))
-go(writeRoutine(2))
-go(writeRoutine(3))
+r1 := start(writeRoutine(1))
+start(writeRoutine(2))
+start(writeRoutine(3))
 times.sleep(3 * times.second)
 fmt.println("Aborting routine 1")
 r1.abort()
