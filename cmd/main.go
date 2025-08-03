@@ -168,26 +168,22 @@ func CompileOnly(modules *vvm.ModuleMap, data []byte, inputFile, outputFile stri
 
 // CompileAndRun compiles the source code and executes it.
 func CompileAndRun(ctx context.Context, modules *vvm.ModuleMap, data []byte, inputFile string) (err error) {
-	bytecode, err := compileSrc(modules, data, inputFile)
+	p, err := compileSrc(modules, data, inputFile)
 	if err != nil {
 		return
 	}
-
-	machine := vvm.NewVM(ctx, bytecode, nil, -1)
-	err = machine.Run()
+	err = p.Run()
 	return
 }
 
 // RunCompiled reads the compiled binary from file and executes it.
 func RunCompiled(ctx context.Context, modules *vvm.ModuleMap, data []byte) (err error) {
-	bytecode := &vvm.Bytecode{}
-	err = bytecode.Decode(bytes.NewReader(data), modules)
+	p := &vvm.Program{}
+	err = p.Decode(bytes.NewReader(data), modules)
 	if err != nil {
 		return
 	}
-
-	machine := vvm.NewVM(ctx, bytecode, nil, -1)
-	err = machine.Run()
+	err = p.Run()
 	return
 }
 
@@ -255,33 +251,17 @@ func RunREPL(ctx context.Context, modules *vvm.ModuleMap, in io.Reader, out io.W
 	}
 }
 
-func compileSrc(
-	modules *vvm.ModuleMap,
-	src []byte,
-	inputFile string,
-) (*vvm.Bytecode, error) {
-	fileSet := parser.NewFileSet()
-	srcFile := fileSet.AddFile(filepath.Base(inputFile), -1, len(src))
-
-	p := parser.NewParser(srcFile, src, nil)
-	file, err := p.ParseFile()
-	if err != nil {
-		return nil, err
-	}
-
-	c := vvm.NewCompiler(srcFile, nil, nil, modules, nil)
-	c.EnableFileImport(true)
+func compileSrc(modules *vvm.ModuleMap, src []byte, inputFile string) (*vvm.Program, error) {
+	s := vvm.NewScript(src)
+	s.SetName(inputFile)
+	s.SetImports(modules)
+	s.EnableFileImport(true)
 	if resolvePath {
-		c.SetImportDir(filepath.Dir(inputFile))
+		if err := s.SetImportDir(filepath.Dir(inputFile)); err != nil {
+			return nil, fmt.Errorf("error setting import dir: %w", err)
+		}
 	}
-
-	if err := c.Compile(file); err != nil {
-		return nil, err
-	}
-
-	bytecode := c.Bytecode()
-	bytecode.RemoveDuplicates()
-	return bytecode, nil
+	return s.Compile()
 }
 
 func doHelp() {

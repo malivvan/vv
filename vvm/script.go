@@ -11,10 +11,14 @@ import (
 	"github.com/malivvan/vv/vvm/parser"
 )
 
+// Magic is a magic number every encoded Program starts with.
+const Magic = "VV\x00"
+
 // Script can simplify compilation and execution of embedded scripts.
 type Script struct {
 	variables        map[string]*Variable
 	modules          *ModuleMap
+	name             string
 	input            []byte
 	maxAllocs        int64
 	maxConstObjects  int
@@ -26,6 +30,7 @@ type Script struct {
 func NewScript(input []byte) *Script {
 	return &Script{
 		variables:       make(map[string]*Variable),
+		name:            "(main)",
 		input:           input,
 		maxAllocs:       -1,
 		maxConstObjects: -1,
@@ -53,6 +58,11 @@ func (s *Script) Remove(name string) bool {
 	}
 	delete(s.variables, name)
 	return true
+}
+
+// SetName sets the name of the script.
+func (s *Script) SetName(name string) {
+	s.name = name
 }
 
 // SetImports sets import modules.
@@ -97,7 +107,7 @@ func (s *Script) Compile() (*Program, error) {
 	}
 
 	fileSet := parser.NewFileSet()
-	srcFile := fileSet.AddFile("(main)", -1, len(s.input))
+	srcFile := fileSet.AddFile(s.name, -1, len(s.input))
 	p := parser.NewParser(srcFile, s.input, nil)
 	file, err := p.ParseFile()
 	if err != nil {
@@ -209,9 +219,17 @@ func (p *Program) Decode(r io.Reader, modules *ModuleMap) error {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 
+	var magic [3]byte
+	_, err := r.Read(magic[:])
+	if err != nil {
+		return err
+	}
+	if string(magic[:]) != Magic {
+		return fmt.Errorf("invalid magic number: %s", magic)
+	}
 	p.globalIndices = make(map[string]int)
 	dec := gob.NewDecoder(r)
-	err := dec.Decode(&p.globalIndices)
+	err = dec.Decode(&p.globalIndices)
 	if err != nil {
 		return err
 	}
@@ -235,9 +253,13 @@ func (p *Program) Decode(r io.Reader, modules *ModuleMap) error {
 func (p *Program) Encode(w io.Writer) error {
 	p.lock.RLock()
 	defer p.lock.RUnlock()
-	enc := gob.NewEncoder(w)
 
-	err := enc.Encode(p.globalIndices)
+	_, err := w.Write([]byte(Magic))
+	if err != nil {
+		return err
+	}
+	enc := gob.NewEncoder(w)
+	err = enc.Encode(p.globalIndices)
 	if err != nil {
 		return err
 	}

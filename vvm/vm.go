@@ -231,6 +231,9 @@ func (v *VM) Abort() {
 	v.childCtl.Lock()
 	atomic.StoreInt64(&v.aborting, 1)
 	v.cancel()
+	for cvm := range v.childCtl.vmMap {
+		cvm.Abort()
+	}
 	v.childCtl.Unlock()
 }
 
