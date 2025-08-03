@@ -52,7 +52,7 @@ lint:
 	@golint -set_exit_status ./vvm/...
 
 test: generate lint
-	@gotestsum --format $(TEST_FORMAT) --format-hide-empty-pkg --hide-summary skipped --raw-command ./test.sh ./...
+	@(go test -json -cover ./pkg/... && GODEBUG=randseednop=0 go test -json -race -cover ./vvm/...) | gotestsum --format $(TEST_FORMAT) --format-hide-empty-pkg --hide-summary skipped --raw-command -- cat
 	@go run ./cmd ./vvm/testdata/cli/test.vv > /dev/null 2>&1 || (echo "vv end to end test failed" && exit 1)
 
 fmt:
