@@ -19,15 +19,13 @@ import (
 )
 
 const (
-	sourceFileExt = ".vv"
-	replPrompt    = ">> "
+	replPrompt = ">> "
 )
 
 var (
 	compileOutput string
 	showHelp      bool
 	showVersion   bool
-	resolvePath   bool // TODO Remove this flag at version 3
 	version       = "dev"
 )
 
@@ -35,8 +33,6 @@ func init() {
 	flag.BoolVar(&showHelp, "help", false, "Show help")
 	flag.StringVar(&compileOutput, "o", "", "Compile output file")
 	flag.BoolVar(&showVersion, "version", false, "Show version")
-	flag.BoolVar(&resolvePath, "resolve", false,
-		"Resolve relative import paths")
 	flag.Parse()
 }
 
@@ -120,7 +116,7 @@ func main() {
 			_, _ = fmt.Fprintln(os.Stderr, err.Error())
 			os.Exit(1)
 		}
-	} else if filepath.Ext(inputFile) == sourceFileExt {
+	} else if string(inputData[:3]) != vvm.Magic {
 		err := CompileAndRun(ctx, modules, inputData, inputFile)
 		if err != nil {
 			_, _ = fmt.Fprintln(os.Stderr, err.Error())
@@ -256,10 +252,8 @@ func compileSrc(modules *vvm.ModuleMap, src []byte, inputFile string) (*vvm.Prog
 	s.SetName(inputFile)
 	s.SetImports(modules)
 	s.EnableFileImport(true)
-	if resolvePath {
-		if err := s.SetImportDir(filepath.Dir(inputFile)); err != nil {
-			return nil, fmt.Errorf("error setting import dir: %w", err)
-		}
+	if err := s.SetImportDir(filepath.Dir(inputFile)); err != nil {
+		return nil, fmt.Errorf("error setting import dir: %w", err)
 	}
 	return s.Compile()
 }
@@ -267,7 +261,7 @@ func compileSrc(modules *vvm.ModuleMap, src []byte, inputFile string) (*vvm.Prog
 func doHelp() {
 	fmt.Println("Usage:")
 	fmt.Println()
-	fmt.Println("	vvm [flags] {input-file}")
+	fmt.Println("	vv [flags] {file}")
 	fmt.Println()
 	fmt.Println("Flags:")
 	fmt.Println()
@@ -276,22 +270,21 @@ func doHelp() {
 	fmt.Println()
 	fmt.Println("Examples:")
 	fmt.Println()
-	fmt.Println("	vvm")
+	fmt.Println("	vv")
 	fmt.Println()
-	fmt.Println("	          Start vvm REPL")
+	fmt.Println("	          Start vv REPL")
 	fmt.Println()
-	fmt.Println("	vvm myapp.vvm")
+	fmt.Println("	vv app.vv")
 	fmt.Println()
-	fmt.Println("	          Compile and run source file (myapp.vvm)")
-	fmt.Println("	          Source file must have .vvm extension")
+	fmt.Println("	          Compile and run script file")
 	fmt.Println()
-	fmt.Println("	vvm -o myapp myapp.vvm")
+	fmt.Println("	vv -o app app.vv")
 	fmt.Println()
-	fmt.Println("	          Compile source file (myapp.vvm) into bytecode file (myapp)")
+	fmt.Println("	          Compile script file into program file")
 	fmt.Println()
-	fmt.Println("	vvm myapp")
+	fmt.Println("	vv app")
 	fmt.Println()
-	fmt.Println("	          Run bytecode file (myapp)")
+	fmt.Println("	          Run program or script file")
 	fmt.Println()
 	fmt.Println()
 }
