@@ -1,11 +1,19 @@
-name: test
-on:
-  push:
-    branches: [ master ]
+name: Test
+
+on: [push, workflow_dispatch]
+
 jobs:
-  test:
-    name: test
-    runs-on: ubuntu-latest
+  unit:
+    name: Test
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+          - macos-13
     steps:
     - name: checkout
       uses: actions/checkout@v4
