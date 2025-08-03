@@ -6,6 +6,8 @@ ifeq ($(shell git status --porcelain),)
 	VERSION = $(shell git describe --tags --abbrev=0)
 endif
 
+TEST_FORMAT ?= pkgname
+
 define build
 	@mkdir -p build
    	$(eval COMPILED := $(shell date -u +'%Y-%m-%dT%H:%M:%S.%9N'))
@@ -45,9 +47,10 @@ install:
 lint:
 	@golint -set_exit_status ./vvm/...
 
+
+
 test: generate lint
-	@go test -cover ./pkg/...
-	@GODEBUG=randseednop=0 go test -race -cover ./vvm/...
+	@gotestsum --format $(TEST_FORMAT) --format-hide-empty-pkg --hide-summary skipped --raw-command ./test.sh ./...
 	@go run ./cmd ./vvm/testdata/cli/test.vv
 
 fmt:
@@ -57,7 +60,7 @@ generate:
 	@go generate ./vvm/...
 
 build: clean
-	$(call build,$(shell go env GOOS),$(shell go env GOARCH),,)
+	$(call build,$(shell go env GOOS),$(shell go env GOARCH),-s -w,)
 
 release: clean
 	$(call build,linux,386,-s -w,)

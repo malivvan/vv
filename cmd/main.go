@@ -8,10 +8,8 @@ import (
 	"fmt"
 	"github.com/malivvan/vv/pkg/cui"
 	"github.com/malivvan/vv/pkg/cui/mdview"
+	"github.com/malivvan/vv/pkg/sh"
 	"io"
-	"log"
-	"net/http"
-	_ "net/http/pprof"
 	"os"
 	"path/filepath"
 	"strings"
@@ -33,9 +31,6 @@ var (
 )
 
 func init() {
-	go func() {
-		log.Println(http.ListenAndServe("localhost:6060", nil))
-	}()
 	flag.BoolVar(&showHelp, "help", false, "Show help")
 	flag.StringVar(&compileOutput, "o", "", "Compile output file")
 	flag.BoolVar(&showVersion, "version", false, "Show version")
@@ -52,7 +47,13 @@ func main() {
 		fmt.Println(version)
 		return
 	}
-
+	if len(os.Args) == 2 && os.Args[1] == "sh" {
+		if err := sh.Exec(os.Stdin, os.Stdout, os.Stderr, []string{}); err != nil {
+			_, _ = fmt.Fprintf(os.Stderr, "Error running shell: %s\n", err.Error())
+			os.Exit(1)
+		}
+		return
+	}
 	if len(os.Args) == 2 && os.Args[1] == "edit" {
 		path := "docs/tutorial.md"
 		f, err := os.Open(path)
