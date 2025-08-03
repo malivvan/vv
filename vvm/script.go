@@ -16,7 +16,7 @@ import (
 )
 
 // Magic is a magic number every encoded Program starts with.
-// format: [4]MAGIC [4]SIZE [N]DATA [8]CRC64
+// format: [4]MAGIC [4]SIZE [N]DATA [8]CRC64(ECMA)
 const Magic = "VVC\x00"
 
 // Script can simplify compilation and execution of embedded scripts.
@@ -247,7 +247,7 @@ func (p *Program) Decode(r io.Reader, modules *ModuleMap) error {
 	if err != nil {
 		return err
 	}
-	if crc64.Checksum(buf[:], crc64.MakeTable(crc64.ISO)) != binary.LittleEndian.Uint64(hash[:]) {
+	if crc64.Checksum(buf[:], crc64.MakeTable(crc64.ECMA)) != binary.LittleEndian.Uint64(hash[:]) {
 		return errors.New("crc32 mismatch")
 	}
 
@@ -301,7 +301,7 @@ func (p *Program) Encode(w io.Writer) error {
 	var size [4]byte
 	binary.LittleEndian.PutUint32(size[:], uint32(buf.Len()))
 	var hash [8]byte
-	binary.LittleEndian.PutUint64(hash[:], crc64.Checksum(buf.Bytes(), crc64.MakeTable(crc64.ISO)))
+	binary.LittleEndian.PutUint64(hash[:], crc64.Checksum(buf.Bytes(), crc64.MakeTable(crc64.ECMA)))
 
 	_, err = w.Write([]byte(Magic))
 	if err != nil {
