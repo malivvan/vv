@@ -1,4 +1,7 @@
-# Module - "enum"
+---
+title: Standard Library - enum
+---
+
 
 ```golang
 enum := import("enum")

@@ -1,4 +1,6 @@
-# Module - "hex"
+---
+title: Standard Library - hex
+---
 
 ```golang
 fmt := import("hex")

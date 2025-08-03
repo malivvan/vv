@@ -1,4 +1,6 @@
-# Module - "json"
+---
+title: Standard Library - json
+---
 
 ```golang
 json := import("json")

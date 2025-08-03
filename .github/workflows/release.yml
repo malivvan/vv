@@ -32,11 +32,14 @@ jobs:
       - name: release
         id: release
         run: make release
+      - name: build docs
+        id: build_docs
+        run: make docs
       - name: read RELEASE.md
         id: read_release
         shell: bash
         run: |
-          r=$(cat build/RELEASE.md)
+          r=$(cat build/release.md)
           r="${r//'%'/'%25'}"
           r="${r//$'\n'/'%0A'}"
           r="${r//$'\r'/'%0D'}"
@@ -52,3 +55,8 @@ jobs:
           file_glob: true
           body: |
             ${{ steps.read_release.outputs.RELEASE_BODY }}
+      - name: upload docs
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/docs

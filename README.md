@@ -1,5 +1,4 @@
-# vv language
-
+# vv ![Go Reference](https://pkg.go.dev/badge/github.com/malivvan/vv.svg) ![test](https://github.com/malivvan/vv/workflows/test/badge.svg) [![Release](https://img.shields.io/github/v/release/malivvan/vv.svg?sort=semver)](https://github.com/malivvan/vv/releases/latest) [![Go Report Card](https://goreportcard.com/badge/github.com/malivvan/vv)](https://goreportcard.com/report/github.com/malivvan/vv) [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 ## Fork / Credits
 This is a continuation of the [github.com/d5/tengo](https://github.com/d5/tengo) project starting of this [pull request](https://github.com/d5/tengo/pull/330) implementing go routines and channels. Special thanks goes to [d5](https://github.com/d5/) for his work on the tengo language and [Bai-Yingjie](https://github.com/Bai-Yingjie) for implementing the foundation of concurrency while retaining the original tests of the project. 

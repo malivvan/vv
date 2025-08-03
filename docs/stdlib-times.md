@@ -1,4 +1,8 @@
-# Module - "times"
+---
+title: Standard Library - times
+---
+
+## Import
 
 ```golang
 times := import("times")

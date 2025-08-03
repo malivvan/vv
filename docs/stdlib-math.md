@@ -1,4 +1,6 @@
-# Module - "math"
+---
+title: Standard Library - math
+---
 
 ```golang
 math := import("math")

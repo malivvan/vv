@@ -1,4 +1,6 @@
-# Module - "base64"
+---
+title: Standard Library - base64
+---
 
 ```golang
 fmt := import("base64")

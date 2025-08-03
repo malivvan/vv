@@ -1,4 +1,7 @@
-# VV CLI Tool
+---
+title: cli
+---
+
 
 VV is designed as an embedding script language for Go, but, it can also be
 compiled and executed as native binary using `vv` CLI tool.

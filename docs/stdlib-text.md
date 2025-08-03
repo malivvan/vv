@@ -1,4 +1,8 @@
-# Module - "text"
+---
+title: Standard Library - text
+---
+
+## Import
 
 ```golang
 text := import("text")

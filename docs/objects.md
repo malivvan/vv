@@ -1,4 +1,6 @@
-# Object Types
+---
+title: object types
+---
 
 ## Table of Contents
 

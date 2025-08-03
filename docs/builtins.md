@@ -1,4 +1,6 @@
-# Builtin Functions
+---
+title: builtin functions
+---
 
 ## format
 

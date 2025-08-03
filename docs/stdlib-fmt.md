@@ -1,4 +1,7 @@
-# Module - "fmt"
+---
+title: Standard Library - fmt
+---
+
 
 ```golang
 fmt := import("fmt")

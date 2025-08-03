@@ -1,4 +1,6 @@
-# Standard Library
+---
+title: standard library
+---
 
 - [os](https://github.com/malivvan/vv/blob/master/docs/stdlib-os.md):
   platform-independent interface to operating system functionality.

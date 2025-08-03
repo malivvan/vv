@@ -1,4 +1,7 @@
-# VV Language Syntax
+---
+title: tutorial
+---
+
 
 VV's syntax is designed to be familiar to Go developers while being a bit
 simpler and more streamlined.

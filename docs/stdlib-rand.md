@@ -1,4 +1,7 @@
-# Module - "rand"
+---
+title: Standard Library - rand
+---
+
 
 ```golang
 rand := import("rand")

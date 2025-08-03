@@ -1,4 +1,6 @@
-# Module - "os"
+---
+title: Standard Library - os
+---
 
 ```golang
 os := import("os")
