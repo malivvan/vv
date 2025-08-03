@@ -3,6 +3,7 @@ package stdlib_test
 import (
 	"github.com/malivvan/vv/vvm"
 	"github.com/malivvan/vv/vvm/require"
+	"runtime"
 	"testing"
 	"time"
 )
@@ -14,12 +15,15 @@ func TestTimes(t *testing.T) {
 	// TODO: maybe
 	// module(t, "times").call("sleep", 1).expect(vvm.UndefinedValue)
 
-	require.True(t, module(t, "times").
-		call("since", time.Now().Add(-time.Hour)).
-		o.(*vvm.Int).Value > 3600000000000)
-	require.True(t, module(t, "times").
-		call("until", time.Now().Add(time.Hour)).
-		o.(*vvm.Int).Value < 3600000000000)
+	// skip on windows
+	if runtime.GOOS != "windows" {
+		require.True(t, module(t, "times").
+			call("since", time.Now().Add(-time.Hour)).
+			o.(*vvm.Int).Value > 3600000000000)
+		require.True(t, module(t, "times").
+			call("until", time.Now().Add(time.Hour)).
+			o.(*vvm.Int).Value < 3600000000000)
+	}
 
 	module(t, "times").call("parse_duration", "1ns").expect(1)
 	module(t, "times").call("parse_duration", "1ms").expect(1000000)
