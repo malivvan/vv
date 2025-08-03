@@ -6,6 +6,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"github.com/malivvan/vv"
 	"github.com/malivvan/vv/pkg/cui"
 	"github.com/malivvan/vv/pkg/cui/mdview"
 	"github.com/malivvan/vv/pkg/sh"
@@ -123,7 +124,7 @@ func main() {
 			_, _ = fmt.Fprintln(os.Stderr, err.Error())
 			os.Exit(1)
 		}
-	} else if string(inputData[:len(vvm.Magic)]) != vvm.Magic {
+	} else if string(inputData[:len(vv.Magic)]) != vv.Magic {
 		err := CompileAndRun(ctx, modules, inputData, inputFile)
 		if err != nil {
 			_, _ = fmt.Fprintln(os.Stderr, err.Error())
@@ -181,7 +182,7 @@ func CompileAndRun(ctx context.Context, modules *vvm.ModuleMap, data []byte, inp
 
 // RunCompiled reads the compiled binary from file and executes it.
 func RunCompiled(ctx context.Context, modules *vvm.ModuleMap, data []byte) (err error) {
-	p := &vvm.Program{}
+	p := &vv.Program{}
 	err = p.Decode(bytes.NewReader(data), modules)
 	if err != nil {
 		return
@@ -254,8 +255,8 @@ func RunREPL(ctx context.Context, modules *vvm.ModuleMap, in io.Reader, out io.W
 	}
 }
 
-func compileSrc(modules *vvm.ModuleMap, src []byte, inputFile string) (*vvm.Program, error) {
-	s := vvm.NewScript(src)
+func compileSrc(modules *vvm.ModuleMap, src []byte, inputFile string) (*vv.Program, error) {
+	s := vv.NewScript(src)
 	s.SetName(inputFile)
 	s.SetImports(modules)
 	s.EnableFileImport(true)

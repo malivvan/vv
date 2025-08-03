@@ -5,8 +5,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/malivvan/vv"
 	"github.com/malivvan/vv/pkg/sh/readline"
-	"github.com/malivvan/vv/vvm"
 	"github.com/malivvan/vv/vvm/stdlib"
 	"io"
 	"mvdan.cc/sh/v3/interp"
@@ -26,7 +26,7 @@ func vvMiddleware(next interp.ExecHandlerFunc) interp.ExecHandlerFunc {
 		}
 		defer f.Close()
 
-		p := &vvm.Program{}
+		p := &vv.Program{}
 		err = p.Decode(f, stdlib.GetModuleMap(stdlib.AllModuleNames()...))
 		if err == nil {
 			err = p.Run()

@@ -3,6 +3,7 @@ package require
 import (
 	"bytes"
 	"fmt"
+	"github.com/malivvan/vv"
 	"reflect"
 	"runtime"
 	"strings"
@@ -184,8 +185,8 @@ func Equal(t *testing.T, expected, actual interface{}, msg ...interface{}) {
 		if expected != actual.(error) {
 			failExpectedActual(t, expected, actual, msg...)
 		}
-	case *vvm.Program:
-		if !expected.Equals(actual.(*vvm.Program)) {
+	case *vv.Program:
+		if !expected.Equals(actual.(*vv.Program)) {
 			failExpectedActual(t, expected, actual, msg...)
 		}
 	default:

@@ -1,6 +1,7 @@
-package vvm_test
+package vv_test
 
 import (
+	"github.com/malivvan/vv"
 	"testing"
 
 	"github.com/malivvan/vv/vvm"
@@ -65,7 +66,7 @@ func TestVariable(t *testing.T) {
 	}
 
 	for _, tc := range vars {
-		v, err := vvm.NewVariable(tc.Name, tc.Value)
+		v, err := vv.NewVariable(tc.Name, tc.Value)
 		require.NoError(t, err)
 		require.Equal(t, tc.Value, v.Value(), "Name: %s", tc.Name)
 		require.Equal(t, tc.ValueType, v.ValueType(), "Name: %s", tc.Name)

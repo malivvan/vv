@@ -3,16 +3,68 @@ vv is a small, fast and secure script language for Go supporting routines and ch
 
 > This is pre release software so expect bugs and breaking changes
 
-## Build
-
-```bash 
-make install build      # build for current platform 
-make install release    # build for all platforms
-```
-
 ## Usage
 
-### Basic
+### package usage
+```golang
+package main
+
+import (
+	"fmt"
+	"github.com/malivvan/vv"
+)
+
+func main() {
+	// script code
+	src := `
+each := func(seq, fn) {
+    for x in seq { fn(x) }
+}
+
+sum := 0
+mul := 1
+each([a, b, c, d], func(x) {
+	sum += x
+	mul *= x
+})`
+
+	// create a new script instance
+	script := vv.NewScript([]byte(src))
+
+	// add variables with default values
+	_ = script.Add("a", 0)
+	_ = script.Add("b", 0)
+	_ = script.Add("c", 0)
+	_ = script.Add("d", 0)
+
+	// compile script to program
+	program, err := script.Compile()
+	if err != nil {
+		panic(err)
+	}
+	
+	// clone a new instance of the program and set values
+	instance := program.Clone()
+	_ = instance.Set("a", 1)
+	_ = instance.Set("b", 9)
+	_ = instance.Set("c", 8)
+	_ = instance.Set("d", 4)
+	
+	// run the instance
+	err = instance.Run()
+	if err != nil {
+		panic(err)
+	}
+
+	// retrieve variable values
+	sum := instance.Get("sum")
+	mul := instance.Get("mul")
+	fmt.Println(sum, mul) // "22 288"
+}
+```
+
+### language usage
+
 ```golang
 fmt := import("fmt")
 
@@ -29,7 +81,7 @@ fmt.println(sum(0, [1, 2, 3]))   // "6"
 fmt.println(sum("", [1, 2, 3]))  // "123"
 ```
 
-### Routines
+#### Routines
 ```golang
 v := 0
 
@@ -44,7 +96,7 @@ fmt.println(rvm2.result()) // 8
 fmt.println(v) // 10 or 11
 ```
 
-### Channels
+#### Channels
 ```golang
 unbufferedChan := chan()
 bufferedChan := chan(128)
@@ -63,7 +115,7 @@ unbufferedChan.close()
 bufferedChan.close()
 ```
 
-### Routines and Channels
+#### Routines and Channels
 ```golang
 reqChan := chan(8)
 repChan := chan(8)
@@ -103,8 +155,28 @@ rServer.abort()
 //100
 //101
 ```
+## Building
 
-## Bundled Packages
+```bash
+make test       # run tests
+make install    # install tools 
+make build      # build for current platform 
+make release    # build for all platforms
+make docs       # generate docs
+```
+
+## Milestones
+- [x] console ui module
+- [x] routines and channels
+- [ ] scriptable webserver module
+- [ ] sh compatible shell for direct bytecode execution
+- [ ] secure self updates using github-releases
+- [ ] ssh system service for running programs in the background
+- [ ] webassembly port with web worker support for concurrency
+
+> **NOTE** there will never be any form of cgo support / usage
+
+## Packages
 | package               | repository                                                                                                               | license                                                                  |
 |-----------------------|--------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------|
 | `cui`                 | [codeberg.org/tslocum/cview](https://codeberg.org/tslocum/cview/src/commit/242e7c1f1b61a4b3722a1afb45ca1165aefa9a59)     | [MIT](pkg/cui/LICENSE)                                                   |

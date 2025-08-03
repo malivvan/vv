@@ -1,10 +1,11 @@
-package vvm_test
+package vv_test
 
 import (
 	"bytes"
 	"context"
 	"errors"
 	"fmt"
+	"github.com/malivvan/vv"
 	"math/rand"
 	"strings"
 	"sync"
@@ -17,8 +18,56 @@ import (
 	"github.com/malivvan/vv/vvm/token"
 )
 
+func TestExample(t *testing.T) {
+	// script code
+	src := `
+each := func(seq, fn) {
+    for x in seq { fn(x) }
+}
+
+sum := 0
+mul := 1
+each([a, b, c, d], func(x) {
+	sum += x
+	mul *= x
+})`
+
+	// create a new script instance
+	script := vv.NewScript([]byte(src))
+
+	// add variables with default values
+	_ = script.Add("a", 0)
+	_ = script.Add("b", 0)
+	_ = script.Add("c", 0)
+	_ = script.Add("d", 0)
+
+	// compile script to program
+	program, err := script.Compile()
+	if err != nil {
+		panic(err)
+	}
+
+	// clone a new instance of the program and set values
+	instance := program.Clone()
+	_ = instance.Set("a", 1)
+	_ = instance.Set("b", 9)
+	_ = instance.Set("c", 8)
+	_ = instance.Set("d", 4)
+
+	// run the instance
+	err = instance.Run()
+	if err != nil {
+		panic(err)
+	}
+
+	// retrieve variable values
+	sum := instance.Get("sum")
+	mul := instance.Get("mul")
+	fmt.Println(sum, mul) // "22 288"
+}
+
 func TestScript_Add(t *testing.T) {
-	s := vvm.NewScript([]byte(`a := b; c := test(b); d := test(5)`))
+	s := vv.NewScript([]byte(`a := b; c := test(b); d := test(5)`))
 	require.NoError(t, s.Add("b", 5))     // b = 5
 	require.NoError(t, s.Add("b", "foo")) // b = "foo"  (re-define before compilation)
 	require.NoError(t, s.Add("test",
@@ -42,7 +91,7 @@ func TestScript_Add(t *testing.T) {
 }
 
 func TestScript_Remove(t *testing.T) {
-	s := vvm.NewScript([]byte(`a := b`))
+	s := vv.NewScript([]byte(`a := b`))
 	err := s.Add("b", 5)
 	require.NoError(t, err)
 	require.True(t, s.Remove("b")) // b is removed
@@ -51,7 +100,7 @@ func TestScript_Remove(t *testing.T) {
 }
 
 func TestScript_Run(t *testing.T) {
-	s := vvm.NewScript([]byte(`a := b`))
+	s := vv.NewScript([]byte(`a := b`))
 	err := s.Add("b", 5)
 	require.NoError(t, err)
 	p, err := s.Run()
@@ -61,7 +110,7 @@ func TestScript_Run(t *testing.T) {
 }
 
 func TestScript_BuiltinModules(t *testing.T) {
-	s := vvm.NewScript([]byte(`math := import("math"); a := math.abs(-19.84)`))
+	s := vv.NewScript([]byte(`math := import("math"); a := math.abs(-19.84)`))
 	s.SetImports(stdlib.GetModuleMap("math"))
 	p, err := s.Run()
 	require.NoError(t, err)
@@ -83,7 +132,7 @@ func TestScript_BuiltinModules(t *testing.T) {
 }
 
 func TestScript_SourceModules(t *testing.T) {
-	s := vvm.NewScript([]byte(`
+	s := vv.NewScript([]byte(`
 enum := import("enum")
 a := enum.all([1,2,3], func(_, v) { 
 	return v > 0 
@@ -102,7 +151,7 @@ a := enum.all([1,2,3], func(_, v) {
 
 func TestScript_SetMaxConstObjects(t *testing.T) {
 	// one constant '5'
-	s := vvm.NewScript([]byte(`a := 5`))
+	s := vv.NewScript([]byte(`a := 5`))
 	s.SetMaxConstObjects(1) // limit = 1
 	_, err := s.Compile()
 	require.NoError(t, err)
@@ -112,7 +161,7 @@ func TestScript_SetMaxConstObjects(t *testing.T) {
 	require.Equal(t, "exceeding constant objects limit: 1", err.Error())
 
 	// two constants '5' and '1'
-	s = vvm.NewScript([]byte(`a := 5 + 1`))
+	s = vv.NewScript([]byte(`a := 5 + 1`))
 	s.SetMaxConstObjects(2) // limit = 2
 	_, err = s.Compile()
 	require.NoError(t, err)
@@ -122,7 +171,7 @@ func TestScript_SetMaxConstObjects(t *testing.T) {
 	require.Equal(t, "exceeding constant objects limit: 2", err.Error())
 
 	// duplicates will be removed
-	s = vvm.NewScript([]byte(`a := 5 + 5`))
+	s = vv.NewScript([]byte(`a := 5 + 5`))
 	s.SetMaxConstObjects(1) // limit = 1
 	_, err = s.Compile()
 	require.NoError(t, err)
@@ -132,7 +181,7 @@ func TestScript_SetMaxConstObjects(t *testing.T) {
 	require.Equal(t, "exceeding constant objects limit: 1", err.Error())
 
 	// no limit set
-	s = vvm.NewScript([]byte(`a := 1 + 2 + 3 + 4 + 5`))
+	s = vv.NewScript([]byte(`a := 1 + 2 + 3 + 4 + 5`))
 	_, err = s.Compile()
 	require.NoError(t, err)
 }
@@ -184,7 +233,7 @@ e := mod1.double(s)
 		},
 	}
 
-	scr := vvm.NewScript(code)
+	scr := vv.NewScript(code)
 	_ = scr.Add("a", 0)
 	_ = scr.Add("b", 0)
 	_ = scr.Add("c", 0)
@@ -194,7 +243,7 @@ e := mod1.double(s)
 	compiled, err := scr.Compile()
 	require.NoError(t, err)
 
-	executeFn := func(compiled *vvm.Program, a, b, c int) (d, e int) {
+	executeFn := func(compiled *vv.Program, a, b, c int) (d, e int) {
 		_ = compiled.Set("a", a)
 		_ = compiled.Set("b", b)
 		_ = compiled.Set("c", c)
@@ -209,7 +258,7 @@ e := mod1.double(s)
 	var wg sync.WaitGroup
 	wg.Add(concurrency)
 	for i := 0; i < concurrency; i++ {
-		go func(compiled *vvm.Program) {
+		go func(compiled *vv.Program) {
 			time.Sleep(time.Duration(rand.Int63n(50)) * time.Millisecond)
 			defer wg.Done()
 
@@ -310,7 +359,7 @@ out := c1()
 	programGet(t, p, "out", int64(15))
 }
 
-func compiledGetCounter(t *testing.T, p *vvm.Program, name string, expected *Counter) {
+func compiledGetCounter(t *testing.T, p *vv.Program, name string, expected *Counter) {
 	v := p.Get(name)
 	require.NotNil(t, v)
 
@@ -321,7 +370,7 @@ func compiledGetCounter(t *testing.T, p *vvm.Program, name string, expected *Cou
 
 func TestScriptSourceModule(t *testing.T) {
 	// script1 imports "mod1"
-	scr := vvm.NewScript([]byte(`out := import("mod")`))
+	scr := vv.NewScript([]byte(`out := import("mod")`))
 	mods := vvm.NewModuleMap()
 	mods.AddSourceModule("mod", []byte(`export 5`))
 	scr.SetImports(mods)
@@ -330,7 +379,7 @@ func TestScriptSourceModule(t *testing.T) {
 	require.Equal(t, int64(5), p.Get("out").Value())
 
 	// executing module function
-	scr = vvm.NewScript([]byte(`fn := import("mod"); out := fn()`))
+	scr = vv.NewScript([]byte(`fn := import("mod"); out := fn()`))
 	mods = vvm.NewModuleMap()
 	mods.AddSourceModule("mod",
 		[]byte(`a := 3; export func() { return a + 5 }`))
@@ -339,7 +388,7 @@ func TestScriptSourceModule(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, int64(8), p.Get("out").Value())
 
-	scr = vvm.NewScript([]byte(`out := import("mod")`))
+	scr = vv.NewScript([]byte(`out := import("mod")`))
 	mods = vvm.NewModuleMap()
 	mods.AddSourceModule("mod",
 		[]byte(`text := import("text"); export text.title("foo")`))
@@ -378,7 +427,7 @@ func BenchmarkArrayIndexCompare(b *testing.B) {
 }
 
 func bench(n int, input string) {
-	s := vvm.NewScript([]byte(input))
+	s := vv.NewScript([]byte(input))
 	c, err := s.Compile()
 	if err != nil {
 		panic(err)
@@ -482,7 +531,7 @@ func TestProgram_EncodeDecode(t *testing.T) {
 	var buf bytes.Buffer
 	err := p.Encode(&buf)
 	require.NoError(t, err)
-	cx := new(vvm.Program)
+	cx := new(vv.Program)
 	b := buf.Bytes()
 
 	err = cx.Decode(&buf, nil)
@@ -497,8 +546,8 @@ func TestProgram_EncodeDecode(t *testing.T) {
 	require.Equal(t, b, bx, "encoded bytes should be equal")
 }
 
-func compile(t *testing.T, input string, vars M) *vvm.Program {
-	s := vvm.NewScript([]byte(input))
+func compile(t *testing.T, input string, vars M) *vv.Program {
+	s := vv.NewScript([]byte(input))
 	for vn, vv := range vars {
 		err := s.Add(vn, vv)
 		require.NoError(t, err)
@@ -511,7 +560,7 @@ func compile(t *testing.T, input string, vars M) *vvm.Program {
 }
 
 func compileError(t *testing.T, input string, vars M) {
-	s := vvm.NewScript([]byte(input))
+	s := vv.NewScript([]byte(input))
 	for vn, vv := range vars {
 		err := s.Add(vn, vv)
 		require.NoError(t, err)
@@ -520,18 +569,18 @@ func compileError(t *testing.T, input string, vars M) {
 	require.Error(t, err)
 }
 
-func programRun(t *testing.T, p *vvm.Program) {
+func programRun(t *testing.T, p *vv.Program) {
 	err := p.Run()
 	require.NoError(t, err)
 }
 
-func programGet(t *testing.T, p *vvm.Program, name string, expected interface{}) {
+func programGet(t *testing.T, p *vv.Program, name string, expected interface{}) {
 	v := p.Get(name)
 	require.NotNil(t, v)
 	require.Equal(t, expected, v.Value())
 }
 
-func programGetAll(t *testing.T, p *vvm.Program, expected M) {
+func programGetAll(t *testing.T, p *vv.Program, expected M) {
 	vars := p.GetAll()
 	require.Equal(t, len(expected), len(vars))
 
@@ -547,6 +596,6 @@ func programGetAll(t *testing.T, p *vvm.Program, expected M) {
 	}
 }
 
-func programIsDefined(t *testing.T, p *vvm.Program, name string, expected bool) {
+func programIsDefined(t *testing.T, p *vv.Program, name string, expected bool) {
 	require.Equal(t, expected, p.IsDefined(name))
 }

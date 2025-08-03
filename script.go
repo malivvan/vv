@@ -1,4 +1,4 @@
-package vvm
+package vv
 
 import (
 	"bytes"
@@ -8,6 +8,7 @@ import (
 	"encoding/gob"
 	"errors"
 	"fmt"
+	"github.com/malivvan/vv/vvm"
 	"hash/crc64"
 	"io"
 	"path/filepath"
@@ -23,7 +24,7 @@ const Magic = "VVC\x00"
 // Script can simplify compilation and execution of embedded scripts.
 type Script struct {
 	variables        map[string]*Variable
-	modules          *ModuleMap
+	modules          *vvm.ModuleMap
 	name             string
 	input            []byte
 	maxAllocs        int64
@@ -45,7 +46,7 @@ func NewScript(input []byte) *Script {
 
 // Add adds a new variable or updates an existing variable to the script.
 func (s *Script) Add(name string, value interface{}) error {
-	obj, err := FromInterface(value)
+	obj, err := vvm.FromInterface(value)
 	if err != nil {
 		return err
 	}
@@ -72,7 +73,7 @@ func (s *Script) SetName(name string) {
 }
 
 // SetImports sets import modules.
-func (s *Script) SetImports(modules *ModuleMap) {
+func (s *Script) SetImports(modules *vvm.ModuleMap) {
 	s.modules = modules
 }
 
@@ -120,7 +121,7 @@ func (s *Script) Compile() (*Program, error) {
 		return nil, err
 	}
 
-	c := NewCompiler(srcFile, symbolTable, nil, s.modules, nil)
+	c := vvm.NewCompiler(srcFile, symbolTable, nil, s.modules, nil)
 	c.EnableFileImport(s.enableFileImport)
 	c.SetImportDir(s.importDir)
 	if err := c.Compile(file); err != nil {
@@ -134,7 +135,7 @@ func (s *Script) Compile() (*Program, error) {
 	indices := make(map[string]int, len(globals))
 	for _, name := range symbolTable.Names() {
 		symbol, _, _ := symbolTable.Resolve(name, false)
-		if symbol.Scope == ScopeGlobal {
+		if symbol.Scope == vvm.ScopeGlobal {
 			indices[name] = symbol.Index
 		}
 	}
@@ -179,18 +180,18 @@ func (s *Script) RunContext(ctx context.Context) (program *Program, err error) {
 	return
 }
 
-func (s *Script) prepCompile() (symbolTable *SymbolTable, globals []Object, err error) {
+func (s *Script) prepCompile() (symbolTable *vvm.SymbolTable, globals []vvm.Object, err error) {
 	var names []string
 	for name := range s.variables {
 		names = append(names, name)
 	}
 
-	symbolTable = NewSymbolTable()
-	for idx, fn := range builtinFuncs {
+	symbolTable = vvm.NewSymbolTable()
+	for idx, fn := range vvm.BuiltinFuncs {
 		symbolTable.DefineBuiltin(idx, fn.Name)
 	}
 
-	globals = make([]Object, GlobalsSize)
+	globals = make([]vvm.Object, vvm.GlobalsSize)
 
 	for idx, name := range names {
 		symbol := symbolTable.Define(name)
@@ -207,21 +208,21 @@ func (s *Script) prepCompile() (symbolTable *SymbolTable, globals []Object, err 
 // create Compiled object.
 type Program struct {
 	globalIndices map[string]int
-	bytecode      *Bytecode
-	globals       []Object
+	bytecode      *vvm.Bytecode
+	globals       []vvm.Object
 	maxAllocs     int64
 	lock          sync.RWMutex
 }
 
 // Bytecode returns the compiled bytecode of the Program.
-func (p *Program) Bytecode() *Bytecode {
+func (p *Program) Bytecode() *vvm.Bytecode {
 	p.lock.RLock()
 	defer p.lock.RUnlock()
 	return p.bytecode
 }
 
 // Decode deserializes the Program from a byte slice.
-func (p *Program) Decode(r io.Reader, modules *ModuleMap) error {
+func (p *Program) Decode(r io.Reader, modules *vvm.ModuleMap) error {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 
@@ -272,7 +273,7 @@ func (p *Program) Decode(r io.Reader, modules *ModuleMap) error {
 	if err != nil {
 		return err
 	}
-	p.bytecode = &Bytecode{}
+	p.bytecode = &vvm.Bytecode{}
 	err = p.bytecode.Decode(r, modules)
 	if err != nil {
 		return err
@@ -338,7 +339,7 @@ func (p *Program) Run() error {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 
-	v := NewVM(context.Background(), p.bytecode, p.globals, p.maxAllocs)
+	v := vvm.NewVM(context.Background(), p.bytecode, p.globals, p.maxAllocs)
 	return v.Run()
 }
 
@@ -347,7 +348,7 @@ func (p *Program) RunContext(ctx context.Context) (err error) {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 
-	v := NewVM(ctx, p.bytecode, p.globals, p.maxAllocs)
+	v := vvm.NewVM(ctx, p.bytecode, p.globals, p.maxAllocs)
 	ch := make(chan error, 1)
 	go func() {
 		ch <- v.Run()
@@ -372,7 +373,7 @@ func (p *Program) Clone() *Program {
 	clone := &Program{
 		globalIndices: p.globalIndices,
 		bytecode:      p.bytecode,
-		globals:       make([]Object, len(p.globals)),
+		globals:       make([]vvm.Object, len(p.globals)),
 		maxAllocs:     p.maxAllocs,
 	}
 	// copy global objects
@@ -398,7 +399,7 @@ func (p *Program) IsDefined(name string) bool {
 	if v == nil {
 		return false
 	}
-	return v != UndefinedValue
+	return v != vvm.UndefinedValue
 }
 
 // Get returns a variable identified by the name.
@@ -406,11 +407,11 @@ func (p *Program) Get(name string) *Variable {
 	p.lock.RLock()
 	defer p.lock.RUnlock()
 
-	value := UndefinedValue
+	value := vvm.UndefinedValue
 	if idx, ok := p.globalIndices[name]; ok {
 		value = p.globals[idx]
 		if value == nil {
-			value = UndefinedValue
+			value = vvm.UndefinedValue
 		}
 	}
 	return &Variable{
@@ -428,7 +429,7 @@ func (p *Program) GetAll() []*Variable {
 	for name, idx := range p.globalIndices {
 		value := p.globals[idx]
 		if value == nil {
-			value = UndefinedValue
+			value = vvm.UndefinedValue
 		}
 		vars = append(vars, &Variable{
 			name:  name,
@@ -444,7 +445,7 @@ func (p *Program) Set(name string, value interface{}) error {
 	p.lock.Lock()
 	defer p.lock.Unlock()
 
-	obj, err := FromInterface(value)
+	obj, err := vvm.FromInterface(value)
 	if err != nil {
 		return err
 	}

@@ -71,7 +71,7 @@ func NewCompiler(file *parser.SourceFile, symbolTable *SymbolTable, constants []
 	}
 
 	// add builtin functions to the symbol table
-	for idx, fn := range builtinFuncs {
+	for idx, fn := range BuiltinFuncs {
 		symbolTable.DefineBuiltin(idx, fn.Name)
 	}
 

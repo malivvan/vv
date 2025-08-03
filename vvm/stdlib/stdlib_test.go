@@ -3,6 +3,7 @@ package stdlib_test
 import (
 	"context"
 	"fmt"
+	"github.com/malivvan/vv"
 	"testing"
 	"time"
 
@@ -232,7 +233,7 @@ func object(v interface{}) vvm.Object {
 }
 
 func expect(t *testing.T, input string, expected interface{}) {
-	s := vvm.NewScript([]byte(input))
+	s := vv.NewScript([]byte(input))
 	s.SetImports(stdlib.GetModuleMap(stdlib.AllModuleNames()...))
 	c, err := s.Run()
 	require.NoError(t, err)
