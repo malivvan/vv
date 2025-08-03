@@ -17,6 +17,6 @@ jobs:
         go-version-file: './go.mod'
         cache-dependency-path: './go.sum'
     - name: install
-      run: make install
+      run: make install/test
     - name: run tests
       run: make test TEST_FORMAT=github-actions

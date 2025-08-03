@@ -39,20 +39,21 @@ define build
 	fi
 endef
 
-
-install:
-	@go install golang.org/x/lint/golint@latest
+install/build:
 	@go install github.com/CycloneDX/cyclonedx-gomod/cmd/cyclonedx-gomod@latest
+
+install/test:
+	@go install golang.org/x/lint/golint@latest
 	@go install gotest.tools/gotestsum@latest
+
+install: install/build install/test
 
 lint:
 	@golint -set_exit_status ./vvm/...
 
-
-
 test: generate lint
 	@gotestsum --format $(TEST_FORMAT) --format-hide-empty-pkg --hide-summary skipped --raw-command ./test.sh ./...
-	@go run ./cmd ./vvm/testdata/cli/test.vv
+	@go run ./cmd ./vvm/testdata/cli/test.vv > /dev/null 2>&1 || (echo "vv end to end test failed" && exit 1)
 
 fmt:
 	@go fmt ./...
